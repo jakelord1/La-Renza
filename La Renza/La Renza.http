@@ -1,0 +1,6 @@
+@La_Renza_HostAddress = http://localhost:5222
+
+GET {{La_Renza_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

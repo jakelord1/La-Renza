@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "La Renza", "La Renza\La Renza.csproj", "{EAEC333A-0CD1-4112-8655-892576F42EDD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EAEC333A-0CD1-4112-8655-892576F42EDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAEC333A-0CD1-4112-8655-892576F42EDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAEC333A-0CD1-4112-8655-892576F42EDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAEC333A-0CD1-4112-8655-892576F42EDD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ECE0F3A7-0E98-4D8B-9494-3C69AA40CAD8}
+	EndGlobalSection
+EndGlobal
