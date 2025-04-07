@@ -1,0 +1,58 @@
+{
+  "Order": {
+    "data": [
+      {
+        "id": 1,
+        "UserId": 1,
+        "Status": "Shipped",
+        "OrderName": "Order #1001",
+        "CreatedAt": "2025-04-01T10:15:00",
+        "CompletedAt": "2025-04-03T18:45:00",
+        "PaymentMethod": 1,
+        "DeliveryMethod": 2,
+        "DeliveryId": 301,
+        "CouponId": 1
+      },
+      {
+        "id": 2,
+        "UserId": 2,
+        "Status": "Processing",
+        "OrderName": "Order #1002",
+        "CreatedAt": "2025-04-04T08:20:00",
+        "CompletedAt": null,
+        "PaymentMethod": 2,
+        "DeliveryMethod": 1,
+        "DeliveryId": 302,
+        "CouponId": null
+      }
+    ]
+  },
+  "OrderItem": {
+    "data": [
+      {
+        "id": 1,
+        "OrderId": 1,
+        "ProductId": 101,
+        "Quantity": 2,
+        "ColorId": 1,
+        "SizeId": 1
+      },
+      {
+        "id": 2,
+        "OrderId": 1,
+        "ProductId": 102,
+        "Quantity": 1,
+        "ColorId": 2,
+        "SizeId": 2
+      },
+      {
+        "id": 3,
+        "OrderId": 2,
+        "ProductId": 101,
+        "Quantity": 3,
+        "ColorId": 1,
+        "SizeId": 2
+      }
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+{
+    "Model": {
+      "data": [
+        {
+          "Id": 1,
+          "Name": "Floral Summer Dress",
+          "Description": "Light and breezy floral summer dress perfect for warm days.",
+          "MaterialInfo": "",
+          "StartDate": "",
+          "Rate": null,
+          "Bage": ""
+        },
+        {
+          "Id": 2,
+          "Name": "Casual Blazer",
+          "Description": "Classic casual blazer perfect for any occasion.",
+          "MaterialInfo": "",
+          "StartDate": "",
+          "Rate": null,
+          "Bage": "SALE"
+        },
+        {
+          "Id": 3,
+          "Name": "Summer Blouse",
+          "Description": "Light and elegant summer blouse for a casual look.",
+          "MaterialInfo": "",
+          "StartDate": "",
+          "Rate": null,
+          "Bage": ""
+        },
+        {
+          "Id": 4,
+          "Name": "Denim Jacket",
+          "Description": "Classic denim jacket that never goes out of style.",
+          "MaterialInfo": "",
+          "StartDate": "",
+          "Rate": null,
+          "Bage": ""
+        }
+      ]
+    },
+    "Product": {
+      "data": [
+        {
+          "Id": 101,
+          "ModelId": 1,
+          "SizeId": 1,
+          "ColorId": 1,
+          "Price": 49.99,
+          "Quantity": null,
+          "Code": ""
+        },
+        {
+          "Id": 102,
+          "ModelId": 2,
+          "SizeId": 2,
+          "ColorId": 2,
+          "originalPrice": 99.99,
+          "Price": 79.99,
+          "Quantity": null,
+          "Code": ""
+        },
+        {
+          "Id": 103,
+          "ModelId": 3,
+          "SizeId": 1,
+          "ColorId": 1,
+          "Price": 39.99,
+          "Quantity": null,
+          "Code": ""
+        },
+        {
+          "Id": 104,
+          "ModelId": 4,
+          "SizeId": 1,
+          "ColorId": 1,
+          "Price": 69.99,
+          "Quantity": null,
+          "Code": ""
+        }
+      ]
+    },
+  
+    "ImageProduct": {
+      "data": [
+        {
+          "Id": 1,
+          "Path": "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+          "ProductId": 101
+        },
+        {
+          "Id": 2,
+          "Path": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+          "ProductId": 102
+        },
+        {
+          "Id": 3,
+          "Path": "https://images.unsplash.com/photo-1496747611176-843222e1e57c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+          "ProductId": 103
+        },
+        {
+          "Id": 4,
+          "Path": "https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+          "ProductId": 104
+        }
+      ]
+    }
+  }
+  

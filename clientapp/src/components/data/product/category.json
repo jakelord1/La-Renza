@@ -1,0 +1,27 @@
+{
+    "Category": {
+      "data": [
+        { "id": 1, "Name": "NEW", "ParentCategoryId": null, "FilterId": null, "ImageId": null, "IsGlobal": 1, "IsActive": 1 },
+        { "id": 2, "Name": "CLOTHING", "ParentCategoryId": null, "FilterId": null, "ImageId": null, "IsGlobal": 1, "IsActive": 1 },
+        { "id": 3, "Name": "ACCESSORIES", "ParentCategoryId": null, "FilterId": null, "ImageId": null, "IsGlobal": 1, "IsActive": 1 },
+        { "id": 4, "Name": "SALE", "ParentCategoryId": null, "FilterId": null, "ImageId": null, "IsGlobal": 1, "IsActive": 1 }
+]
+    },
+    "ProductCategory": {
+      "data": [
+        { "ProductId": 101, "CategoryId": 1 },
+        { "ProductId": 102, "CategoryId": 1 },
+        { "ProductId": 103, "CategoryId": 1 },
+        { "ProductId": 104, "CategoryId": 1 }
+      ]
+    },
+    "CategoryPath": {
+      "data": [
+        { "id": 1, "Path": "new/" },
+        { "id": 2, "Path": "clothing/" },
+        { "id": 3, "Path": "accessories/" },
+        { "id": 4, "Path": "sale/" }
+      ]
+    }
+  }
+  

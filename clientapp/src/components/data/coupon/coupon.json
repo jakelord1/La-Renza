@@ -1,0 +1,18 @@
+{
+  "Coupon": {
+    "data": [
+      {
+        "id": 1,
+        "Name": "WELCOME10",
+        "Description": "10% discount on the first order",
+        "Price": 0.00
+      },
+      {
+        "id": 2,
+        "Name": "FREESHIP",
+        "Description": "Free shipping on orders over 2000 UAH",
+        "Price": 0.00
+      }
+    ]
+  }
+}
