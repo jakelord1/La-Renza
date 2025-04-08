@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "La Renza", "La Renza\La Ren
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "clientapp", "ClientApp\clientapp.esproj", "{785AAF38-B510-4313-B923-EA06BB282272}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "La Renza.DAL", "La Renza.DAL\La Renza.DAL.csproj", "{2A45EC84-B5FE-426C-B3F6-7BBFB42F3757}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "La Renza.BLL", "La Renza.BLL\La Renza.BLL.csproj", "{4FF6F955-9164-4979-A245-826A80BB6486}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,14 @@ Global
 		{785AAF38-B510-4313-B923-EA06BB282272}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{785AAF38-B510-4313-B923-EA06BB282272}.Release|Any CPU.Build.0 = Release|Any CPU
 		{785AAF38-B510-4313-B923-EA06BB282272}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{2A45EC84-B5FE-426C-B3F6-7BBFB42F3757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A45EC84-B5FE-426C-B3F6-7BBFB42F3757}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A45EC84-B5FE-426C-B3F6-7BBFB42F3757}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A45EC84-B5FE-426C-B3F6-7BBFB42F3757}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FF6F955-9164-4979-A245-826A80BB6486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FF6F955-9164-4979-A245-826A80BB6486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FF6F955-9164-4979-A245-826A80BB6486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FF6F955-9164-4979-A245-826A80BB6486}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
