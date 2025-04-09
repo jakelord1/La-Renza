@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-//using La_Renza.DAL.Entities;
+using La_Renza.DAL.Entities;
 
 namespace La_Renza.DAL.EF
 {   
