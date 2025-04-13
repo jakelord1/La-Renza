@@ -2,11 +2,30 @@
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using La_Renza.DAL.Entities;
+using System.Numerics;
 
 namespace La_Renza.DAL.EF
 {   
     public class LaRenzaContext : DbContext
-    { 
+    {
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<Admin> Admins { get; set; }
+
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<CategoryImage> CategoryImages { get; set; }
+        public DbSet<Color> Colors { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<CommentImage> CommentImages { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<Model> Models { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Size> Sizes { get; set; }
+        public DbSet<User> Users { get; set; }
+      
         public LaRenzaContext(DbContextOptions<LaRenzaContext> options)
                    : base(options)
         {
@@ -30,6 +49,7 @@ namespace La_Renza.DAL.EF
 
 
             string connectionString = config.GetConnectionString("DefaultConnection");
+            //optionsBuilder.UseSqlServer(connectionString);
             optionsBuilder.UseMySQL(connectionString);
             return new LaRenzaContext(optionsBuilder.Options);
         }
