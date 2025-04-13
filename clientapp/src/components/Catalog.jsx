@@ -59,7 +59,7 @@ const catalogProducts = [
     id: 8,
     name: 'Track Pants',
     price: '22.99',
-    image: 'https://images.unsplash.com/photo-1588365527737-97f1c9eb7a0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
     description: 'Comfortable track pants'
   }
 ];
