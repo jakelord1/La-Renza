@@ -7,6 +7,8 @@ import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
 import ResetPasswordForm from './components/auth/ResetPasswordForm';
+import Account from './components/Account';
+import Catalog from './components/Catalog';
 import './App.css';
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
             <Route path="/login" element={<LoginForm />} />
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+            <Route path="/catalog" element={<Catalog />} />
+            <Route path="/account/*" element={<Account />} />
             {/* <Route path="/reset-password/:token" element={<ResetPasswordForm />} /> */}
           </Routes>
         </main>

@@ -1,0 +1,152 @@
+{
+    "Color": {
+    "data": [
+      {
+        "Id": 1,
+        "Path": "#FFFFFF",
+        "Name": "White"
+      },
+      {
+        "Id": 2,
+        "Path": "#000000",
+        "Name": "Black"
+      },
+      {
+        "Id": 3,
+        "Path": "#FF0000",
+        "Name": "Red"
+      },
+      {
+        "Id": 4,
+        "Path": "#00FF00",
+        "Name": "Green"
+      },
+      {
+        "Id": 5,
+        "Path": "#0000FF",
+        "Name": "Blue"
+      },
+      {
+        "Id": 6,
+        "Path": "#FFFF00",
+        "Name": "Yellow"
+      },
+      {
+        "Id": 7,
+        "Path": "#FFA500",
+        "Name": "Orange"
+      },
+      {
+        "Id": 8,
+        "Path": "#800080",
+        "Name": "Purple"
+      },
+      {
+        "Id": 9,
+        "Path": "#FFC0CB",
+        "Name": "Pink"
+      },
+      {
+        "Id": 10,
+        "Path": "#A52A2A",
+        "Name": "Brown"
+      },
+      {
+        "Id": 11,
+        "Path": "#FFD700",
+        "Name": "Gold"
+      },
+      {
+        "Id": 12,
+        "Path": "#C0C0C0",
+        "Name": "Silver"
+      },
+      {
+        "Id": 13,
+        "Path": "#008080",
+        "Name": "Teal"
+      },
+      {
+        "Id": 14,
+        "Path": "#FF6347",
+        "Name": "Tomato"
+      },
+      {
+        "Id": 15,
+        "Path": "#D2691E",
+        "Name": "Chocolate"
+      },
+      {
+        "Id": 16,
+        "Path": "#2F4F4F",
+        "Name": "Dark Slate Gray"
+      },
+      {
+        "Id": 17,
+        "Path": "#800000",
+        "Name": "Maroon"
+      }
+    ]
+  },
+  "Size": {
+    "data": [
+      {
+        "Id": 1,
+        "Name": "XXS"
+      },
+      {
+        "Id": 2,
+        "Name": "XS"
+      },
+      {
+        "Id": 3,
+        "Name": "S"
+      },
+      {
+        "Id": 4,
+        "Name": "M"
+      },
+      {
+        "Id": 5,
+        "Name": "L"
+      },
+      {
+        "Id": 6,
+        "Name": "XL"
+      },
+      {
+        "Id": 7,
+        "Name": "XXL"
+      },
+      {
+        "Id": 8,
+        "Name": "XXXL"
+      }
+    ]
+  },
+    "ProductColor": {
+      "data": [
+        {
+          "ColorId": 1,
+          "ProductId": 101
+        },
+        {
+          "ColorId": 2,
+          "ProductId": 102
+        }
+      ]
+    },
+    "ProductSize": {
+      "data": [
+        {
+          "ProductId": 101,
+          "SizeId": 1
+        },
+        {
+          "ProductId": 102,
+          "SizeId": 2
+        }
+      ]
+    }
+  }
+  
