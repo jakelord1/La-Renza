@@ -47,9 +47,9 @@ const Home = () => {
 
   return (
     <>
-      <section className="hero-section" data-aos="fade-up" style={{ marginTop: "-20px" }}>
+      <section className="hero-section" data-aos="fade-up">
         <div className="container">
-          <div className="row align-items-center min-vh-100">
+          <div className="row align-items-center">
             <div className="col-lg-6">
               <span className="badge bg-light text-dark mb-3" data-aos="fade-right" data-aos-delay="200">
                 NEW COLLECTION 2025
@@ -83,16 +83,16 @@ const Home = () => {
               <div className="hero-image-grid">
                 <div className="image-container main-image">
                   <img 
-                    src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
-                    className="img-fluid" 
-                    alt="Fashion" 
+                    src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                    alt="Fashion Model in Yellow"
+                    loading="eager"
                   />
                 </div>
                 <div className="image-container secondary-image">
                   <img 
-                    src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
-                    className="img-fluid" 
-                    alt="Fashion" 
+                    src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                    alt="Fashion Model in White"
+                    loading="eager"
                   />
                 </div>
               </div>
