@@ -1,0 +1,54 @@
+{
+  "User": {
+    "data": [
+      {
+        "id": 1,
+        "E-mail": "oleksandr.shevchenko@example.ua",
+        "PhoneNumber": "+380501234567",
+        "FullName": "Oleksandr",
+        "Surname": "Shevchenko",
+        "BirthDate": "1992-03-12T00:00:00",
+        "Gender": 1,
+        "Password": "hashed_password_1",
+        "NewsOn": 1,
+        "LaRenzaPoints": 85
+      },
+      {
+        "id": 2,
+        "E-mail": "iryna.kovalchuk@example.ua",
+        "PhoneNumber": "+380631112233",
+        "FullName": "Iryna",
+        "Surname": "Kovalchuk",
+        "BirthDate": "1988-07-25T00:00:00",
+        "Gender": 0,
+        "Password": "hashed_password_2",
+        "NewsOn": 0,
+        "LaRenzaPoints": 260
+      }
+    ]
+  },
+  "UserCoupon": {
+    "data": [
+      {
+        "UserId": 1,
+        "CuponId": 1
+      },
+      {
+        "UserId": 2,
+        "CuponId": 2
+      }
+    ]
+  },
+  "Favorite": {
+    "data": [
+      {
+        "UserId": 1,
+        "ProductId": 101
+      },
+      {
+        "UserId": 2,
+        "ProductId": 102
+      }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "Address": {
+    "data": [
+      {
+        "id": 1,
+        "SecondName": "Shevchenko",
+        "FullName": "Shevchenko Bohdan Oleksandrovych",
+        "Street": "Khreshchatyk St.",
+        "City": "Kyiv",
+        "HouseNum": "15B",
+        "PostIndex": "01001",
+        "AdditionalInfo": "apt. 7",
+        "PhoneNumber": "+380501234567",
+        "UserId": 1
+      },
+      {
+        "id": 2,
+        "SecondName": "Kovalchuk",
+        "FullName": "Kovalchuk Iryna Viktorivna",
+        "Street": "Svobody Ave.",
+        "City": "Lviv",
+        "HouseNum": "22A",
+        "PostIndex": "79000",
+        "AdditionalInfo": "3rd floor",
+        "PhoneNumber": "+380631112233",
+        "UserId": 2
+      }
+    ]
+  },
+  "Invoice": {
+    "data": [
+      {
+        "id": 101,
+        "FullName": "Shevchenko Bohdan Oleksandrovych",
+        "SecondName": "Shevchenko",
+        "City": "Kyiv",
+        "PostIndex": "01001",
+        "Street": "Khreshchatyk St.",
+        "HouseNumber": "15B",
+        "IsDigital": 1,
+        "UserId": 1
+      },
+      {
+        "id": 102,
+        "FullName": "Kovalchuk Iryna Viktorivna",
+        "SecondName": "Kovalchuk",
+        "City": "Lviv",
+        "PostIndex": "79000",
+        "Street": "Svobody Ave.",
+        "HouseNumber": "22A",
+        "IsDigital": 0,
+        "UserId": 2
+      }
+    ]
+  }
+}
