@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.DAL.Entities
 {
-    public class Invoice
+    public class InvoiceInfo
     {
         public int Id { get; set; }
         public int? UserId { get; set; }

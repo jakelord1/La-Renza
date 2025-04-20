@@ -12,12 +12,12 @@ namespace La_Renza.DAL.EF
         public DbSet<Admin> Admins { get; set; }
 
         public DbSet<Category> Categories { get; set; }
-        public DbSet<CategoryImage> CategoryImages { get; set; }
+        public DbSet<Image> CategoryImages { get; set; }
         public DbSet<Color> Colors { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<CommentImage> CommentImages { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
-        public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<InvoiceInfo> Invoices { get; set; }
         public DbSet<Model> Models { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
