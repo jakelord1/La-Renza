@@ -19,6 +19,7 @@ namespace La_Renza.DAL.Entities
         public ICollection<Category>? Children { get; set; } = new List<Category>();
         public ICollection<Model>? Models { get; set; }
 
+
     }
 
 }

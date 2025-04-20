@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.DAL.Entities
 {
-    public class Color
+    public class ColorOption
     {
         public int Id {  get; set; }
         public string Name { get; set; }
@@ -16,5 +16,6 @@ namespace La_Renza.DAL.Entities
 
         public Model Model { get; set; }
         public Image Image { get; set; }
+
     }
 }

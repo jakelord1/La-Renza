@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,5 +14,7 @@ namespace La_Renza.DAL.Entities
         public int SizeId { get; set; }
         public int Quantity {  get; set; }
         public ICollection<Comment>? Comments { get; set; }
+        public ColorOption? ColorOption { get; set; }
+
     }
 }

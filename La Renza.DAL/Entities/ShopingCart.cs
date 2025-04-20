@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.DAL.Entities
 {
-    internal class ShopingCart
+    public class ShopingCart
     {
         public int Id { get; set; }
         public int UserId { get; set; }

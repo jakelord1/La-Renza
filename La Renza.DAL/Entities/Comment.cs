@@ -16,7 +16,7 @@ namespace La_Renza.DAL.Entities
         public int? ImageId { get; set; }
         public Product? Product { get; set; }
         public User? User { get; set; }
-        public Image Image { get; set; }
+        public Image? Image { get; set; }
 
         public string Text { get; set; }
         public int? Rating { get; set; }

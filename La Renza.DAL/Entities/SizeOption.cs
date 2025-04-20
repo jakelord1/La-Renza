@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.DAL.Entities
 {
-    public class Size
+    public class SizeOption
     {
         public int Id { get; set; }
         //public int? OrderItemId { get; set; }
