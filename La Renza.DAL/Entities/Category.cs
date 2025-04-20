@@ -14,11 +14,10 @@ namespace La_Renza.DAL.Entities
         public int? ParentCategoryId { get; set; }
         public bool IsGlobal { get; set; }
         public bool IsActive { get; set; }
-        public Category? ParentCategory { get; set; } 
+        public Image CategoryImage { get; set; }
 
-        public ICollection<Category> Children { get; set; } = new List<Category>();
-        public ICollection<Product>? Products { get; set; }
-        public ICollection<CategoryImage>? CategoryImages { get; set; }
+        public ICollection<Category>? Children { get; set; } = new List<Category>();
+        public ICollection<Model>? Models { get; set; }
 
     }
 

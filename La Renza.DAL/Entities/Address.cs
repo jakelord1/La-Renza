@@ -18,9 +18,9 @@ namespace La_Renza.DAL.Entities
         public string PostIndex { get; set; }
         public string AdditionalInfo { get; set; }
         public string PhoneNumber { get; set; }
-        public ICollection<Order>? Orders { get; set; }
+        //public ICollection<Order>? Orders { get; set; }
 
-        public User? User { get; set; }
+        //public User? User { get; set; }
 
     }
 }
