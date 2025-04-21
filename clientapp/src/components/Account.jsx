@@ -15,14 +15,14 @@ const Account = () => {
         <div className="row">
           <div className="col-md-3">
             <div className="account-sidebar">
-              <h4 className="mb-4">My Account</h4>
+              <h4 className="mb-4">Мій кабінет</h4>
               <ul className="nav flex-column">
                 <li className="nav-item">
                   <Link 
                     to="/account" 
                     className={`nav-link ${location.pathname === '/account' ? 'active' : ''}`}
                   >
-                    Profile
+                    Профіль
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -30,7 +30,7 @@ const Account = () => {
                     to="/account/orders" 
                     className={`nav-link ${location.pathname === '/account/orders' ? 'active' : ''}`}
                   >
-                    Orders
+                    Замовлення
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -38,7 +38,7 @@ const Account = () => {
                     to="/account/addresses" 
                     className={`nav-link ${location.pathname === '/account/addresses' ? 'active' : ''}`}
                   >
-                    Addresses
+                    Адреси
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -46,7 +46,7 @@ const Account = () => {
                     to="/account/wishlist" 
                     className={`nav-link ${location.pathname === '/account/wishlist' ? 'active' : ''}`}
                   >
-                    Wishlist
+                    Обране
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -54,7 +54,7 @@ const Account = () => {
                     to="/account/settings" 
                     className={`nav-link ${location.pathname === '/account/settings' ? 'active' : ''}`}
                   >
-                    Settings
+                    Налаштування
                   </Link>
                 </li>
               </ul>

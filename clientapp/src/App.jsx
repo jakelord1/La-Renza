@@ -9,12 +9,16 @@ import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
 import ResetPasswordForm from './components/auth/ResetPasswordForm';
 import Account from './components/Account';
 import Catalog from './components/Catalog';
+import Favorites from './components/Favorites';
+import Cart from './components/Cart';
 import './App.css';
 
 function App() {
   return (
     <Router>
       <div className="d-flex flex-column min-vh-100">
+        {/* Линия над хедером */}
+        <div style={{width:'100%', borderTop:'1.5px solid #eee'}}></div>
         <Navbar />
         <main className="flex-grow-1">
           <Routes>
@@ -24,6 +28,8 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordForm />} />
             <Route path="/catalog" element={<Catalog />} />
             <Route path="/account/*" element={<Account />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/cart" element={<Cart />} />
             {/* <Route path="/reset-password/:token" element={<ResetPasswordForm />} /> */}
           </Routes>
         </main>
