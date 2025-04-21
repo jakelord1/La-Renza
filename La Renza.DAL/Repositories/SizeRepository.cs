@@ -5,46 +5,46 @@ using La_Renza.DAL.EF;
 
 namespace La_Renza.DAL.Repositories
 {
-    public class SizeOptionRepository : IRepository<SizeOption>
+    public class SizeRepository : IRepository<Size>
     {
         private LaRenzaContext db;
 
-        public SizeOptionRepository(LaRenzaContext context)
+        public SizeRepository(LaRenzaContext context)
         {
             this.db = context;
         }
 
-        public async Task<IEnumerable<SizeOption>> GetAll()
+        public async Task<IEnumerable<Size>> GetAll()
         {
             return await db.Sizes.ToListAsync();
         }
 
-        public async Task<SizeOption> Get(int id)
+        public async Task<Size> Get(int id)
         {
-            SizeOption? size = await db.Sizes.FindAsync(id);
+            Size? size = await db.Sizes.FindAsync(id);
             return size!;
         }
 
-        public async Task<SizeOption> Get(string name)
+        public async Task<Size> Get(string name)
         {
             var sizes = await db.Sizes.Where(s => s.Name == name).ToListAsync();
-            SizeOption? size = sizes?.FirstOrDefault();
+            Size? size = sizes?.FirstOrDefault();
             return size!;
         }
 
-        public async Task Create(SizeOption size)
+        public async Task Create(Size size)
         {
             await db.Sizes.AddAsync(size);
         }
 
-        public void Update(SizeOption size)
+        public void Update(Size size)
         {
             db.Entry(size).State = EntityState.Modified;
         }
 
         public async Task Delete(int id)
         {
-            SizeOption? size = await db.Sizes.FindAsync(id);
+            Size? size = await db.Sizes.FindAsync(id);
             if (size != null)
                 db.Sizes.Remove(size);
         }

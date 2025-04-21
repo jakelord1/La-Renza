@@ -12,7 +12,7 @@ namespace La_Renza.DAL.EF
         public DbSet<Admin> Admins { get; set; }
 
         public DbSet<Category> Categories { get; set; }
-        public DbSet<ColorOption> Colors { get; set; }
+        public DbSet<Color> Colors { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
         public DbSet<Image> Images { get; set; }
@@ -21,7 +21,7 @@ namespace La_Renza.DAL.EF
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Product> Products { get; set; }
-        public DbSet<SizeOption> Sizes { get; set; }
+        public DbSet<Size> Sizes { get; set; }
         public DbSet<User> Users { get; set; }
 
         public DbSet<ShopingCart> ShopingCarts { get; set; }

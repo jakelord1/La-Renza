@@ -6,7 +6,7 @@ using La_Renza.DAL.Entities;
 
 namespace La_Renza.DAL.Repositories
 {
-    public class ColorOptionRepository : IRepository<ColorOption>
+    public class ColorOptionRepository : IRepository<Color>
     {
         private LaRenzaContext db;
 
@@ -15,7 +15,7 @@ namespace La_Renza.DAL.Repositories
             this.db = context;
         }
 
-        public async Task<IEnumerable<ColorOption>> GetAll()
+        public async Task<IEnumerable<Color>> GetAll()
         {
             return await db.Colors
                   .Include(c => c.Model)
@@ -23,39 +23,39 @@ namespace La_Renza.DAL.Repositories
                   .ToListAsync();
         }
 
-        public async Task<ColorOption> Get(int id)
+        public async Task<Color> Get(int id)
         {
             var colors = await db.Colors
                 .Include(c => c.Model)
                 .Include(c => c.Image)
                 .Where(a => a.Id == id).ToListAsync();
-            ColorOption? color = colors?.FirstOrDefault();
+            Color? color = colors?.FirstOrDefault();
             return color!;
         }
 
-        public async Task<ColorOption> Get(string name)
+        public async Task<Color> Get(string name)
         {         
             var colors = await db.Colors
                 .Include(c => c.Model)
                 .Include(c => c.Image)
                 .Where(a => a.Name == name).ToListAsync();
-            ColorOption? color = colors?.FirstOrDefault();
+            Color? color = colors?.FirstOrDefault();
             return color!;
         }
 
-        public async Task Create(ColorOption color)
+        public async Task Create(Color color)
         {
             await db.Colors.AddAsync(color);
         }
 
-        public void Update(ColorOption color)
+        public void Update(Color color)
         {
             db.Entry(color).State = EntityState.Modified;
         }
 
         public async Task Delete(int id)
         {
-            ColorOption? color = await db.Colors.FindAsync(id);
+            Color? color = await db.Colors.FindAsync(id);
             if (color != null)
                 db.Colors.Remove(color);
         }

@@ -14,7 +14,8 @@ namespace La_Renza.DAL.Entities
         public int SizeId { get; set; }
         public int Quantity {  get; set; }
         public ICollection<Comment>? Comments { get; set; }
-        public ColorOption? ColorOption { get; set; }
+        public Color? Color { get; set; }
+        public Size? Size { get; set; }
 
     }
 }
