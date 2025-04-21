@@ -19,5 +19,6 @@ namespace La_Renza.DAL.Entities
         public bool IsDigital { get; set; }
 
         public User? User { get; set; }
+
     }
 }

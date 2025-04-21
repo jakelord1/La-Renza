@@ -16,7 +16,7 @@ namespace La_Renza.DAL.Entities
         public int? CouponId { get; set; }
         public string OrderName { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime CompletedAt { get; set; }
+        public DateTime? CompletedAt { get; set; }
         public int PaymentMethod { get; set; }
         public int DeliveryMethod { get; set; }
         public ICollection<OrderItem>? OrderItems { get; set; }
