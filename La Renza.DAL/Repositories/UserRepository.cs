@@ -49,5 +49,15 @@ namespace La_Renza.DAL.Repositories
             if (user != null)
                 db.Users.Remove(user);
         }
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Users.AnyAsync(user => user.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Users.AnyAsync();
+        }
+
     }
 }

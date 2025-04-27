@@ -11,5 +11,8 @@ namespace La_Renza.DAL.Interfaces
         Task Create(T item);
         void Update(T item);
         Task Delete(int id);
+        Task<bool> Exists(int id);
+        Task<bool> Any();
+
     }
 }
