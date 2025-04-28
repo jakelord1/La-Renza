@@ -2,6 +2,7 @@
 using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
 using La_Renza.DAL.Interfaces;
+using La_Renza.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,25 +20,51 @@ namespace La_Renza.BLL.Services
             _db = db;
             _mapper = mapper;
         }
-        public Task CreateColor(ColorDTO colorDto)
+        public async Task CreateColor(ColorDTO colorDto)
         {
-
+            var photos = _mapper.Map<IEnumerable<ImageDTO>>(colorDto.Photos);
+            var color = new Color 
+            {
+                Name = colorDto.Name,
+                ModelId = colorDto.ModelId,
+                ImageId = colorDto.ImageId,
+                Photos = (ICollection<Image>)photos
+            };
+            await _db.Colors.Create(color);
+            await _db.Save();
         }
-        public Task UpdateColor(ColorDTO colorDto)
+        public async Task UpdateColor(ColorDTO colorDto)
         {
-
+            var photos = _mapper.Map<IEnumerable<ImageDTO>>(colorDto.Photos);
+            var color = new Color
+            {
+                Id = colorDto.Id,
+                Name = colorDto.Name,
+                ModelId = colorDto.ModelId,
+                ImageId = colorDto.ImageId,
+                Photos = (ICollection<Image>)photos
+            };
+            var Saved = await _db.Colors.Get(colorDto.Id);
+            if (Saved != null)
+                Saved = color;
+            else
+                throw new Exception();
+            await _db.Save();
         }
-        public Task DeleteColor(int id)
+        public async Task DeleteColor(int id)
         {
-
+            await _db.Colors.Delete(id);
+            await _db.Save();
         }
-        public Task<ColorDTO> GetColor(int id)
+        public async Task<ColorDTO> GetColor(int id)
         {
-
+            var color = await _db.Colors.Get(id);
+            return _mapper.Map<ColorDTO>(color);
         }
-        public Task<IEnumerable<ColorDTO>> GetColors()
+        public async Task<IEnumerable<ColorDTO>> GetColors()
         {
-
+            var colors = await _db.Colors.GetAll();
+            return _mapper.Map<IEnumerable<ColorDTO>>(colors);
         }
     }
 }

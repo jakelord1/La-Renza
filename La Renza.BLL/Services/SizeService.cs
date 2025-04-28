@@ -2,6 +2,7 @@
 using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
 using La_Renza.DAL.Interfaces;
+using La_Renza.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,25 +20,45 @@ namespace La_Renza.BLL.Services
             _db = db;
             _mapper = mapper;
         }
-        public Task CreateSize(SizeDTO sizesDto)
+        public async Task CreateSize(SizeDTO sizeDto)
         {
-
+            var size = new Size
+            {
+                Name = sizeDto.Name,
+                CategoryId = sizeDto.CategoryId
+            };
+            await _db.Sizes.Create(size);
+            await _db.Save();
         }
-        public Task UpdateSize(SizeDTO sizeDto)
+        public async Task UpdateSize(SizeDTO sizeDto)
         {
-
+            var size = new Size
+            {
+                Id = sizeDto.Id,
+                Name = sizeDto.Name,
+                CategoryId = sizeDto.CategoryId
+            };
+            var Saved = await _db.Sizes.Get(sizeDto.Id);
+            if (Saved != null)
+                Saved = size;
+            else
+                throw new Exception();
+            await _db.Save();
         }
-        public Task DeleteSize(int id)
+        public async Task DeleteSize(int id)
         {
-
+            await _db.Sizes.Delete(id);
+            await _db.Save();
         }
-        public Task<SizeDTO> GetSize(int id)
+        public async Task<SizeDTO> GetSize(int id)
         {
-
+            var size = await _db.Sizes.Get(id);
+            return _mapper.Map<SizeDTO>(size);
         }
-        public Task<IEnumerable<SizeDTO>> GetSizes()
+        public async Task<IEnumerable<SizeDTO>> GetSizes()
         {
-
+            var size = await _db.Sizes.GetAll();
+            return _mapper.Map<IEnumerable<SizeDTO>>(size);
         }
     }
 }

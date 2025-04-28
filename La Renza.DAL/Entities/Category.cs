@@ -17,8 +17,8 @@ namespace La_Renza.DAL.Entities
         public int ImageId { get; set; }
         public Image CategoryImage { get; set; }
 
-        public ICollection<Category>? Children { get; set; } = new List<Category>();
-        public ICollection<Size> SizeOptions { get; set; }
+        public ICollection<Category>? Children { get; set; }
+        public ICollection<Size>? SizeOptions { get; set; }
         public ICollection<Model>? Models { get; set; }
 
 

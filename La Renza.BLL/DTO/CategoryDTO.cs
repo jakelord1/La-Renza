@@ -14,9 +14,6 @@ namespace La_Renza.BLL.DTO
 
         public int? ParentCategoryId { get; set; }
         public bool IsGlobal { get; set; }
-        public string CategoryImage { get; set; }
-
-        public ICollection<CategoryDTO>? Children { get; set; }
-        public ICollection<SizeDTO> SizeOptions { get; set; }
+        public int ImageId { get; set; }
     }
 }

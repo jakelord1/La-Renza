@@ -2,6 +2,7 @@
 using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
 using La_Renza.DAL.Interfaces;
+using La_Renza.DAL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,25 +20,45 @@ namespace La_Renza.BLL.Services
             _db = db;
             _mapper = mapper;
         }
-        public Task CreateProduct(ProductDTO productDto)
+        public async Task CreateProduct(ProductDTO productDto)
         {
-
+            var product = new Product
+            {
+                ColorId = productDto.ColorId,
+                SizeId = productDto.SizeId,
+                Quantity = productDto.Quantity
+            };
+            await _db.Products.Create(product);
+            await _db.Save();
         }
-        public Task UpdateProduct(ProductDTO productDto)
+        public async Task UpdateProduct(ProductDTO productDto)
         {
-
+            var product = new Product
+            {
+                ColorId = productDto.ColorId,
+                SizeId = productDto.SizeId,
+                Quantity = productDto.Quantity
+            };
+            var Saved = await _db.Products.Get(productDto.Id);
+            if (Saved != null)
+                Saved = product;
+            else
+                throw new Exception();
         }
-        public Task DeleteProduct(int id)
+        public async Task DeleteProduct(int id)
         {
-
+            await _db.Products.Delete(id);
+            await _db.Save();
         }
-        public Task<ProductDTO> GetProduct(int id)
+        public async Task<ProductDTO> GetProduct(int id)
         {
-
+            var products = await _db.Products.Get(id);
+            return _mapper.Map<ProductDTO>(products);
         }
-        public Task<IEnumerable<ProductDTO>> GetProducts()
+        public async Task<IEnumerable<ProductDTO>> GetProducts()
         {
-
+            var products = await _db.Products.GetAll();
+            return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
     }
 }

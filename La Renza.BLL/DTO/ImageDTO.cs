@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    public class UserDTO
+    public class ImageDTO
     {
+        public int Id { get; set; }    
+        public string Path { get; set; }
     }
 }

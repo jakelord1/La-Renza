@@ -13,8 +13,5 @@ namespace La_Renza.BLL.DTO
         public int ColorId { get; set; }
         public int SizeId { get; set; }
         public int Quantity { get; set; }
-        public ICollection<CommentDTO>? Comments { get; set; }
-        public ColorDTO? Color { get; set; }
-        public SizeDTO? Size { get; set; }
     }
 }

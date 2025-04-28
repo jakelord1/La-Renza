@@ -15,7 +15,6 @@ namespace La_Renza.BLL.DTO
         public string? MaterialInfo { get; set; }
         public DateOnly StartDate { get; set; }
 
-        public ICollection<CategoryDTO> Categories { get; set; }
         public double? Rate { get; set; }
         public string? Bage { get; set; }
     }
