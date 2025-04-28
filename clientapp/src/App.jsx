@@ -11,14 +11,15 @@ import Account from './components/Account';
 import Catalog from './components/Catalog';
 import Favorites from './components/Favorites';
 import Cart from './components/Cart';
+import PromoBanner from './components/PromoBanner';
+import ProductDetailsWrapper from './components/ProductDetailsWrapper.jsx'; 
 import './App.css';
 
 function App() {
   return (
     <Router>
       <div className="d-flex flex-column min-vh-100">
-        {/* Линия над хедером */}
-        <div style={{width:'100%', borderTop:'1.5px solid #eee'}}></div>
+        <PromoBanner />
         <Navbar />
         <main className="flex-grow-1">
           <Routes>
@@ -30,6 +31,7 @@ function App() {
             <Route path="/account/*" element={<Account />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/product/:id" element={<ProductDetailsWrapper />} /> 
             {/* <Route path="/reset-password/:token" element={<ResetPasswordForm />} /> */}
           </Routes>
         </main>

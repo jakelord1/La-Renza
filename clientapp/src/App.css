@@ -49,8 +49,8 @@
 
 body {
   font-family: 'Montserrat', sans-serif;
-  padding-top: 40px;
   margin: 0;
+  /* padding-top: 40px; */
   overflow-x: hidden;
   background-color: #fff;
 }
@@ -240,10 +240,14 @@ body {
   width: 100%;
   border-bottom: none;
   margin-bottom: 0;
+  padding-bottom: 0px;
+  padding-top: 16px;
 }
 
 .navbar-brand {
+  /* margin-top: 16px; */
   font-weight: 700;
+  /* margin-bottom: 16px; */
 }
 
 .nav-link {

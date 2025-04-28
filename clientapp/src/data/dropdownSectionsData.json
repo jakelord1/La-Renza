@@ -1,0 +1,157 @@
+{
+  "all": {
+    "subcategories": [
+      {
+        "label": "Популярне",
+        "icon": "bi bi-star",
+        "sections": [
+          {
+            "title": "Топ категорії",
+            "items": [
+              { "img": "https://randomuser.me/api/portraits/women/10.jpg", "label": "Жінкам" },
+              { "img": "https://randomuser.me/api/portraits/men/10.jpg", "label": "Чоловікам" },
+              { "img": "https://randomuser.me/api/portraits/lego/1.jpg", "label": "Дітям" },
+              { "img": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=80&h=80", "label": "Для дому" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "woman": {
+    "subcategories": [
+      {
+        "label": "Одяг",
+        "icon": "bi bi-person-lines-fill",
+        "sections": [
+          { "title": "Верхній одяг", "items": [
+            { "img": "https://randomuser.me/api/portraits/women/11.jpg", "label": "Пуховики" },
+            { "img": "https://randomuser.me/api/portraits/women/12.jpg", "label": "Пальта" }
+          ] },
+          { "title": "Плаття", "items": [
+            { "img": "https://randomuser.me/api/portraits/women/13.jpg", "label": "Вечірні" },
+            { "img": "https://randomuser.me/api/portraits/women/14.jpg", "label": "Повсякденні" }
+          ] }
+        ]
+      },
+      {
+        "label": "Взуття",
+        "icon": "bi bi-bag",
+        "sections": [
+          { "title": "Сезонне взуття", "items": [
+            { "img": "https://randomuser.me/api/portraits/women/15.jpg", "label": "Черевики" },
+            { "img": "https://randomuser.me/api/portraits/women/16.jpg", "label": "Кросівки" }
+          ] }
+        ]
+      }
+    ]
+  },
+  "home": {
+    "subcategories": [
+      {
+        "label": "Декор",
+        "icon": "bi bi-house",
+        "sections": [
+          { "title": "Текстиль", "items": [
+            { "img": "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=facearea&w=80&h=80", "label": "Пледи" },
+            { "img": "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=facearea&w=80&h=80", "label": "Подушки" }
+          ] },
+          { "title": "Аксесуари для дому", "items": [
+            { "img": "https://images.unsplash.com/photo-1503389152951-9c3d0293a0b3?auto=format&fit=facearea&w=80&h=80", "label": "Вази" },
+            { "img": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=80&h=80", "label": "Свічки" }
+          ] }
+        ]
+      }
+    ]
+  },
+  "child": {
+    "subcategories": [
+      {
+        "label": "Одяг для дітей",
+        "icon": "bi bi-person",
+        "sections": [
+          { "title": "Для дівчаток", "items": [
+            { "img": "https://randomuser.me/api/portraits/lego/2.jpg", "label": "Сукні" },
+            { "img": "https://randomuser.me/api/portraits/lego/3.jpg", "label": "Куртки" }
+          ] },
+          { "title": "Для хлопчиків", "items": [
+            { "img": "https://randomuser.me/api/portraits/lego/4.jpg", "label": "Футболки" },
+            { "img": "https://randomuser.me/api/portraits/lego/5.jpg", "label": "Джинси" }
+          ] }
+        ]
+      }
+    ]
+  },
+  "man": {
+    "subcategories": [
+      {
+        "label": "Чоловічий одяг",
+        "icon": "bi bi-person-badge",
+        "sections": [
+          { "title": "Верхній одяг", "items": [
+            { "img": "https://randomuser.me/api/portraits/men/11.jpg", "label": "Куртки" },
+            { "img": "https://randomuser.me/api/portraits/men/12.jpg", "label": "Пальта" }
+          ] },
+          { "title": "Штани", "items": [
+            { "img": "https://randomuser.me/api/portraits/men/13.jpg", "label": "Джинси" },
+            { "img": "https://randomuser.me/api/portraits/men/14.jpg", "label": "Брюки" }
+          ] }
+        ]
+      },
+      {
+        "label": "Взуття",
+        "icon": "bi bi-bag",
+        "sections": [
+          { "title": "Сезонне взуття", "items": [
+            { "img": "https://randomuser.me/api/portraits/men/15.jpg", "label": "Черевики" },
+            { "img": "https://randomuser.me/api/portraits/men/16.jpg", "label": "Кросівки" }
+          ] }
+        ]
+      }
+    ]
+  },
+  "accessories": {
+    "subcategories": [
+      {
+        "label": "Аксесуари для жінок",
+        "icon": "bi bi-gem",
+        "sections": [
+          {
+            "title": "Головні убори",
+            "items": [
+              { "img": "https://randomuser.me/api/portraits/women/6.jpg", "label": "Панами" },
+              { "img": "https://randomuser.me/api/portraits/women/7.jpg", "label": "Шапки" }
+            ]
+          },
+          {
+            "title": "Ювелірні вироби",
+            "items": [
+              { "img": "https://randomuser.me/api/portraits/women/8.jpg", "label": "Сережки" },
+              { "img": "https://randomuser.me/api/portraits/women/9.jpg", "label": "Кільця" }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Аксесуари для чоловіків",
+        "icon": "bi bi-wallet2",
+        "sections": [
+          {
+            "title": "Головні убори",
+            "items": [
+              { "img": "https://randomuser.me/api/portraits/men/6.jpg", "label": "Панами" },
+              { "img": "https://randomuser.me/api/portraits/men/7.jpg", "label": "Шапки" }
+            ]
+          },
+          {
+            "title": "Гаманці та ремені",
+            "items": [
+              { "img": "https://randomuser.me/api/portraits/men/8.jpg", "label": "Гаманці" },
+              { "img": "https://randomuser.me/api/portraits/men/9.jpg", "label": "Ремені" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
