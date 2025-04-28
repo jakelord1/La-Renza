@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Interfaces
 {
-    internal interface ICommentService
+    public interface ICommentService
     {
-        Task CreateComment(CommentDTO commentDto);
-        Task UpdateComment(CommentDTO commentDto);
-        Task DeleteComment(int id);
-        Task<CommentDTO> GetComment(int id);
-        Task<IEnumerable<CommentDTO>> GetComments();
+        public Task CreateComment(CommentDTO commentDto);
+        public Task UpdateComment(CommentDTO commentDto);
+        public Task DeleteComment(int id);
+        public Task<CommentDTO> GetComment(int id);
+        public Task<IEnumerable<CommentDTO>> GetComments();
     }
 }

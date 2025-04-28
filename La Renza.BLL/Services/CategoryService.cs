@@ -10,34 +10,34 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Services
 {
-    internal class CommentService : ICommentService
+    internal class CategoryService : ICategoryService
     {
         private readonly IUnitOfWork _db;
         private readonly IMapper _mapper;
-        public CommentService(IUnitOfWork db, IMapper mapper)
+        public CategoryService(IUnitOfWork db, IMapper mapper)
         {
             _db = db;
             _mapper = mapper;
         }
-        public Task CreateComment(CommentDTO commentDto)
+        public Task CreateCategory(CategoryDTO categoryDto)
         {
 
         }
-        public Task UpdateComment(CommentDTO commentDto)
+        public Task UpdateCategory(CategoryDTO categoryDto)
         {
 
         }
-        public Task DeleteComment(int id)
+        public Task DeleteCategory(int id)
         {
 
         }
-        public Task<CommentDTO> GetComment(int id)
+        public Task<CategoryDTO> GetCategory(int id)
         {
 
         }
-        public async Task<IEnumerable<CommentDTO>> GetComments()
+        public Task<IEnumerable<CategoryDTO>> GetCategories()
         {
-            
+
         }
     }
 }

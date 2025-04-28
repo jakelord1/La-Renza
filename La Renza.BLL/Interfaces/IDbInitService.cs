@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace La_Renza.BLL.DTO
+namespace La_Renza.BLL.Interfaces
 {
-    public class UserDTO
+    internal interface IDbInitService
     {
+        Task InitializeAsync();
     }
 }

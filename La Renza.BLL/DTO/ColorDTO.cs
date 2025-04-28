@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    internal class ColorDTO
+    public class ColorDTO
     {
         int Id { get; set; }
         public string Name { get; set; }

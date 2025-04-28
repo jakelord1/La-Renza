@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    internal class SizeDTO
+    public class SizeDTO
     {
         public int Id {  get; set; }
         public string Name { get; set; }

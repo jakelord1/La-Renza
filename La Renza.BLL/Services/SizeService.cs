@@ -10,34 +10,34 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Services
 {
-    internal class CommentService : ICommentService
+    internal class SizeService : ISizeService
     {
         private readonly IUnitOfWork _db;
         private readonly IMapper _mapper;
-        public CommentService(IUnitOfWork db, IMapper mapper)
+        public SizeService(IUnitOfWork db, IMapper mapper)
         {
             _db = db;
             _mapper = mapper;
         }
-        public Task CreateComment(CommentDTO commentDto)
+        public Task CreateSize(SizeDTO sizesDto)
         {
 
         }
-        public Task UpdateComment(CommentDTO commentDto)
+        public Task UpdateSize(SizeDTO sizeDto)
         {
 
         }
-        public Task DeleteComment(int id)
+        public Task DeleteSize(int id)
         {
 
         }
-        public Task<CommentDTO> GetComment(int id)
+        public Task<SizeDTO> GetSize(int id)
         {
 
         }
-        public async Task<IEnumerable<CommentDTO>> GetComments()
+        public Task<IEnumerable<SizeDTO>> GetSizes()
         {
-            
+
         }
     }
 }

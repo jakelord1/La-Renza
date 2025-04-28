@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    internal class CommentDTO
+    public class CommentDTO
     {
         public int Id { get; set; }
         public int ProductId { get; set; }
