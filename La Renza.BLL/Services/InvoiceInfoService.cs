@@ -1,0 +1,88 @@
+﻿using La_Renza.BLL.DTO;
+using La_Renza.DAL.Entities;
+using La_Renza.DAL.Interfaces;
+using La_Renza.BLL.Infrastructure;
+using La_Renza.BLL.Interfaces;
+using AutoMapper;
+
+namespace La_Renza.BLL.Services
+{
+    public class InvoiceInfoService : IInvoiceInfoService
+    {
+        IUnitOfWork Database { get; set; }
+
+        public InvoiceInfoService(IUnitOfWork uow)
+        {
+            Database = uow;
+        }
+
+        public async Task CreateInvoiceInfo(InvoiceInfoDTO invoiceInfoDto)
+        {
+            var invoiceInfo = new InvoiceInfo
+            {
+                UserId = invoiceInfoDto.UserId,
+                FullName = invoiceInfoDto.FullName,
+                SecondName = invoiceInfoDto.SecondName,
+                City = invoiceInfoDto.City,
+                PostIndex = invoiceInfoDto.PostIndex,
+                Street = invoiceInfoDto.Street,
+                HouseNumber = invoiceInfoDto.HouseNumber,
+                IsDigital = invoiceInfoDto.IsDigital
+            };
+            await Database.Invoices.Create(invoiceInfo);
+            await Database.Save();
+        }
+
+        public async Task UpdateInvoiceInfo(InvoiceInfoDTO invoiceInfoDto)
+        {
+            var invoiceInfo = new InvoiceInfo
+            {
+                UserId = invoiceInfoDto.UserId,
+                FullName = invoiceInfoDto.FullName,
+                SecondName = invoiceInfoDto.SecondName,
+                City = invoiceInfoDto.City,
+                PostIndex = invoiceInfoDto.PostIndex,
+                Street = invoiceInfoDto.Street,
+                HouseNumber = invoiceInfoDto.HouseNumber,
+                IsDigital = invoiceInfoDto.IsDigital
+            };
+            Database.Invoices.Update(invoiceInfo);
+            await Database.Save();
+        }
+
+        public async Task DeleteInvoiceInfo(int id)
+        {
+            await Database.Invoices.Delete(id);
+            await Database.Save();
+        }
+
+        public async Task<InvoiceInfoDTO> GetInvoiceInfo(int id)
+        {
+            var invoiceInfo = await Database.Invoices.Get(id);
+            if (invoiceInfo == null)
+                throw new ValidationException("Wrong invoices!", "");
+            return new InvoiceInfoDTO
+            {
+                UserId = invoiceInfo.UserId,
+                FullName = invoiceInfo.FullName,
+                SecondName = invoiceInfo.SecondName,
+                City = invoiceInfo.City,
+                PostIndex = invoiceInfo.PostIndex,
+                Street = invoiceInfo.Street,
+                HouseNumber = invoiceInfo.HouseNumber,
+                IsDigital = invoiceInfo.IsDigital,
+                User = invoiceInfo.User.Email
+            };
+        }
+
+
+        public async Task<IEnumerable<InvoiceInfoDTO>> GetInvoiceInfos()
+        {
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<InvoiceInfo, InvoiceInfoDTO>()
+            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
+            var mapper = new Mapper(config);
+            return mapper.Map<IEnumerable<InvoiceInfo>, IEnumerable<InvoiceInfoDTO>>(await Database.Invoices.GetAll());
+        }
+
+    }
+}

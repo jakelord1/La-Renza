@@ -20,7 +20,8 @@ namespace La_Renza.DAL.Interfaces
         IRepository<SizeOption> Sizes { get; }
         IRepository<User> Users { get; }
         IRepository<ShopingCart> ShopingCarts { get; }
-
+        IRepository<DeliveryMethod> DeliveryMethods { get; }
+        
         Task Save();
     }
 }

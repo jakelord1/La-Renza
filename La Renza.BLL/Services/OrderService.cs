@@ -29,7 +29,7 @@ namespace La_Renza.BLL.Services
                 CreatedAt = orderDto.CreatedAt,
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
-                DeliveryMethod = orderDto.DeliveryMethod
+                DeliveryMethodId = orderDto.DeliveryMethodId
             };
             await Database.Orders.Create(order);
             await Database.Save();
@@ -48,7 +48,7 @@ namespace La_Renza.BLL.Services
                 CreatedAt = orderDto.CreatedAt,
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
-                DeliveryMethod = orderDto.DeliveryMethod
+                DeliveryMethodId = orderDto.DeliveryMethodId
             };
             Database.Orders.Update(order);
             await Database.Save();
@@ -76,7 +76,10 @@ namespace La_Renza.BLL.Services
                 CreatedAt = order.CreatedAt,
                 CompletedAt = order.CompletedAt,
                 PaymentMethod = order.PaymentMethod,
-                DeliveryMethod = order.DeliveryMethod
+                DeliveryMethodId = order.DeliveryMethodId,
+                User = order.User.Email,
+                Address = order.Address.City,
+                Coupon = order.Coupon.Name
             };
         }
 

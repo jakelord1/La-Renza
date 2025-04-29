@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using La_Renza.DAL.Entities;
 
-namespace La_Renza.DAL.Entities
+namespace La_Renza.BLL.DTO
 {
-    public class Address
+    public class AddressDTO
     {
         public int Id { get; set; }
         public int? UserId { get; set; }
@@ -18,9 +15,7 @@ namespace La_Renza.DAL.Entities
         public string PostIndex { get; set; }
         public string AdditionalInfo { get; set; }
         public string PhoneNumber { get; set; }
-        //public ICollection<Order>? Orders { get; set; }
-
-        public User? User { get; set; }
+        public string? User { get; set; }
 
     }
 }

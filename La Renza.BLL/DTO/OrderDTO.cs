@@ -14,7 +14,7 @@ namespace La_Renza.BLL.DTO
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public int PaymentMethod { get; set; }
-        public int DeliveryMethod { get; set; }
+        public int DeliveryMethodId { get; set; }
         public string? User { get; set; }
         public string? Address { get; set; }
         public string? Coupon { get; set; }
