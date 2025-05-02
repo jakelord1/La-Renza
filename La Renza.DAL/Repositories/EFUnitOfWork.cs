@@ -25,7 +25,8 @@ namespace La_Renza.DAL.Repositories
         private SizeOptionRepository sizeOptionRepository;
         private UserRepository userRepository;
         private ShopingCartRepository shoppingCartRepository;
-
+        private DeliveryMethodRepository deliveryMethodRepository;
+        
 
         public EFUnitOfWork(LaRenzaContext context)
         {
@@ -179,6 +180,16 @@ namespace La_Renza.DAL.Repositories
                 if (shoppingCartRepository == null)
                     shoppingCartRepository = new ShopingCartRepository(db);
                 return shoppingCartRepository;
+            }
+        }
+
+        public IRepository<DeliveryMethod> DeliveryMethods
+        {
+            get
+            {
+                if (deliveryMethodRepository == null)
+                    deliveryMethodRepository = new DeliveryMethodRepository(db);
+                return deliveryMethodRepository;
             }
         }
 

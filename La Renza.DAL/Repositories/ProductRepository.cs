@@ -53,5 +53,16 @@ namespace La_Renza.DAL.Repositories
             if (product != null)
                 db.Products.Remove(product);
         }
+
+
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Products.AnyAsync(product => product.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Products.AnyAsync();
+        }
     }
 }

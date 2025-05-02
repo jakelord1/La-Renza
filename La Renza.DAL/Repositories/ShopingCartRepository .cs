@@ -62,6 +62,14 @@ namespace La_Renza.DAL.Repositories
                 db.ShopingCarts.Remove(shopingCart);
         }
 
-       
+        public async Task<bool> Exists(int id)
+        {
+            return await db.ShopingCarts.AnyAsync(shopingCart => shopingCart.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.ShopingCarts.AnyAsync();
+        }
     }
 }

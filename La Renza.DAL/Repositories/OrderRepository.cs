@@ -63,5 +63,16 @@ namespace La_Renza.DAL.Repositories
             if (order != null)
                 db.Orders.Remove(order);
         }
+
+
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Orders.AnyAsync(order => order.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Orders.AnyAsync();
+        }
     }
 }

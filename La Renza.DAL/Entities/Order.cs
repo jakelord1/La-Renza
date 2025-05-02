@@ -18,8 +18,9 @@ namespace La_Renza.DAL.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public int PaymentMethod { get; set; }
-        public int DeliveryMethod { get; set; }
+        public int DeliveryMethodId { get; set; }
         public ICollection<OrderItem>? OrderItems { get; set; }
+        public ICollection<DeliveryMethod>? DeliveryMethods { get; set; }
 
         public User? User { get; set; }
         public Address? Address { get; set; }

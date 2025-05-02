@@ -56,5 +56,15 @@ namespace La_Renza.DAL.Repositories
             if (invoiceInfo != null)
                 db.Invoices.Remove(invoiceInfo);
         }
+
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Invoices.AnyAsync(invoiceInfo => invoiceInfo.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Invoices.AnyAsync();
+        }
     }
 }

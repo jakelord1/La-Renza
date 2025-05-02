@@ -48,5 +48,16 @@ namespace La_Renza.DAL.Repositories
             if (model != null)
                 db.Models.Remove(model);
         }
+
+
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Models.AnyAsync(model => model.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Models.AnyAsync();
+        }
     }
 }

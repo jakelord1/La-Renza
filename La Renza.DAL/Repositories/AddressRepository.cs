@@ -48,5 +48,16 @@ namespace La_Renza.DAL.Repositories
             if (address != null)
                 db.Addresses.Remove(address);
         }
+
+
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Addresses.AnyAsync(address => address.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Addresses.AnyAsync();
+        }
     }
 }

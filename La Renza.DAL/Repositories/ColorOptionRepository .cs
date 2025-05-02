@@ -60,5 +60,15 @@ namespace La_Renza.DAL.Repositories
                 db.Colors.Remove(color);
         }
 
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Colors.AnyAsync(color => color.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Colors.AnyAsync();
+        }
+
     }
 }

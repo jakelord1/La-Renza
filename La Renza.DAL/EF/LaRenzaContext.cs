@@ -23,7 +23,8 @@ namespace La_Renza.DAL.EF
         public DbSet<Product> Products { get; set; }
         public DbSet<SizeOption> Sizes { get; set; }
         public DbSet<User> Users { get; set; }
-
+        public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+        
         public DbSet<ShopingCart> ShopingCarts { get; set; }
         public LaRenzaContext(DbContextOptions<LaRenzaContext> options)
                    : base(options)
