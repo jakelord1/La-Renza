@@ -24,20 +24,22 @@ const mockOrders = [
   }
 ];
 
+const statusLabels = { completed: 'Виконано', processing: 'В обробці', cancelled: 'Скасовано' };
+
 const AccountOrders = () => {
   return (
     <div className="account-content">
-      <h2 className="mb-4">My Orders</h2>
+      <h2 className="mb-4">Мої замовлення</h2>
       <div className="table-responsive">
         <table className="orders-table">
           <thead>
             <tr>
-              <th>Order</th>
-              <th>Date</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th>Замовлення</th>
+              <th>Дата</th>
+              <th>Кількість</th>
+              <th>Сума</th>
+              <th>Статус</th>
+              <th>Дія</th>
             </tr>
           </thead>
           <tbody>
@@ -45,15 +47,15 @@ const AccountOrders = () => {
               <tr key={order.id}>
                 <td>{order.id}</td>
                 <td>{new Date(order.date).toLocaleDateString()}</td>
-                <td>{order.items} items</td>
+                <td>{order.items} шт.</td>
                 <td>${order.total}</td>
                 <td>
                   <span className={`order-status ${order.status}`}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    {statusLabels[order.status]}
                   </span>
                 </td>
                 <td>
-                  <button className="btn btn-sm btn-outline-secondary">View Details</button>
+                  <button className="btn btn-sm btn-outline-secondary">Деталі</button>
                 </td>
               </tr>
             ))}

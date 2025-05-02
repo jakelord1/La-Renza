@@ -29,7 +29,7 @@ const AccountAddresses = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">My Addresses</h2>
         <button className="btn btn-purple">
-          <i className="bi bi-plus-lg me-2"></i>Add New Address
+          <i className="bi bi-plus-lg me-2"></i>Додати нову адресу
         </button>
       </div>
       
@@ -38,7 +38,7 @@ const AccountAddresses = () => {
           <div key={address.id} className="col-md-6 mb-4">
             <div className="address-card">
               {address.isDefault && (
-                <span className="badge bg-primary">Default</span>
+                <span className="badge bg-primary">Загальний</span>
               )}
               <h5>{address.name}</h5>
               <p className="mb-1">{address.street}</p>
@@ -48,15 +48,15 @@ const AccountAddresses = () => {
               <p className="mb-3">{address.country}</p>
               <div className="address-actions">
                 <button className="btn btn-sm btn-outline-secondary">
-                  <i className="bi bi-pencil me-2"></i>Edit
+                  <i className="bi bi-pencil me-2"></i>Редагувати
                 </button>
                 {!address.isDefault && (
                   <>
                     <button className="btn btn-sm btn-outline-secondary">
-                      Set as Default
+                      Зробити загальним
                     </button>
                     <button className="btn btn-sm btn-outline-danger">
-                      <i className="bi bi-trash me-2"></i>Delete
+                      <i className="bi bi-trash me-2"></i>Видалити
                     </button>
                   </>
                 )}
