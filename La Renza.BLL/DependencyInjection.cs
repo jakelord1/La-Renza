@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using La_Renza.DAL.Repositories;
 using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.Services;
+using La_Renza.DAL.Entities;
 
 namespace La_Renza.BLL
 {
@@ -17,6 +18,24 @@ namespace La_Renza.BLL
     {
         public static void AddLaRenzaBLL(this IServiceCollection services)
         {
+            services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IColorService, ColorService>();
+            services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<ICouponService, CouponService>();
+            services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
+            services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IInvoiceInfoService, InvoiceInfoService>();
+            services.AddScoped<ILangRead>();
+            services.AddScoped<IModelService, ModelService>();
+            services.AddScoped<IOrderItemService, OrderItemService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IShopingCartService, ShopingCartService>();
+            services.AddScoped<ISizeService, SizeService>();
+            services.AddScoped<IUserService, UserService>();
+
             services.AddScoped<IDbInitService, DbInitService>();
             services.AddScoped<IUnitOfWork, EFUnitOfWork>();
 
