@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.DAL.Entities
 {
-    public class ColorOption
+    public class Color
     {
         public int Id {  get; set; }
         public string Name { get; set; }

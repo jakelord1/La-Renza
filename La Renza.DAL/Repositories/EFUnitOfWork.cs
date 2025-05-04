@@ -22,7 +22,7 @@ namespace La_Renza.DAL.Repositories
         private OrderRepository orderRepository;
         private OrderItemRepository orderItemRepository;
         private ProductRepository productRepository;
-        private SizeOptionRepository sizeOptionRepository;
+        private SizeRepository sizeOptionRepository;
         private UserRepository userRepository;
         private ShopingCartRepository shoppingCartRepository;
         private DeliveryMethodRepository deliveryMethodRepository;
@@ -63,7 +63,7 @@ namespace La_Renza.DAL.Repositories
             }
         }
 
-        public IRepository<ColorOption> Colors
+        public IRepository<Color> Colors
         {
             get
             {
@@ -153,12 +153,12 @@ namespace La_Renza.DAL.Repositories
             }
         }
 
-        public IRepository<SizeOption> Sizes
+        public IRepository<Size> Sizes
         {
             get
             {
                 if (sizeOptionRepository == null)
-                    sizeOptionRepository = new SizeOptionRepository(db);
+                    sizeOptionRepository = new SizeRepository(db);
                 return sizeOptionRepository;
             }
         }

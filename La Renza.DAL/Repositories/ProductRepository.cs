@@ -30,12 +30,19 @@ namespace La_Renza.DAL.Repositories
         public async Task<Product> Get(string color)
         {
             var products = await db.Products
-                                   .Where(p => p.ColorOption.Name == color)
+                                   .Where(p => p.Color.Name == color)
                                    .ToListAsync();
             Product? product = products?.FirstOrDefault();
             return product!;
         }
-
+        public async Task<Product> GetBySize(string size)
+        {
+            var products = await db.Products
+                                   .Where(p => p.Size.Name == size)
+                                   .ToListAsync();
+            Product? product = products?.FirstOrDefault();
+            return product!;
+        }
 
         public async Task Create(Product product)
         {
