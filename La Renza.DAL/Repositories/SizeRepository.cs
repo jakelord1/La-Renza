@@ -48,5 +48,14 @@ namespace La_Renza.DAL.Repositories
             if (size != null)
                 db.Sizes.Remove(size);
         }
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Sizes.AnyAsync(size => size.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Sizes.AnyAsync();
+        }
     }
 }

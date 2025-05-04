@@ -49,5 +49,14 @@ namespace La_Renza.DAL.Repositories
             if (coupon != null)
                 db.Coupons.Remove(coupon);
         }
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Coupons.AnyAsync(coupon => coupon.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Coupons.AnyAsync();
+        }
     }
 }

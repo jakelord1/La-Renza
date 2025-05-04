@@ -13,8 +13,8 @@ namespace La_Renza.DAL.Repositories
         private AddressRepository addressRepository;
         private AdminRepository adminRepository;
         private CategoryRepository categoryRepository;
-        private ColorOptionRepository colorOptionRepository;
         private CommentRepository commentRepository;
+        private ColorRepository colorRepository;
         private CouponRepository couponRepository;
         private ImageRepository imageRepository;
         private InvoiceInfoRepository invoiceInfoRepository;
@@ -67,9 +67,9 @@ namespace La_Renza.DAL.Repositories
         {
             get
             {
-                if (colorOptionRepository == null)
-                    colorOptionRepository = new ColorOptionRepository(db);
-                return colorOptionRepository;
+                if (colorRepository == null)
+                    colorRepository = new ColorRepository(db);
+                return colorRepository;
             }
         }
 

@@ -56,6 +56,14 @@ namespace La_Renza.DAL.Repositories
             if (category != null)
                 db.Categories.Remove(category);
         }
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Categories.AnyAsync(categ => categ.Id == id);
+        }
 
+        public async Task<bool> Any()
+        {
+            return await db.Categories.AnyAsync();
+        }
     }
 }

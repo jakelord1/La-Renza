@@ -6,11 +6,11 @@ using La_Renza.DAL.Entities;
 
 namespace La_Renza.DAL.Repositories
 {
-    public class ColorOptionRepository : IRepository<Color>
+    public class ColorRepository : IRepository<Color>
     {
         private LaRenzaContext db;
 
-        public ColorOptionRepository(LaRenzaContext context)
+        public ColorRepository(LaRenzaContext context)
         {
             this.db = context;
         }
@@ -59,6 +59,14 @@ namespace La_Renza.DAL.Repositories
             if (color != null)
                 db.Colors.Remove(color);
         }
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Colors.AnyAsync(color => color.Id == id);
+        }
 
+        public async Task<bool> Any()
+        {
+            return await db.Colors.AnyAsync();
+        }
     }
 }
