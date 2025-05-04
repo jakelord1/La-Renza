@@ -14,7 +14,7 @@ namespace La_Renza.BLL.Infrastructure
         public MapperProfile()
         { 
             CreateMap<Comment, CommentDTO>()
-                .ForMember(dest => dest.ImagePath, opt => opt.MapFrom(src => src.Image.Path))
+                .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.Image.Id))
                 .ReverseMap();
             CreateMap<Category, CategoryDTO>()
                 .ReverseMap();
