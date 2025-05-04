@@ -27,7 +27,7 @@ const mockWishlist = [
 const AccountWishlist = () => {
   return (
     <div className="account-content">
-      <h2 className="mb-4">My Wishlist</h2>
+      <h2 className="mb-4">Мій список бажань</h2>
       <div className="row">
         {mockWishlist.map((item) => (
           <div key={item.id} className="col-md-4 mb-4">
@@ -56,7 +56,7 @@ const AccountWishlist = () => {
                     className={`btn ${item.inStock ? 'btn-purple' : 'btn-secondary'}`}
                     disabled={!item.inStock}
                   >
-                    {item.inStock ? 'Add to Cart' : 'Out of Stock'}
+                    {item.inStock ? 'Додати до кошика' : 'Немає в наявності'}
                   </button>
                 </div>
               </div>

@@ -49,5 +49,16 @@ namespace La_Renza.DAL.Repositories
             if (admin != null)
                 db.Admins.Remove(admin);
         }
+
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Admins.AnyAsync(admin => admin.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Admins.AnyAsync();
+        }
+
     }
 }

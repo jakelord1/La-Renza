@@ -65,5 +65,15 @@ namespace La_Renza.DAL.Repositories
             if (comment != null)
                 db.Comments.Remove(comment);
         }
+
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Comments.AnyAsync(comment => comment.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Comments.AnyAsync();
+        }
     }
 }
