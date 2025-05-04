@@ -48,5 +48,14 @@ namespace La_Renza.DAL.Repositories
             if (image != null)
                 db.Images.Remove(image);
         }
+        public async Task<bool> Exists(int id)
+        {
+            return await db.Images.AnyAsync(image => image.Id == id);
+        }
+
+        public async Task<bool> Any()
+        {
+            return await db.Images.AnyAsync();
+        }
     }
 }
