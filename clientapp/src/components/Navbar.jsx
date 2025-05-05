@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CartCount from './CartCount';
+import AccountPopover from './AccountPopover';
 
 const popularTags = [
   'сумка', 'джинси жіночі', 'піжама', 'футболка',
@@ -33,7 +34,9 @@ const recommendedProducts = [
 
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
+  const [showPopover, setShowPopover] = useState(false);
   const searchRef = useRef(null);
+  const popoverTimeout = useRef();
 
   const handleToggleSearch = e => {
     e.preventDefault();
@@ -109,34 +112,31 @@ const Navbar = () => {
                 <i className="bi bi-heart fs-5" style={{ color: '#000' }}></i>
               </Link>
 
-              <div className="dropdown">
+              <div
+                className="position-relative"
+                onMouseEnter={() => {
+                  clearTimeout(popoverTimeout.current);
+                  setShowPopover(true);
+                }}
+                onMouseLeave={() => {
+                  popoverTimeout.current = setTimeout(() => setShowPopover(false), 120);
+                }}
+                style={{display: 'flex', alignItems: 'center'}}
+              >
                 <button
-                  className="btn btn-link nav-link px-2 text-dark dropdown-toggle"
+                  className="btn btn-link nav-link px-2 text-dark"
                   type="button"
-                  data-bs-toggle="dropdown"
+                  style={{outline: 'none', boxShadow: 'none'}}
+                  tabIndex={0}
                 >
                   <i className="bi bi-person fs-5" style={{ color: '#000' }} />
                 </button>
-                <ul className="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <Link className="dropdown-item" to="/account">
-                      Мій кабінет
-                    </Link>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/login">
-                      Увійти
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/register">
-                      Реєстрація
-                    </Link>
-                  </li>
-                </ul>
+                {showPopover && (
+                  <AccountPopover
+                    onLogin={() => window.location.href = '/login'}
+                    onRegister={() => window.location.href = '/register'}
+                  />
+                )}
               </div>
 
               <Link to="/cart" className="nav-link px-2 position-relative text-success">
@@ -146,7 +146,7 @@ const Navbar = () => {
             </div>
           </div>
         </div>
-          </nav>
+      </nav>
 
       {showSearch && (
         <div
