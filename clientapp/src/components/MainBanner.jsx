@@ -2,15 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const carouselItems = [
   {
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    image: '../src/assets/images/banner/car-banner.png',
     link: '/catalog',
   },
   {
-    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80',
+    image: '../src/assets/images/banner/delivery-banner.png',
     link: '/favorites',
   },
   {
-    image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80',
+    image: '../src/assets/images/banner/plants-banner.png',
     link: '/sale',
   },
 ];

@@ -54,7 +54,7 @@ const NavbarDropdown = ({ section, onMouseLeave }) => {
         minHeight: 440,
         height: 480,
       }}>
-        {/* Лівий блок підкатегорій */}
+
         <div style={{ width: 240, background: '#fafbfc', borderRight: '1px solid #eee', padding: '22px 0', height: '100%' }}>
           {subcategories.map((sub, idx) => (
             <div
@@ -74,7 +74,7 @@ const NavbarDropdown = ({ section, onMouseLeave }) => {
             </div>
           ))}
         </div>
-        {/* Правий блок з секціями */}
+
         <NavbarDropdownSection section={section} activeSub={activeSub} />
       </div>
     </div>
@@ -94,13 +94,13 @@ const Navbar = () => {
   };
   const handleCategoryLeave = () => {
     setIsCategoryHovered(false);
-    // activeCategory не сбрасываем сразу
+
   };
   const handleNavLeave = () => {
     setIsDropdownHovered(false);
-    // activeCategory не сбрасываем сразу
+
   };
-  // useEffect следит за обоими состояниями
+
   useEffect(() => {
     if (!isCategoryHovered && !isDropdownHovered) {
       setActiveCategory(null);
@@ -113,40 +113,15 @@ const Navbar = () => {
       className="navbar navbar-expand-lg navbar-light bg-white fixed-top"
       style={{ boxShadow: 'none', zIndex: 1002, position: 'relative', borderBottom: '1px solid #e5e5e5' }}
     >
-      <div className="container" style={{ maxWidth: 1080 }}>
-        <Link className="navbar-brand" to="/">
-          <img src="/images/larenza-logo.png" alt="La'Renza" height="18" />
-        </Link>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav mx-auto" style={{ position: 'relative' }}>
-            {categories.map((cat) => (
-              <li
-                className="nav-item"
-                key={cat.label}
-                onMouseEnter={() => handleCategoryEnter(cat.query)}
-                onMouseLeave={handleCategoryLeave}
-                style={{ position: 'relative' }}
-              >
-                <Link
-                  className={"nav-link px-3 text-dark fw-bold"}
-                  to={`/catalog?category=${cat.query}`}
-                  style={{
-                    fontSize: 15,
-                    background: (activeCategory === cat.query || hoveredNav === cat.query) ? '#f5f5f5' : 'transparent',
-                    borderRadius: 3,
-                    fontWeight: 700,
-                    transition: 'background .12s',
-                  }}
-                >
-                  {cat.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="d-flex align-items-center">
+      <div className="container" style={{ maxWidth: 1080, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', padding: '9px 0', width: '100%', position: 'relative' }}>
+
+          <div style={{ flex: 1 }}></div>
+          <Link className="navbar-brand" to="/" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
+            <img src="/images/larenza-logo.png" alt="La'Renza" height="18" />
+          </Link>
+          <div className="d-flex align-items-center" style={{ gap: 8, marginLeft: 'auto' }}>
             <Link to="/search" className="nav-link px-2 text-primary">
               <i className="bi bi-search fs-5" style={{color:'#000'}}></i>
             </Link>
@@ -168,6 +143,39 @@ const Navbar = () => {
               <i className="bi bi-bag fs-5" style={{color:'#000'}}></i>
               <CartCount />
             </Link>
+          </div>
+        </div>
+        {/* Кнопки и меню под логотипом и иконками */}
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav" style={{ flex: 1 }}>
+            <ul className="navbar-nav mx-auto" style={{ position: 'relative' }}>
+              {categories.map((cat) => (
+                <li
+                  className="nav-item"
+                  key={cat.label}
+                  onMouseEnter={() => handleCategoryEnter(cat.query)}
+                  onMouseLeave={handleCategoryLeave}
+                  style={{ position: 'relative' }}
+                >
+                  <Link
+                    className={"nav-link px-3 text-dark fw-bold"}
+                    to={`/catalog?category=${cat.query}`}
+                    style={{
+                      fontSize: 15,
+                      background: (activeCategory === cat.query || hoveredNav === cat.query) ? '#f5f5f5' : 'transparent',
+                      borderRadius: 3,
+                      fontWeight: 700,
+                      transition: 'background .12s',
+                    }}
+                  >
+                    {cat.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

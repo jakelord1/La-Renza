@@ -1,4 +1,7 @@
 import React from 'react';
+import AddToCartModal from './AddToCartModal';
+import SelectSizeModal from './SelectSizeModal';
+import UnifiedCartModal from './UnifiedCartModal';
 
 const BADGE_COLORS = {
   'НОВИНКА': 'bg-primary text-white',
@@ -28,7 +31,6 @@ const toggleFavorite = (product) => {
   window.dispatchEvent(new Event('favorites-updated'));
 };
 
-// Cart functionality
 const getCart = () => {
   try {
     return JSON.parse(localStorage.getItem('cart')) || [];
@@ -36,17 +38,6 @@ const getCart = () => {
   return [];
 };
 const isInCart = (product) => getCart().some((item) => item.id === product.id);
-const toggleCart = (product) => {
-  let cart = [];
-  try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (error) { /* ignore parse error */ }
-  if (cart.some((item) => item.id === product.id)) {
-    cart = cart.filter((item) => item.id !== product.id);
-  } else {
-    cart.push(product);
-  }
-  localStorage.setItem('cart', JSON.stringify(cart));
-  window.dispatchEvent(new Event('cart-updated'));
-};
 
 const ProductCard = ({ product }) => {
 
@@ -55,6 +46,7 @@ const ProductCard = ({ product }) => {
 
   const [favorite, setFavorite] = React.useState(isFavorite(product));
   const [inCart, setInCart] = React.useState(isInCart(product));
+  const [showModal, setShowModal] = React.useState(false);
 
   React.useEffect(() => {
     const update = () => setFavorite(isFavorite(product));
@@ -67,6 +59,16 @@ const ProductCard = ({ product }) => {
     window.addEventListener('cart-updated', updateCart);
     return () => window.removeEventListener('cart-updated', updateCart);
   }, [product]);
+
+  const handleCartClick = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => setShowModal(false);
+  const handleCheckout = () => {
+    setShowModal(false);
+    window.location.href = '/cart';
+  };
 
   return (
     <div className="product-card position-relative d-flex flex-column p-0" style={{background:'#fff', borderRadius: '10px', minWidth: 260, maxWidth: 260, width: 260, height: 420, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', border: 'none', overflow:'hidden', margin:'0 10px 18px 10px'}}>
@@ -95,13 +97,19 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      <button className="btn p-0 position-absolute bottom-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={() => toggleCart(product)}>
+      <button className="btn p-0 position-absolute bottom-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={handleCartClick}>
         <svg width="22" height="22" fill={inCart ? 'var(--purple)' : 'none'} stroke={inCart ? 'var(--purple)' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
           <circle cx="9" cy="21" r="1"/>
           <circle cx="20" cy="21" r="1"/>
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
       </button>
+      <UnifiedCartModal
+        show={showModal}
+        product={product}
+        onClose={handleCloseModal}
+        onCheckout={handleCheckout}
+      />
     </div>
   );
 };
