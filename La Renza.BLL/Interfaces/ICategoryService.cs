@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Interfaces
 {
-    internal interface ICategoryService
+    public interface ICategoryService
     {
         Task CreateCategory(CategoryDTO categoryDto);
         Task UpdateCategory(CategoryDTO categoryDto);

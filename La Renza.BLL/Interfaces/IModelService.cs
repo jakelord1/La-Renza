@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Interfaces
 {
-    internal interface IModelService
+    public interface IModelService
     {
         Task CreateModel(ModelDTO modelDto);
         Task UpdateModel(ModelDTO modelDto);

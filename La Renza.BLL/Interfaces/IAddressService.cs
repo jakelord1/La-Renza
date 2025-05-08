@@ -2,7 +2,7 @@
 
 namespace La_Renza.BLL.Interfaces
 {
-    interface IAddressService
+    public interface IAddressService
     {
         Task CreateAddress(AddressDTO adressDto);
         Task UpdateAddress(AddressDTO adressDto);
