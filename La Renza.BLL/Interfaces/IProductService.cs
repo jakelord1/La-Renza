@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Interfaces
 {
-    internal interface IProductService
+    public interface IProductService
     {
         Task CreateProduct(ProductDTO productDto);
         Task UpdateProduct(ProductDTO productDto);
