@@ -1,5 +1,5 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Montserrat', Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -65,4 +65,18 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.larenza-font {
+  font-family: 'Montserrat', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.navbar-nav {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.navbar {
+  padding-bottom: 0 !important;
 }

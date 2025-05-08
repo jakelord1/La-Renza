@@ -39,6 +39,7 @@
   font-size: 0.95em;
   padding: 0.5em 1em;
   border-radius: 16px;
+  background: #a1a3a7 !important;
 }
 .product-details-page .active {
   background: #a259e6;
@@ -127,8 +128,8 @@
   border-radius: 4px !important;
 }
 .badge-fit {
-  background: #edeef0;
-  color: #6c757d;
+  background: #d6d8db !important;
+  color: #3e4448;
   font-weight: 500;
   border-radius: 12px;
   font-size: 1em;
@@ -184,4 +185,8 @@
   border: none !important;
   background: none !important;
   box-shadow: 0 2px 8px #0001;
+}
+
+.bg-light {
+  background-color: #e0e3e8 !important;
 }

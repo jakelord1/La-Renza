@@ -1,7 +1,7 @@
 import React from 'react';
 
 const PromoBanner = () => (
-  <div style={{
+  <div className="larenza-font" style={{
     width: '100%',
     background: '#7326b6',
     color: '#fff',

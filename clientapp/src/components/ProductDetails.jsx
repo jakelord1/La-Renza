@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './ProductDetails.css';
 import AddToCartModal from './AddToCartModal';
+import { Pagination } from 'react-bootstrap';
 
 const ProductDetails = ({ product }) => {
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
@@ -12,7 +13,18 @@ const ProductDetails = ({ product }) => {
   const [likedReviews, setLikedReviews] = useState({});
   const modalRef = useRef(null);
   const [openSection, setOpenSection] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
+  useEffect(() => {
+    fetch('/data/comments.json')
+      .then(res => res.json())
+      .then(data => {
+        const productReviews = data.comments.filter(comment => comment.productId === product.id);
+        setReviews(productReviews);
+      });
+  }, [product.id]);
 
   useEffect(() => {
     if (!showModal) return;
@@ -62,43 +74,6 @@ const ProductDetails = ({ product }) => {
   };
   const handleContinue = () => setShowModal(false);
 
-  const reviews = [
-    {
-      id: 1,
-      author: 'Анастасія',
-      date: '2025-04-25',
-      rating: 5,
-      text: 'Трохи оверсайз, мені лойк',
-      color: 'чорний',
-      size: 'L',
-      fit: 'Ідеальна',
-      likes: 12,
-    },
-    {
-      id: 2,
-      author: 'Олег',
-      date: '2025-04-25',
-      rating: 5,
-      text: 'Супер якість',
-      color: 'білий',
-      size: 'XL',
-      fit: 'Ідеальна',
-      likes: 7,
-    },
-    {
-      id: 3,
-      author: 'Ірина',
-      date: '2025-04-25',
-      rating: 5,
-      text: 'Класний матеріал. Розмір приблизно.',
-      color: 'чорний',
-      size: 'XS',
-      fit: 'Ідеальна',
-      likes: 3,
-    },
-  ];
-
-
   const breadcrumbs = [
     { label: 'La\'Renza', link: '/' },
     { label: 'Жінка', link: '/catalog?cat=woman' },
@@ -110,6 +85,8 @@ const ProductDetails = ({ product }) => {
     'ВІД НАЙСТАРШИХ',
     'ВІД НАЙВИЩОГО РЕЙТИНГУ',
     'ВІД НАЙНИЖЧОГО РЕЙТИНГУ',
+    'ЗА ЛАЙКАМИ (БІЛЬШЕ)',
+    'ЗА ЛАЙКАМИ (МЕНШЕ)',
   ];
 
 
@@ -118,12 +95,102 @@ const ProductDetails = ({ product }) => {
     if (sort === 'ВІД НАЙСТАРШИХ') return [...reviews].sort((a, b) => new Date(a.date) - new Date(b.date));
     if (sort === 'ВІД НАЙВИЩОГО РЕЙТИНГУ') return [...reviews].sort((a, b) => b.rating - a.rating);
     if (sort === 'ВІД НАЙНИЖЧОГО РЕЙТИНГУ') return [...reviews].sort((a, b) => a.rating - b.rating);
+    if (sort === 'ЗА ЛАЙКАМИ (БІЛЬШЕ)') return [...reviews].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    if (sort === 'ЗА ЛАЙКАМИ (МЕНШЕ)') return [...reviews].sort((a, b) => (a.likes || 0) - (b.likes || 0));
     return reviews;
   };
 
 
   const handleLikeReview = (id) => {
     setLikedReviews(prev => ({ ...prev, [id]: !prev[id] }));
+    // Here you would typically update the likes count in the JSON file
+    // For now, we'll just update the local state
+    setReviews(prevReviews => 
+      prevReviews.map(review => 
+        review.id === id 
+          ? { ...review, likes: review.likes + (likedReviews[id] ? -1 : 1) }
+          : review
+      )
+    );
+  };
+
+  // Pagination calculations
+  const sortedReviews = getSortedReviews();
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedReviews.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(sortedReviews.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // Previous button
+    pages.push(
+      <Pagination.Prev 
+        key="prev" 
+        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
+      />
+    );
+
+    // First page
+    if (startPage > 1) {
+      pages.push(
+        <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
+          1
+        </Pagination.Item>
+      );
+      if (startPage > 2) {
+        pages.push(<Pagination.Ellipsis key="ellipsis1" disabled />);
+      }
+    }
+
+    // Page numbers
+    for (let number = startPage; number <= endPage; number++) {
+      pages.push(
+        <Pagination.Item 
+          key={number} 
+          active={number === currentPage}
+          onClick={() => handlePageChange(number)}
+        >
+          {number}
+        </Pagination.Item>
+      );
+    }
+
+    // Last page
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pages.push(<Pagination.Ellipsis key="ellipsis2" disabled />);
+      }
+      pages.push(
+        <Pagination.Item key={totalPages} onClick={() => handlePageChange(totalPages)}>
+          {totalPages}
+        </Pagination.Item>
+      );
+    }
+
+    // Next button
+    pages.push(
+      <Pagination.Next 
+        key="next" 
+        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages}
+      />
+    );
+
+    return pages;
   };
 
   return (
@@ -293,7 +360,7 @@ const ProductDetails = ({ product }) => {
         </div>
       </div>
       <div className="product-reviews-section mt-5" id="product-reviews-section">
-        <h3 className="mb-3">Відгуки про товар <span className="badge bg-light text-dark">{reviews.length}</span></h3>
+        <h3 className="mb-3">Відгуки про товар <span className="badge bg-light">{reviews.length}</span></h3>
         <div className="mb-2 d-flex align-items-center" style={{gap: 10, zIndex: 10, position: 'relative', maxWidth: 420}}>
           <span style={{fontWeight: 600, fontSize: '1rem', whiteSpace: 'nowrap', color: '#222'}}>Сортувати:</span>
           <div className="position-relative" style={{width: 280}}>
@@ -344,9 +411,8 @@ const ProductDetails = ({ product }) => {
           <span className="badge badge-fit">більше 5%</span>
         </div>
         <div className="reviews-list">
-          {getSortedReviews().map(r => (
+          {currentItems.map(r => (
             <div key={r.id} className="card mb-3 p-3 shadow-sm d-flex flex-row align-items-start gap-3 position-relative">
-
               <div style={{width: 48, height: 48, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f3f3', borderRadius: 12, border: '1px solid #eee'}}>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Question_Mark.svg" alt="?" style={{width: 32, height: 32, objectFit: 'contain'}} />
               </div>
@@ -356,7 +422,12 @@ const ProductDetails = ({ product }) => {
                   <span className="text-warning">{'★'.repeat(r.rating)}</span>
                   <span className="ms-2 small text-secondary">{r.date}</span>
                 </div>
-                <div>{r.text}</div>
+                <div className="mb-2">{r.text}</div>
+                <div className="small text-secondary d-flex align-items-center gap-2">
+                  <span>Розмір: {r.size}</span>
+                  <span>•</span>
+                  <span>Колір: {r.color}</span>
+                </div>
               </div>
 
               <button
@@ -390,6 +461,13 @@ const ProductDetails = ({ product }) => {
             </div>
           ))}
         </div>
+        {sortedReviews.length > itemsPerPage && (
+          <div className="d-flex justify-content-center mt-4">
+            <Pagination className="mb-0">
+              {renderPagination()}
+            </Pagination>
+          </div>
+        )}
       </div>
       <AddToCartModal
         show={showModal}
