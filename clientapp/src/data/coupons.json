@@ -1,0 +1,52 @@
+{
+  "coupons": [
+    {
+      "id": 1,
+      "code": "WELCOME10",
+      "discount": 100,
+      "startDate": "2024-03-01",
+      "endDate": "2024-12-31",
+      "description": "Знижка 100₴ на першу покупку"
+    },
+    {
+      "id": 2,
+      "code": "SUMMER20",
+      "discount": 200,
+      "startDate": "2024-06-01",
+      "endDate": "2024-08-31",
+      "description": "Знижка 200₴ на літню колекцію"
+    },
+    {
+      "id": 3,
+      "code": "SPRING15",
+      "discount": 150,
+      "startDate": "2024-03-15",
+      "endDate": "2024-05-31",
+      "description": "Весняна знижка 150₴ на всі товари"
+    },
+    {
+      "id": 4,
+      "code": "AUTUMN50",
+      "discount": 50,
+      "startDate": "2024-09-01",
+      "endDate": "2024-10-31",
+      "description": "Осіння знижка 50₴ на замовлення від 500₴"
+    },
+    {
+      "id": 5,
+      "code": "BIRTHDAY300",
+      "discount": 300,
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31",
+      "description": "300₴ до дня народження!"
+    },
+    {
+      "id": 6,
+      "code": "VIP500",
+      "discount": 500,
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31",
+      "description": "Ексклюзивна знижка 500₴ для VIP-клієнтів"
+    }
+  ]
+} 

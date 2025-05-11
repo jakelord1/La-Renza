@@ -13,6 +13,16 @@ const navLinks = [
     icon: 'bi-chat-left-text',
     label: 'Коментарі',
   },
+  {
+    to: '/admin/coupons',
+    icon: 'bi-ticket-perforated',
+    label: 'Купони',
+  },
+  {
+    to: '/admin/users',
+    icon: 'bi-people',
+    label: 'Користувачі'
+  },
 ];
 
 const AdminLayout = () => {

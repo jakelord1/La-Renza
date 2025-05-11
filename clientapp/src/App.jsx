@@ -17,7 +17,9 @@ import {
   AdminLogin,
   AdminLayout,
   Dashboard,
-  Comments
+  Comments,
+  Coupons,
+  Users
 } from './components/admin';
 import './App.css';
 
@@ -31,6 +33,8 @@ function App() {
           <Route path="/admin/*" element={<AdminLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="comments" element={<Comments />} />
+            <Route path="coupons" element={<Coupons />} />
+            <Route path="users" element={<Users />} />
           </Route>
           
           {/* Main Site Routes */}
