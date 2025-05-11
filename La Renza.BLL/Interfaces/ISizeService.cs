@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Interfaces
 {
-    internal interface ISizeService
+    public interface ISizeService
     {
         Task CreateSize(SizeDTO sizesDto);
         Task UpdateSize(SizeDTO sizeDto);

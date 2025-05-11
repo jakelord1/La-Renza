@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Interfaces
 {
-    internal interface IColorService
+    public interface IColorService
     {
         Task CreateColor(ColorDTO colorDto);
         Task UpdateColor(ColorDTO colorDto);
