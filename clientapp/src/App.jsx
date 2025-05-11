@@ -11,29 +11,51 @@ import Account from './components/Account';
 import Catalog from './components/Catalog';
 import Favorites from './components/Favorites';
 import Cart from './components/Cart';
+import PromoBanner from './components/PromoBanner';
+import ProductDetailsWrapper from './components/ProductDetailsWrapper.jsx'; 
+import { 
+  AdminLogin,
+  AdminLayout,
+  Dashboard,
+  Comments
+} from './components/admin';
 import './App.css';
 
 function App() {
   return (
     <Router>
       <div className="d-flex flex-column min-vh-100">
-        {/* Линия над хедером */}
-        <div style={{width:'100%', borderTop:'1.5px solid #eee'}}></div>
-        <Navbar />
-        <main className="flex-grow-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            <Route path="/forgot-password" element={<ForgotPasswordForm />} />
-            <Route path="/catalog" element={<Catalog />} />
-            <Route path="/account/*" element={<Account />} />
-            <Route path="/favorites" element={<Favorites />} />
-            <Route path="/cart" element={<Cart />} />
-            {/* <Route path="/reset-password/:token" element={<ResetPasswordForm />} /> */}
-          </Routes>
-        </main>
-        <Footer />
+        <Routes>
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<AdminLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="comments" element={<Comments />} />
+          </Route>
+          
+          {/* Main Site Routes */}
+          <Route path="*" element={
+            <>
+              <PromoBanner />
+              <Navbar />
+              <main className="flex-grow-1">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<LoginForm />} />
+                  <Route path="/register" element={<RegisterForm />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+                  <Route path="/catalog" element={<Catalog />} />
+                  <Route path="/account/*" element={<Account />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/product/:id" element={<ProductDetailsWrapper />} /> 
+                  {/* <Route path="/reset-password/:token" element={<ResetPasswordForm />} /> */}
+                </Routes>
+              </main>
+              <Footer />
+            </>
+          } />
+        </Routes>
       </div>
     </Router>
   );
