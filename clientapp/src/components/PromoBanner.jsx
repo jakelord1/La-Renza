@@ -1,7 +1,21 @@
 import React from 'react';
 
 const PromoBanner = () => (
-  <div className="w-100 bg-purple text-white text-center py-2" style={{background: 'var(--purple)', fontWeight: 600, letterSpacing: 1, marginTop: 15}}>
+  <div className="larenza-font" style={{
+    width: '100%',
+    background: '#7326b6',
+    color: '#fff',
+    fontWeight: 700,
+    fontSize: 15,
+    minHeight: 38,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    letterSpacing: 0.1,
+    padding: '0 0',
+    border: 'none',
+    zIndex: 2000,
+  }}>
     Безкоштовна доставка при замовленні від 300000₴ по всій Україні!
   </div>
 );

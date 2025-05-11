@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PromoBanner from './PromoBanner';
 import CategoryList from './CategoryList';
 import MainBanner from './MainBanner';
 import CategoryTabs from './CategoryTabs';
@@ -10,14 +9,14 @@ const Home = () => {
   const [activeTab, setActiveTab] = useState('Усі');
 
   return (
-    <>
-      <PromoBanner />
+    <div className="larenza-font">
+      {/* Navbar буде під PromoBanner, якщо Navbar додається на рівні App або Layout */}
       <CategoryList />
       <MainBanner />
       <CategoryTabs active={activeTab} setActive={setActiveTab} />
       <ProductGrid />
       <FooterEmailSubscribe />
-    </>
+    </div>
   );
 };
 

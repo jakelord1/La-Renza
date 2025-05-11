@@ -8,11 +8,16 @@ const getCart = () => {
   }
 };
 
+const getTotalCount = () => {
+  const cart = getCart();
+  return cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+};
+
 const CartCount = () => {
-  const [count, setCount] = useState(getCart().length);
+  const [count, setCount] = useState(getTotalCount());
 
   useEffect(() => {
-    const update = () => setCount(getCart().length);
+    const update = () => setCount(getTotalCount());
     window.addEventListener('cart-updated', update);
     return () => window.removeEventListener('cart-updated', update);
   }, []);

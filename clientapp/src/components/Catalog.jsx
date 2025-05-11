@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import ProductCard from './ProductCard';
 
 const catalogProducts = [
@@ -64,7 +64,49 @@ const catalogProducts = [
   }
 ];
 
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'від найновіших' },
+  { value: 'oldest', label: 'від найстарших' },
+  { value: 'rating_high', label: 'від найвищого рейтингу' },
+  { value: 'rating_low', label: 'від найнижчого рейтингу' },
+];
+
 const Catalog = () => {
+  const [sort, setSort] = useState('newest');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Закрытие меню по клику вне и по Esc
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false);
+    };
+    const handleKey = (e) => { if (e.key === 'Escape') setDropdownOpen(false); };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [dropdownOpen]);
+
+  const sortedProducts = useMemo(() => {
+    let arr = [...catalogProducts];
+    switch (sort) {
+      case 'newest':
+        return arr.sort((a, b) => b.id - a.id);
+      case 'oldest':
+        return arr.sort((a, b) => a.id - b.id);
+      case 'rating_high':
+        return arr.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case 'rating_low':
+        return arr.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+      default:
+        return arr;
+    }
+  }, [sort]);
+
   return (
     <div className="catalog-page">
       <div className="catalog-header py-4">
@@ -91,21 +133,24 @@ const Catalog = () => {
                   <li><a className="dropdown-item" href="#">XL</a></li>
                 </ul>
               </div>
-              <select className="form-select form-select-sm" style={{ width: 'auto' }}>
-                <option>Sort by</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Newest</option>
-                <option>Popular</option>
+              {/* Стандартный select для сортировки */}
+              <select
+                className="form-select form-select-sm fw-bold"
+                style={{ width: 'auto', minWidth: 220, fontSize: '1.1rem' }}
+                value={sort}
+                onChange={e => setSort(e.target.value)}
+              >
+                {SORT_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             </div>
           </div>
         </div>
       </div>
-      
       <div className="container py-4">
         <div className="catalog-grid">
-          {catalogProducts.map((product) => (
+          {sortedProducts.map((product) => (
             <div key={product.id} className="catalog-grid-item">
               <ProductCard product={product} />
             </div>

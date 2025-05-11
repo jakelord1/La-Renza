@@ -9,6 +9,18 @@ const getCart = () => {
   }
 };
 
+const getFavorites = () => {
+  try {
+    return JSON.parse(localStorage.getItem('favorites')) || [];
+  } catch {
+    return [];
+  }
+};
+
+const setFavorites = (favorites) => {
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+};
+
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [isCheckout, setIsCheckout] = useState(true);
@@ -19,16 +31,68 @@ const Cart = () => {
     phone: '',
     address: ''
   });
+  const [favorites, setFavoritesState] = useState(getFavorites());
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     setCartItems(getCart());
+    setFavoritesState(getFavorites());
     const update = () => setCartItems(getCart());
     window.addEventListener('cart-updated', update);
     return () => window.removeEventListener('cart-updated', update);
   }, []);
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+  const deliveryOptions = [
+    { id: 'nova', name: 'Нова Пошта (отримання у відділенні)', price: 50, eta: '1-5 днів' },
+    { id: 'meest_pay', name: 'Meest Пошта (оплата при отриманні)', price: 50, eta: '2-9 днів' },
+    { id: 'meest_online', name: 'Meest Пошта (онлайн оплата)', price: 0, eta: '2-9 днів' },
+    { id: 'nova_online', name: 'Нова Пошта (онлайн оплата)', price: 0, eta: '1-5 днів' },
+  ];
+  const paymentOptions = [
+    { id: 'card', name: 'Банківська карта' },
+    { id: 'gpay', name: 'Google Pay' },
+    { id: 'apay', name: 'Apple Pay' },
+  ];
+
+  const changeQuantity = (id, value) => {
+    if (value === 0) {
+      removeItem(id);
+    } else {
+      let newQuantity = value;
+      if (typeof value === 'string') {
+        newQuantity = parseInt(value, 10);
+        if (isNaN(newQuantity)) newQuantity = 1;
+      }
+      newQuantity = Math.max(1, Math.min(1000, newQuantity));
+      const updated = getCart().map(item => {
+        if (item.id === id) {
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      });
+      localStorage.setItem('cart', JSON.stringify(updated));
+      window.dispatchEvent(new Event('cart-updated'));
+    }
+  };
+
+  const addToFavorites = (product) => {
+    let favs = getFavorites();
+    if (!favs.find(item => item.id === product.id)) {
+      favs.push(product);
+      setFavorites(favs);
+      setFavoritesState(favs);
+      // Видаляємо з корзини одразу після додавання в обране
+      removeItem(product.id);
+    }
+  };
+
+  const isFavorite = (id) => favorites.some(item => item.id === id);
+
+  const totalPrice = cartItems.reduce((sum, item) => sum + ((Number(item.price) || 0) * (item.quantity || 1)), 0);
+  const deliveryPrice = selectedDelivery ? deliveryOptions.find(opt => opt.id === selectedDelivery)?.price || 0 : 0;
+  const totalWithDelivery = totalPrice + deliveryPrice;
 
   const removeItem = (id) => {
     const updated = getCart().filter(item => item.id !== id);
@@ -40,13 +104,112 @@ const Cart = () => {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Order placed', { cartItems, formData });
+    if (!selectedDelivery || !selectedPayment) return;
+    console.log('Order placed', { cartItems, formData, selectedDelivery, selectedPayment });
     localStorage.removeItem('cart');
     window.dispatchEvent(new Event('cart-updated'));
     setCartItems([]);
     setIsCheckout(false);
     setOrderPlaced(true);
   };
+
+  function QuantitySelector({ quantity, onChange }) {
+    const [custom, setCustom] = useState(false);
+    const [customValue, setCustomValue] = useState(quantity > 9 ? quantity : '');
+
+    useEffect(() => {
+      if (quantity > 9) {
+        setCustom(false); // всегда возвращаем select после подтверждения
+        setCustomValue(quantity);
+      } else {
+        setCustom(false);
+        setCustomValue('');
+      }
+    }, [quantity]);
+
+    const handleSelect = e => {
+      if (e.target.value === '10+') {
+        setCustom(true);
+        setCustomValue(quantity > 9 ? quantity : '');
+      } else if (e.target.value === '0') {
+        onChange(0); // удалить
+      } else {
+        setCustom(false);
+        onChange(Number(e.target.value));
+      }
+    };
+
+    const handleInput = e => {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length > 4) val = val.slice(0, 4);
+      setCustomValue(val);
+    };
+
+    const handleConfirm = () => {
+      let num = Math.max(10, Math.min(1000, Number(customValue)));
+      if (!customValue || isNaN(num)) return;
+      onChange(num);
+      setCustom(false);
+    };
+
+    const handleInputKeyDown = e => {
+      if (e.key === 'Enter') {
+        handleConfirm();
+      }
+      if (e.key === 'Escape') {
+        setCustom(false);
+        setCustomValue(quantity > 9 ? quantity : '');
+      }
+    };
+
+    // Fix: Always show the current quantity as a visible option if not standard
+    const standardOptions = [1,2,3,4,5,6,7,8,9];
+    const showCustomOption = quantity > 9 && !standardOptions.includes(quantity);
+
+    return (
+      <>
+        {!custom ? (
+          <select
+            className="form-select form-select-sm d-inline-block"
+            style={{width: 70, display: 'inline-block'}}
+            value={quantity === 0 ? 1 : quantity}
+            onChange={handleSelect}
+          >
+            <option value="0" style={{color: 'red'}}>0 (Видалити)</option>
+            {standardOptions.map(i => (
+              <option key={i} value={i}>{i}</option>
+            ))}
+            <option value="10+">10+</option>
+            {showCustomOption && (
+              <option value={quantity}>{quantity}</option>
+            )}
+          </select>
+        ) : (
+          <div style={{display: 'inline-flex', alignItems: 'center', gap: 4}}>
+            <input
+              type="number"
+              min="10"
+              max="1000"
+              className="form-control form-control-sm d-inline-block"
+              style={{width: 60, display: 'inline-block'}}
+              value={customValue}
+              onChange={handleInput}
+              onKeyDown={handleInputKeyDown}
+              placeholder="10+"
+              autoFocus
+            />
+            <button
+              type="button"
+              className="btn btn-outline-dark btn-sm"
+              style={{height: 32, fontWeight: 600, minWidth: 32}}
+              onClick={handleConfirm}
+              disabled={!customValue || isNaN(Number(customValue)) || Number(customValue) < 10 || Number(customValue) > 1000}
+            >Підтвердити</button>
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <section className="cart-page bg-light py-5">
@@ -71,8 +234,19 @@ const Cart = () => {
                         <div className="ms-3 flex-grow-1">
                           <h5 className="mb-1">{product.name}</h5>
                           <p className="mb-0 text-purple fw-bold">{product.price} UAH</p>
+                          <div className="d-flex align-items-center mt-2 gap-2">
+                            {/* Кількість: селект + "10+" */}
+                            <span>Кількість:</span>
+                            <QuantitySelector
+                              quantity={product.quantity || 1}
+                              onChange={val => changeQuantity(product.id, val)}
+                            />
+                          </div>
                         </div>
-                        <button className="btn btn-outline-danger btn-sm" onClick={() => removeItem(product.id)}>Видалити</button>
+                        <button className="btn btn-outline-danger btn-sm me-2" onClick={() => removeItem(product.id)}>Видалити</button>
+                        <button className={`btn btn-${isFavorite(product.id) ? 'secondary' : 'outline-primary'} btn-sm`} onClick={() => addToFavorites(product)} disabled={isFavorite(product.id)}>
+                          {isFavorite(product.id) ? 'В обраному' : 'В обране'}
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -80,6 +254,14 @@ const Cart = () => {
                 <div className="d-flex justify-content-between align-items-center bg-white rounded-3 shadow-sm p-3">
                   <h4 className="mb-0">Вартість:</h4>
                   <h4 className="mb-0 text-purple fw-bold">{totalPrice.toFixed(2)} UAH</h4>
+                </div>
+                <div className="d-flex justify-content-between align-items-center bg-white rounded-3 shadow-sm p-3 mt-2">
+                  <span>Доставка:</span>
+                  <span className="fw-bold">{selectedDelivery ? `${deliveryPrice} UAH` : '—'}</span>
+                </div>
+                <div className="d-flex justify-content-between align-items-center bg-white rounded-3 shadow-sm p-3 mt-2">
+                  <span>Загальна сума:</span>
+                  <span className="fw-bold text-purple">{totalWithDelivery.toFixed(2)} UAH</span>
                 </div>
                 {!isCheckout && (
                   <div className="text-end mt-3">
@@ -91,6 +273,48 @@ const Cart = () => {
                 {isCheckout && (
                   <form onSubmit={handleSubmit} className="card p-4 bg-white rounded-4 shadow-sm" style={{ width: '100%' }}>
                     <h3 className="text-center mb-4 text-purple">Оформлення замовлення</h3>
+                    <div className="mb-3">
+                      <label className="form-label">Виберіть спосіб доставки</label>
+                      <div>
+                        {deliveryOptions.map(opt => (
+                          <div className="form-check mb-1" key={opt.id}>
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              id={`delivery-${opt.id}`}
+                              name="delivery"
+                              value={opt.id}
+                              checked={selectedDelivery === opt.id}
+                              onChange={() => setSelectedDelivery(opt.id)}
+                              required
+                            />
+                            <label className="form-check-label" htmlFor={`delivery-${opt.id}`}>
+                              {opt.name} <span className="text-muted">({opt.eta})</span> — <span className="fw-bold">{opt.price === 0 ? 'Безкоштовно' : `${opt.price} UAH`}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Виберіть спосіб оплати</label>
+                      <div>
+                        {paymentOptions.map(opt => (
+                          <div className="form-check form-check-inline" key={opt.id}>
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              id={`payment-${opt.id}`}
+                              name="payment"
+                              value={opt.id}
+                              checked={selectedPayment === opt.id}
+                              onChange={() => setSelectedPayment(opt.id)}
+                              required
+                            />
+                            <label className="form-check-label" htmlFor={`payment-${opt.id}`}>{opt.name}</label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     <div className="mb-3">
                       <label className="form-label">Ім'я</label>
                       <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} required />
@@ -108,7 +332,7 @@ const Cart = () => {
                       <textarea className="form-control" name="address" value={formData.address} onChange={handleChange} rows={3} required />
                     </div>
                     <div className="text-end">
-                      <button type="submit" className="btn text-white px-4 py-2" style={{background: 'var(--purple)'}}>Підтвердити замовлення</button>
+                      <button type="submit" className="btn text-white px-4 py-2" style={{background: 'var(--purple)'}} disabled={!selectedDelivery || !selectedPayment}>Підтвердити замовлення</button>
                       <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/')}>Продовжити покупки</button>
                     </div>
                   </form>
