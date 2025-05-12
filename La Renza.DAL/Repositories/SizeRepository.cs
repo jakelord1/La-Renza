@@ -16,25 +16,25 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Size>> GetAll()
         {
-            return await db.Sizes.ToListAsync();
+            return await db.Size.ToListAsync();
         }
 
         public async Task<Size> Get(int id)
         {
-            Size? size = await db.Sizes.FindAsync(id);
+            Size? size = await db.Size.FindAsync(id);
             return size!;
         }
 
         public async Task<Size> Get(string name)
         {
-            var sizes = await db.Sizes.Where(s => s.Name == name).ToListAsync();
+            var sizes = await db.Size.Where(s => s.Name == name).ToListAsync();
             Size? size = sizes?.FirstOrDefault();
             return size!;
         }
 
         public async Task Create(Size size)
         {
-            await db.Sizes.AddAsync(size);
+            await db.Size.AddAsync(size);
         }
 
         public void Update(Size size)
@@ -44,18 +44,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Size? size = await db.Sizes.FindAsync(id);
+            Size? size = await db.Size.FindAsync(id);
             if (size != null)
-                db.Sizes.Remove(size);
+                db.Size.Remove(size);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.Sizes.AnyAsync(size => size.Id == id);
+            return await db.Size.AnyAsync(size => size.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Sizes.AnyAsync();
+            return await db.Size.AnyAsync();
         }
     }
 }

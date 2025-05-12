@@ -16,7 +16,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Order>> GetAll()
         {
-            return await db.Orders
+            return await db.Order
                 .Include(o => o.User)
                 .Include(o => o.Address)
                 .Include(o => o.Coupon)
@@ -25,7 +25,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Order> Get(int id)
         {
-            var orders = await db.Orders
+            var orders = await db.Order
                 .Include(o => o.User)
                 .Include(o => o.Address)
                 .Include(o => o.Coupon)
@@ -37,7 +37,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Order> Get(string orderName)
         {
-            var orders = await db.Orders
+            var orders = await db.Order
                 .Include(o => o.User)
                 .Include(o => o.Address)
                 .Include(o => o.Coupon)
@@ -49,7 +49,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(Order order)
         {
-            await db.Orders.AddAsync(order);
+            await db.Order.AddAsync(order);
         }
 
         public void Update(Order order)
@@ -59,20 +59,20 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Order? order = await db.Orders.FindAsync(id);
+            Order? order = await db.Order.FindAsync(id);
             if (order != null)
-                db.Orders.Remove(order);
+                db.Order.Remove(order);
         }
 
 
         public async Task<bool> Exists(int id)
         {
-            return await db.Orders.AnyAsync(order => order.Id == id);
+            return await db.Order.AnyAsync(order => order.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Orders.AnyAsync();
+            return await db.Order.AnyAsync();
         }
     }
 }

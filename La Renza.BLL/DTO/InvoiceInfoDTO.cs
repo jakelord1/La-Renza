@@ -6,6 +6,7 @@ namespace La_Renza.BLL.DTO
     public class InvoiceInfoDTO
     {
         public int? UserId { get; set; }
+        public int Id { get; set; }
         public string FullName { get; set; }
         public string SecondName { get; set; }
         public string City { get; set; }

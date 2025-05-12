@@ -17,7 +17,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Comment>> GetAll()
         {
-            return await db.Comments
+            return await db.Comment
                   .Include(c => c.Product)
                   .Include(c => c.User)
                   .Include(c => c.Image)
@@ -26,7 +26,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Comment> Get(int id)
         {
-            var comments = await db.Comments
+            var comments = await db.Comment
                 .Include(c => c.User)
                 .Include(c => c.Product)
                 .Include(c => c.Image)
@@ -37,7 +37,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Comment> Get(string email)
         {
-            var comments = await db.Comments
+            var comments = await db.Comment
                 .Include(c => c.User)
                 .Include(c => c.Product)
                 .Include(c => c.Image)
@@ -51,7 +51,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(Comment comment)
         {
-            await db.Comments.AddAsync(comment);
+            await db.Comment.AddAsync(comment);
         }
 
         public void Update(Comment comment)
@@ -61,19 +61,19 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Comment? comment = await db.Comments.FindAsync(id);
+            Comment? comment = await db.Comment.FindAsync(id);
             if (comment != null)
-                db.Comments.Remove(comment);
+                db.Comment.Remove(comment);
         }
 
         public async Task<bool> Exists(int id)
         {
-            return await db.Comments.AnyAsync(comment => comment.Id == id);
+            return await db.Comment.AnyAsync(comment => comment.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Comments.AnyAsync();
+            return await db.Comment.AnyAsync();
         }
     }
 }

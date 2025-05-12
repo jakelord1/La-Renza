@@ -16,25 +16,25 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Image>> GetAll()
         {
-            return await db.Images.ToListAsync();
+            return await db.Image.ToListAsync();
         }
 
         public async Task<Image> Get(int id)
         {
-            Image? image = await db.Images.FindAsync(id);
+            Image? image = await db.Image.FindAsync(id);
             return image!;
         }
 
         public async Task<Image> Get(string path)
         {
-            var images = await db.Images.Where(i => i.Path == path).ToListAsync();
+            var images = await db.Image.Where(i => i.Path == path).ToListAsync();
             Image? image = images?.FirstOrDefault();
             return image!;
         }
 
         public async Task Create(Image image)
         {
-            await db.Images.AddAsync(image);
+            await db.Image.AddAsync(image);
         }
 
         public void Update(Image image)
@@ -44,18 +44,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Image? image = await db.Images.FindAsync(id);
+            Image? image = await db.Image.FindAsync(id);
             if (image != null)
-                db.Images.Remove(image);
+                db.Image.Remove(image);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.Images.AnyAsync(image => image.Id == id);
+            return await db.Image.AnyAsync(image => image.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Images.AnyAsync();
+            return await db.Image.AnyAsync();
         }
     }
 }

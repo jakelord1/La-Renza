@@ -14,7 +14,7 @@ namespace La_Renza.DAL
         public static void AddLaRenzaDAL(this IServiceCollection services, string connectionString)
         {
             services.AddDbContext<LaRenzaContext>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseMySQL(connectionString));
         }
     }
 }

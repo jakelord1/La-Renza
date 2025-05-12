@@ -21,7 +21,6 @@ namespace La_Renza.BLL.Services
             var deliveryMethod = new DeliveryMethod
             {
                 Id = deliveryMethodDto.Id,
-                OrderId = deliveryMethodDto.OrderId,
                 Name = deliveryMethodDto.Name,
                 DeliveryPrice = deliveryMethodDto.DeliveryPrice
 
@@ -35,7 +34,6 @@ namespace La_Renza.BLL.Services
             var deliveryMethod = new DeliveryMethod
             {
                 Id = deliveryMethodDto.Id,
-                OrderId = deliveryMethodDto.OrderId,
                 Name = deliveryMethodDto.Name,
                 DeliveryPrice = deliveryMethodDto.DeliveryPrice
 
@@ -58,7 +56,6 @@ namespace La_Renza.BLL.Services
             return new DeliveryMethodDTO
             {
                 Id = deliveryMethod.Id,
-                OrderId = deliveryMethod.OrderId,
                 Name = deliveryMethod.Name,
                 DeliveryPrice = deliveryMethod.DeliveryPrice
             };
@@ -67,8 +64,7 @@ namespace La_Renza.BLL.Services
    
         public async Task<IEnumerable<DeliveryMethodDTO>> GetDeliveryMethods()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DeliveryMethod, DeliveryMethodDTO>()
-            .ForMember("Order", opt => opt.MapFrom(c => c.Order.Address)));
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<DeliveryMethod, DeliveryMethodDTO>());
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<DeliveryMethod>, IEnumerable<DeliveryMethodDTO>>(await Database.DeliveryMethods.GetAll());
         }

@@ -17,25 +17,25 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<User>> GetAll()
         {
-            return await db.Users.ToListAsync();
+            return await db.User.ToListAsync();
         }
 
         public async Task<User> Get(int id)
         {
-            User? user = await db.Users.FindAsync(id);
+            User? user = await db.User.FindAsync(id);
             return user!;
         }
 
         public async Task<User> Get(string email)
         {
-            var users = await db.Users.Where(u => u.Email == email).ToListAsync(); 
+            var users = await db.User.Where(u => u.Email == email).ToListAsync(); 
             User? user = users?.FirstOrDefault();
             return user!;
         }
 
         public async Task Create(User user)
         {
-            await db.Users.AddAsync(user);
+            await db.User.AddAsync(user);
         }
 
         public void Update(User user)
@@ -45,18 +45,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            User? user = await db.Users.FindAsync(id);
+            User? user = await db.User.FindAsync(id);
             if (user != null)
-                db.Users.Remove(user);
+                db.User.Remove(user);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.Users.AnyAsync(user => user.Id == id);
+            return await db.User.AnyAsync(user => user.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Users.AnyAsync();
+            return await db.User.AnyAsync();
         }
 
     }

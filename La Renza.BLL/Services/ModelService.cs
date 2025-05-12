@@ -9,6 +9,8 @@ using La_Renza.DAL.Interfaces;
 using La_Renza.DAL.Entities;
 using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.DTO;
+using Microsoft.EntityFrameworkCore.Query.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace La_Renza.BLL.Services
 {
@@ -25,9 +27,23 @@ namespace La_Renza.BLL.Services
         {
             
         }
-        public Task UpdateModel(ModelDTO modelDto)
+        public async Task UpdateModel(ModelDTO modelDto)
         {
-
+            var model = new Model
+            {
+                Name = modelDto.Name,
+                Description = modelDto.Description,
+                StartDate = modelDto.StartDate,
+                MaterialInfo = modelDto.MaterialInfo,
+                Id = modelDto.Id,
+                Rate = modelDto.Rate,
+                Bage = modelDto.Bage
+            };
+            var Saved = await _db.Models.Get(modelDto.Id);
+            if (Saved != null)
+                Saved = model;
+            else
+                throw new Exception();
         }
         public async Task DeleteModel(int id)
         {

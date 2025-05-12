@@ -16,25 +16,25 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Model>> GetAll()
         {
-            return await db.Models.ToListAsync();
+            return await db.Model.ToListAsync();
         }
 
         public async Task<Model> Get(int id)
         {
-            Model? model = await db.Models.FindAsync(id);
+            Model? model = await db.Model.FindAsync(id);
             return model!;
         }
 
         public async Task<Model> Get(string name)
         {
-            var models = await db.Models.Where(m => m.Name == name).ToListAsync();
+            var models = await db.Model.Where(m => m.Name == name).ToListAsync();
             Model? model = models?.FirstOrDefault();
             return model!;
         }
 
         public async Task Create(Model model)
         {
-            await db.Models.AddAsync(model);
+            await db.Model.AddAsync(model);
         }
 
         public void Update(Model model)
@@ -44,18 +44,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Model? model = await db.Models.FindAsync(id);
+            Model? model = await db.Model.FindAsync(id);
             if (model != null)
-                db.Models.Remove(model);
+                db.Model.Remove(model);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.Models.AnyAsync(model => model.Id == id);
+            return await db.Model.AnyAsync(model => model.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Models.AnyAsync();
+            return await db.Model.AnyAsync();
         }
     }
 }

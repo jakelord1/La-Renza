@@ -173,7 +173,7 @@ namespace La_Renza.DAL.Repositories
             }
         }
 
-        public IRepository<ShopingCart> ShopingCarts
+        public IRepository<ShoppingCart> ShopingCarts
         {
             get
             {

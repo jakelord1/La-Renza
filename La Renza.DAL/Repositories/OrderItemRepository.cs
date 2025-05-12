@@ -16,7 +16,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<OrderItem>> GetAll()
         {
-            return await db.OrderItems
+            return await db.OrderItem
                 .Include(o => o.Product) 
                 .Include(o => o.Order)    
                 .ToListAsync();
@@ -24,7 +24,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<OrderItem> Get(int id)
         {
-            var orderItems = await db.OrderItems
+            var orderItems = await db.OrderItem
                 .Include(o => o.Product)
                 .Include(o => o.Order)
                 .Where(a => a.Id == id)
@@ -34,7 +34,7 @@ namespace La_Renza.DAL.Repositories
         }
         public async Task<OrderItem> Get(string name)
         {
-            var orderItems = await db.OrderItems
+            var orderItems = await db.OrderItem
                   .Include(o => o.Product)
                   .Include(o => o.Order)
                   .Where(o => o.Order.OrderName == name)
@@ -46,7 +46,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(OrderItem orderItem)
         {
-            await db.OrderItems.AddAsync(orderItem);
+            await db.OrderItem.AddAsync(orderItem);
         }
 
         public void Update(OrderItem orderItem)
@@ -56,18 +56,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            OrderItem? orderItem = await db.OrderItems.FindAsync(id);
+            OrderItem? orderItem = await db.OrderItem.FindAsync(id);
             if (orderItem != null)
-                db.OrderItems.Remove(orderItem);
+                db.OrderItem.Remove(orderItem);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.OrderItems.AnyAsync(ordIt => ordIt.Id == id);
+            return await db.OrderItem.AnyAsync(ordIt => ordIt.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.OrderItems.AnyAsync();
+            return await db.OrderItem.AnyAsync();
         }
     }
 }

@@ -9,9 +9,7 @@ namespace La_Renza.DAL.Entities
     public class DeliveryMethod
     {
         public int Id { get; set; }
-        public int OrderId { get; set; }
         public string Name { get; set; }
         public double DeliveryPrice { get; set; }
-        public Order Order { get; set; }
     }
 }

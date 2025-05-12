@@ -16,25 +16,25 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Address>> GetAll()
         {
-            return await db.Addresses.ToListAsync();
+            return await db.Address.ToListAsync();
         }
 
         public async Task<Address> Get(int id)
         {
-            Address? address = await db.Addresses.FindAsync(id);
+            Address? address = await db.Address.FindAsync(id);
             return address!;
         }
 
         public async Task<Address> Get(string fullName)
         {
-            var addresses = await db.Addresses.Where(a => a.FullName == fullName).ToListAsync();
+            var addresses = await db.Address.Where(a => a.FullName == fullName).ToListAsync();
             Address? address = addresses?.FirstOrDefault();
             return address!;
         }
 
         public async Task Create(Address address)
         {
-            await db.Addresses.AddAsync(address);
+            await db.Address.AddAsync(address);
         }
 
         public void Update(Address address)
@@ -44,20 +44,20 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Address? address = await db.Addresses.FindAsync(id);
+            Address? address = await db.Address.FindAsync(id);
             if (address != null)
-                db.Addresses.Remove(address);
+                db.Address.Remove(address);
         }
 
 
         public async Task<bool> Exists(int id)
         {
-            return await db.Addresses.AnyAsync(address => address.Id == id);
+            return await db.Address.AnyAsync(address => address.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Addresses.AnyAsync();
+            return await db.Address.AnyAsync();
         }
     }
 }

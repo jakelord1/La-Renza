@@ -27,7 +27,6 @@ namespace La_Renza.BLL
             services.AddScoped<IDeliveryMethodService, DeliveryMethodService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IInvoiceInfoService, InvoiceInfoService>();
-            services.AddScoped<ILangRead>();
             services.AddScoped<IModelService, ModelService>();
             services.AddScoped<IOrderItemService, OrderItemService>();
             services.AddScoped<IOrderService, OrderService>();

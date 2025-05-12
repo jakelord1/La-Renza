@@ -18,18 +18,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Product>> GetAll()
         {
-            return await db.Products.ToListAsync();
+            return await db.Product.ToListAsync();
         }
 
         public async Task<Product> Get(int id)
         {
-            Product? product = await db.Products.FindAsync(id);
+            Product? product = await db.Product.FindAsync(id);
             return product!;
         }
 
         public async Task<Product> Get(string color)
         {
-            var products = await db.Products
+            var products = await db.Product
                                    .Where(p => p.Color.Name == color)
                                    .ToListAsync();
             Product? product = products?.FirstOrDefault();
@@ -37,7 +37,7 @@ namespace La_Renza.DAL.Repositories
         }
         public async Task<Product> GetBySize(string size)
         {
-            var products = await db.Products
+            var products = await db.Product
                                    .Where(p => p.Size.Name == size)
                                    .ToListAsync();
             Product? product = products?.FirstOrDefault();
@@ -46,7 +46,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(Product product)
         {
-            await db.Products.AddAsync(product);
+            await db.Product.AddAsync(product);
         }
 
         public void Update(Product product)
@@ -56,20 +56,20 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Product? product = await db.Products.FindAsync(id);
+            Product? product = await db.Product.FindAsync(id);
             if (product != null)
-                db.Products.Remove(product);
+                db.Product.Remove(product);
         }
 
 
         public async Task<bool> Exists(int id)
         {
-            return await db.Products.AnyAsync(product => product.Id == id);
+            return await db.Product.AnyAsync(product => product.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Products.AnyAsync();
+            return await db.Product.AnyAsync();
         }
     }
 }

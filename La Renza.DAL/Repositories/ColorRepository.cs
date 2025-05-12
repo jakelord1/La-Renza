@@ -17,7 +17,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Color>> GetAll()
         {
-            return await db.Colors
+            return await db.Color
                   .Include(c => c.Model)
                   .Include(c => c.Image)
                   .ToListAsync();
@@ -25,7 +25,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Color> Get(int id)
         {
-            var colors = await db.Colors
+            var colors = await db.Color
                 .Include(c => c.Model)
                 .Include(c => c.Image)
                 .Where(a => a.Id == id).ToListAsync();
@@ -35,7 +35,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Color> Get(string name)
         {         
-            var colors = await db.Colors
+            var colors = await db.Color
                 .Include(c => c.Model)
                 .Include(c => c.Image)
                 .Where(a => a.Name == name).ToListAsync();
@@ -45,7 +45,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(Color color)
         {
-            await db.Colors.AddAsync(color);
+            await db.Color.AddAsync(color);
         }
 
         public void Update(Color color)
@@ -55,18 +55,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Color? color = await db.Colors.FindAsync(id);
+            Color? color = await db.Color.FindAsync(id);
             if (color != null)
-                db.Colors.Remove(color);
+                db.Color.Remove(color);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.Colors.AnyAsync(color => color.Id == id);
+            return await db.Color.AnyAsync(color => color.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Colors.AnyAsync();
+            return await db.Color.AnyAsync();
         }
     }
 }
