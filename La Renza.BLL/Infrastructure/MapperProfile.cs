@@ -17,6 +17,7 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.Image.Id))
                 .ReverseMap();
             CreateMap<Category, CategoryDTO>()
+                .ForMember(dest => dest.ParentCategoryId, opt => opt.MapFrom(src => src.CategoryId))
                 .ReverseMap();
             CreateMap<Size, SizeDTO>()
                 .ReverseMap();

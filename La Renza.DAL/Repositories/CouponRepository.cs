@@ -17,25 +17,25 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Coupon>> GetAll()
         {
-            return await db.Coupons.ToListAsync();
+            return await db.Coupon.ToListAsync();
         }
 
         public async Task<Coupon> Get(int id)
         {
-            Coupon? coupon = await db.Coupons.FindAsync(id);
+            Coupon? coupon = await db.Coupon.FindAsync(id);
             return coupon!;
         }
 
         public async Task<Coupon> Get(string name)
         {
-            var coupons = await db.Coupons.Where(a => a.Name == name).ToListAsync();
+            var coupons = await db.Coupon.Where(a => a.Name == name).ToListAsync();
             Coupon? coupon = coupons?.FirstOrDefault();
             return coupon!;
         }
 
         public async Task Create(Coupon coupon)
         {
-            await db.Coupons.AddAsync(coupon);
+            await db.Coupon.AddAsync(coupon);
         }
 
         public void Update(Coupon coupon)
@@ -45,18 +45,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Coupon? coupon = await db.Coupons.FindAsync(id);
+            Coupon? coupon = await db.Coupon.FindAsync(id);
             if (coupon != null)
-                db.Coupons.Remove(coupon);
+                db.Coupon.Remove(coupon);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.Coupons.AnyAsync(coupon => coupon.Id == id);
+            return await db.Coupon.AnyAsync(coupon => coupon.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Coupons.AnyAsync();
+            return await db.Coupon.AnyAsync();
         }
     }
 }

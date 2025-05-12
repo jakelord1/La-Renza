@@ -27,7 +27,7 @@ namespace La_Renza.BLL.Services
             var category = new Category
             {
                 Name = categoryDto.Name,
-                ParentCategoryId = categoryDto.ParentCategoryId,
+                CategoryId = categoryDto.ParentCategoryId,
                 IsGlobal = categoryDto.IsGlobal,
                 ImageId = categoryDto.ImageId,
                 IsActive = true
@@ -41,7 +41,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = categoryDto.Id,
                 Name = categoryDto.Name,
-                ParentCategoryId = categoryDto.ParentCategoryId,
+                CategoryId = categoryDto.ParentCategoryId,
                 IsGlobal = categoryDto.IsGlobal,
                 ImageId = categoryDto.ImageId,
                 IsActive = true

@@ -18,7 +18,7 @@ namespace La_Renza.BLL.Services
 
         public async Task CreateShopingCart(ShopingCartDTO shopingCartDto)
         {
-            var shopingCart = new ShopingCart
+            var shopingCart = new ShoppingCart
             {
                 Id = shopingCartDto.Id,
                 UserId = shopingCartDto.UserId,
@@ -32,7 +32,7 @@ namespace La_Renza.BLL.Services
 
         public async Task UpdateShopingCart(ShopingCartDTO shopingCartDto)
         {
-            var shopingCart = new ShopingCart
+            var shopingCart = new ShoppingCart
             {
                 Id = shopingCartDto.Id,
                 UserId = shopingCartDto.UserId,
@@ -68,11 +68,11 @@ namespace La_Renza.BLL.Services
    
         public async Task<IEnumerable<ShopingCartDTO>> GetShopingCarts()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<ShopingCart, ShopingCartDTO>()
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<ShoppingCart, ShopingCartDTO>()
             .ForMember("User", opt => opt.MapFrom(c => c.User.Email))
             .ForMember("Product", opt => opt.MapFrom(c => c.Product.Id)));
             var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<ShopingCart>, IEnumerable<ShopingCartDTO>>(await Database.ShopingCarts.GetAll());
+            return mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(await Database.ShopingCarts.GetAll());
         }
 
     }

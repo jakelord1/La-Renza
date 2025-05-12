@@ -5,7 +5,7 @@ using La_Renza.DAL.EF;
 
 namespace La_Renza.DAL.Repositories
 {
-    public class ShopingCartRepository : IRepository<ShopingCart>
+    public class ShopingCartRepository : IRepository<ShoppingCart>
     {
         private LaRenzaContext db;
 
@@ -14,62 +14,62 @@ namespace La_Renza.DAL.Repositories
             this.db = context;
         }
 
-        public async Task<IEnumerable<ShopingCart>> GetAll()
+        public async Task<IEnumerable<ShoppingCart>> GetAll()
         {
-            return await db.ShopingCarts
+            return await db.ShoppingCart
                 .Include(sc => sc.User)   
                 .Include(sc => sc.Product) 
                 .ToListAsync();
         }
 
-        public async Task<ShopingCart> Get(int id)
+        public async Task<ShoppingCart> Get(int id)
         {
-            var shoppingCartItems = await db.ShopingCarts
+            var shoppingCartItems = await db.ShoppingCart
                 .Include(sc => sc.User)
                 .Include(sc => sc.Product)
                 .Where(sc => sc.Id == id).ToListAsync();
 
-            ShopingCart? shopingCart = shoppingCartItems?.FirstOrDefault();
+            ShoppingCart? shopingCart = shoppingCartItems?.FirstOrDefault();
             return shopingCart!;
         }
 
-        public async Task<ShopingCart> Get(string email)
+        public async Task<ShoppingCart> Get(string email)
         {
-            var shoppingCartItems = await db.ShopingCarts
+            var shoppingCartItems = await db.ShoppingCart
            .Include(sc => sc.User)
            .Include(sc => sc.Product)
            .Where(sc => sc.User.Email == email).ToListAsync();
 
-            ShopingCart? shopingCart = shoppingCartItems?.FirstOrDefault();
+            ShoppingCart? shopingCart = shoppingCartItems?.FirstOrDefault();
             return shopingCart!;
         }
 
      
-        public async Task Create(ShopingCart shopingCart)
+        public async Task Create(ShoppingCart shopingCart)
         {
-            await db.ShopingCarts.AddAsync(shopingCart);
+            await db.ShoppingCart.AddAsync(shopingCart);
         }
 
-        public void Update(ShopingCart shopingCart)
+        public void Update(ShoppingCart shopingCart)
         {
             db.Entry(shopingCart).State = EntityState.Modified;
         }
 
         public async Task Delete(int id)
         {
-            ShopingCart? shopingCart = await db.ShopingCarts.FindAsync(id);
+            ShoppingCart? shopingCart = await db.ShoppingCart.FindAsync(id);
             if (shopingCart != null)
-                db.ShopingCarts.Remove(shopingCart);
+                db.ShoppingCart.Remove(shopingCart);
         }
 
         public async Task<bool> Exists(int id)
         {
-            return await db.ShopingCarts.AnyAsync(shopcarts => shopcarts.Id == id);
+            return await db.ShoppingCart.AnyAsync(shopcarts => shopcarts.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.ShopingCarts.AnyAsync();
+            return await db.ShoppingCart.AnyAsync();
         }
     }
 }

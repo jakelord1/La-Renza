@@ -17,14 +17,14 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Category>> GetAll()
         {
-            return await db.Categories
+            return await db.Category
              .Include(c => c.ImageId)
              .ToListAsync();
         }
 
         public async Task<Category> Get(int id)
         {
-            var categories = await db.Categories
+            var categories = await db.Category
              .Include(c => c.CategoryImage)
              .Where(a => a.Id == id).ToListAsync();
             Category? category = categories?.FirstOrDefault();
@@ -33,7 +33,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Category> Get(string name)
         {         
-            var categories = await db.Categories
+            var categories = await db.Category
                 .Include(c => c.CategoryImage)
                 .Where(a => a.Name == name).ToListAsync();
             Category? category = categories?.FirstOrDefault();
@@ -42,7 +42,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(Category category)
         {
-            await db.Categories.AddAsync(category);
+            await db.Category.AddAsync(category);
         }
 
         public void Update(Category category)
@@ -52,18 +52,18 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            Category? category = await db.Categories.FindAsync(id);
+            Category? category = await db.Category.FindAsync(id);
             if (category != null)
-                db.Categories.Remove(category);
+                db.Category.Remove(category);
         }
         public async Task<bool> Exists(int id)
         {
-            return await db.Categories.AnyAsync(categ => categ.Id == id);
+            return await db.Category.AnyAsync(categ => categ.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Categories.AnyAsync();
+            return await db.Category.AnyAsync();
         }
     }
 }

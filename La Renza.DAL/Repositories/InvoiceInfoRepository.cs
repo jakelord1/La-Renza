@@ -16,14 +16,14 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<InvoiceInfo>> GetAll()
         {
-            return await db.Invoices
+            return await db.Invoice
                 .Include(i => i.User) 
                 .ToListAsync();
         }
 
         public async Task<InvoiceInfo> Get(int id)
         {
-            var invoiceInfos = await db.Invoices
+            var invoiceInfos = await db.Invoice
                 .Include(i => i.User) 
                 .Where(i => i.Id == id)
                 .ToListAsync();
@@ -33,7 +33,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<InvoiceInfo> Get(string fullName)
         {
-            var invoiceInfos = await db.Invoices
+            var invoiceInfos = await db.Invoice
                 .Where(i => i.FullName == fullName)
                 .ToListAsync();
             InvoiceInfo? invoiceInfo = invoiceInfos?.FirstOrDefault();
@@ -42,7 +42,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(InvoiceInfo invoiceInfo)
         {
-            await db.Invoices.AddAsync(invoiceInfo);
+            await db.Invoice.AddAsync(invoiceInfo);
         }
 
         public void Update(InvoiceInfo invoiceInfo)
@@ -52,19 +52,19 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            InvoiceInfo? invoiceInfo = await db.Invoices.FindAsync(id);
+            InvoiceInfo? invoiceInfo = await db.Invoice.FindAsync(id);
             if (invoiceInfo != null)
-                db.Invoices.Remove(invoiceInfo);
+                db.Invoice.Remove(invoiceInfo);
         }
 
         public async Task<bool> Exists(int id)
         {
-            return await db.Invoices.AnyAsync(invoiceInfo => invoiceInfo.Id == id);
+            return await db.Invoice.AnyAsync(invoiceInfo => invoiceInfo.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Invoices.AnyAsync();
+            return await db.Invoice.AnyAsync();
         }
     }
 }

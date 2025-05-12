@@ -1,7 +1,5 @@
 ﻿using La_Renza.DAL.Entities;
 
-using La_Renza.DAL.Entities;
-
 namespace La_Renza.DAL.Interfaces
 {
     public interface IUnitOfWork
@@ -13,6 +11,7 @@ namespace La_Renza.DAL.Interfaces
 
         IRepository<Comment> Comments { get; }
         IRepository<Coupon> Coupons { get; }
+        IRepository<DeliveryMethod> DeliveryMethods { get; }
         IRepository<Image> Images { get; }
         IRepository<InvoiceInfo> Invoices { get; }
         IRepository<Model> Models { get; }
@@ -21,7 +20,7 @@ namespace La_Renza.DAL.Interfaces
         IRepository<Product> Products { get; }
         IRepository<Size> Sizes { get; }
         IRepository<User> Users { get; }
-        IRepository<ShopingCart> ShopingCarts { get; }
+        IRepository<ShoppingCart> ShopingCarts { get; }
         Task Save();
     }
 }
