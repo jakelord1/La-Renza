@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Interfaces
 {
-    internal interface IImageService
+    public interface IImageService
     {
         Task CreateImage(ImageDTO imageDto);
         Task UpdateImage(ImageDTO imageDto);

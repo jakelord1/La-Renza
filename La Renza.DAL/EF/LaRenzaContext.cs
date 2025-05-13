@@ -17,7 +17,7 @@ namespace La_Renza.DAL.EF
         public DbSet<Comment> Comment { get; set; }
         public DbSet<Coupon> Coupon { get; set; }
         public DbSet<Image> Image { get; set; }
-        public DbSet<InvoiceInfo> Invoice { get; set; }
+        public DbSet<InvoiceInfo> InvoiceInfo { get; set; }
         public DbSet<Model> Model { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderItem> OrderItem { get; set; }

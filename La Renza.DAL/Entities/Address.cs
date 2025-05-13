@@ -9,7 +9,7 @@ namespace La_Renza.DAL.Entities
     public class Address
     {
         public int Id { get; set; }
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
         public string SecondName { get; set; }
         public string FullName { get; set; }
         public string Street { get; set; }
@@ -18,9 +18,9 @@ namespace La_Renza.DAL.Entities
         public string PostIndex { get; set; }
         public string AdditionalInfo { get; set; }
         public string PhoneNumber { get; set; }
-        //public ICollection<Order>? Orders { get; set; }
 
-        public User? User { get; set; }
+        public ICollection<Order>? Orders { get; set; }
+        public User User { get; set; }
 
     }
 }

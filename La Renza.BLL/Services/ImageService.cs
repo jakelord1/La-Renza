@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.Services
 {
-    internal class ImageService : IImageService
+    public class ImageService : IImageService
     {
         private readonly IUnitOfWork _db;
         private readonly IMapper _mapper;

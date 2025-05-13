@@ -10,6 +10,9 @@ namespace La_Renza.DAL.Entities
     {
         public int Id { get; set; }
         public string Path { get; set; }
+        public ICollection<Color> Colors { get; set; }
+        public ICollection<Category> Categories { get; set; }
+        public ICollection<Comment> Comments { get; set; }
 
     }
 }

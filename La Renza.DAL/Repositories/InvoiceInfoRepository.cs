@@ -16,14 +16,14 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<InvoiceInfo>> GetAll()
         {
-            return await db.Invoice
+            return await db.InvoiceInfo
                 .Include(i => i.User) 
                 .ToListAsync();
         }
 
         public async Task<InvoiceInfo> Get(int id)
         {
-            var invoiceInfos = await db.Invoice
+            var invoiceInfos = await db.InvoiceInfo
                 .Include(i => i.User) 
                 .Where(i => i.Id == id)
                 .ToListAsync();
@@ -33,7 +33,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<InvoiceInfo> Get(string fullName)
         {
-            var invoiceInfos = await db.Invoice
+            var invoiceInfos = await db.InvoiceInfo
                 .Where(i => i.FullName == fullName)
                 .ToListAsync();
             InvoiceInfo? invoiceInfo = invoiceInfos?.FirstOrDefault();
@@ -42,7 +42,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Create(InvoiceInfo invoiceInfo)
         {
-            await db.Invoice.AddAsync(invoiceInfo);
+            await db.InvoiceInfo.AddAsync(invoiceInfo);
         }
 
         public void Update(InvoiceInfo invoiceInfo)
@@ -52,19 +52,19 @@ namespace La_Renza.DAL.Repositories
 
         public async Task Delete(int id)
         {
-            InvoiceInfo? invoiceInfo = await db.Invoice.FindAsync(id);
+            InvoiceInfo? invoiceInfo = await db.InvoiceInfo.FindAsync(id);
             if (invoiceInfo != null)
-                db.Invoice.Remove(invoiceInfo);
+                db.InvoiceInfo.Remove(invoiceInfo);
         }
 
         public async Task<bool> Exists(int id)
         {
-            return await db.Invoice.AnyAsync(invoiceInfo => invoiceInfo.Id == id);
+            return await db.InvoiceInfo.AnyAsync(invoiceInfo => invoiceInfo.Id == id);
         }
 
         public async Task<bool> Any()
         {
-            return await db.Invoice.AnyAsync();
+            return await db.InvoiceInfo.AnyAsync();
         }
     }
 }
