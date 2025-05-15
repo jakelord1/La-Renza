@@ -36,22 +36,18 @@ namespace La_Renza.BLL.Services
             await Database.Save();
         }
 
-        public async Task UpdateAddress(AddressDTO adressDto)
+        public async Task UpdateAddress(AddressDTO addressDto)
         {
-            var adress = new Address
-            {
-
-                Id = adressDto.Id,
-                UserId = adressDto.UserId,
-                SecondName = adressDto.SecondName,
-                FullName = adressDto.FullName,
-                Street = adressDto.Street,
-                City = adressDto.City,
-                HouseNum = adressDto.HouseNum,
-                PostIndex = adressDto.PostIndex,
-                AdditionalInfo = adressDto.AdditionalInfo,
-                PhoneNumber = adressDto.PhoneNumber
-            };
+            var adress = await Database.Addresses.Get(addressDto.Id);
+            adress.UserId = addressDto.UserId;
+            adress.SecondName = addressDto.SecondName;
+            adress.FullName = addressDto.FullName;
+            adress.Street = addressDto.Street;
+            adress.City = addressDto.City;
+            adress.HouseNum = addressDto.HouseNum;
+            adress.PostIndex = addressDto.PostIndex;
+            adress.AdditionalInfo = addressDto.AdditionalInfo;
+            adress.PhoneNumber = addressDto.PhoneNumber;
             Database.Addresses.Update(adress);
             await Database.Save();
         }
@@ -79,7 +75,7 @@ namespace La_Renza.BLL.Services
                 PostIndex = address.PostIndex,
                 AdditionalInfo = address.AdditionalInfo,
                 PhoneNumber = address.PhoneNumber,
-                User = address.User.Email
+                User = address.User?.Email
             };
         }
 
