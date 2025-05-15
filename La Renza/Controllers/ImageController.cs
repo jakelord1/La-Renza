@@ -16,17 +16,17 @@ namespace La_Renza.Controllers
         {
             _imageService = imageService;
         }
-        // GET: api/InvoiceInfos
+        // GET: api/Images
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<InvoiceInfoDTO>>> GetInvoiceInfos()
+        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages()
         {
             var invoiceInfos = await _imageService.GetImages();
             return Ok(invoiceInfos);
         }
 
-        // GET: api/InvoiceInfos/5
+        // GET: api/Images/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<InvoiceInfoDTO>> GetInvoiceInfo(int id)
+        public async Task<ActionResult<ImageDTO>> GetImage(int id)
         {
             ImageDTO image = await _imageService.GetImage((int)id);
 
@@ -37,9 +37,9 @@ namespace La_Renza.Controllers
             return new ObjectResult(image);
         }
 
-        // PUT: api/InvoiceInfos
+        // PUT: api/Images
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutInvoiceInfo(int id, ImageDTO image)
+        public async Task<IActionResult> PutImage(int id, ImageDTO image)
         {
             if (!ModelState.IsValid)
             {
@@ -54,9 +54,9 @@ namespace La_Renza.Controllers
             return Ok(image);
         }
 
-        // POST: api/InvoiceInfos
+        // POST: api/Images
         [HttpPost]
-        public async Task<ActionResult<InvoiceInfoDTO>> PostInvoiceInfo(ImageDTO image)
+        public async Task<ActionResult<ImageDTO>> PostImage(ImageDTO image)
         {
             if (!ModelState.IsValid)
             {
@@ -66,9 +66,9 @@ namespace La_Renza.Controllers
             return Ok(image);
         }
 
-        // DELETE: api/InvoiceInfos/5
+        // DELETE: api/Images/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteInvoiceInfo(int id)
+        public async Task<IActionResult> DeleteImage(int id)
         {
             if (!ModelState.IsValid)
             {
