@@ -79,7 +79,7 @@ namespace La_Renza.BLL.Services
                 PostIndex = address.PostIndex,
                 AdditionalInfo = address.AdditionalInfo,
                 PhoneNumber = address.PhoneNumber,
-                User = address.User?.Email
+                User = address.User.Email
             };
         }
 
