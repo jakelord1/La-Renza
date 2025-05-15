@@ -20,8 +20,7 @@ namespace La_Renza.DAL.Entities
         public int PaymentMethod { get; set; }
         public int DeliveryMethodId { get; set; }
         public ICollection<OrderItem>? OrderItems { get; set; }
-        public ICollection<DeliveryMethod>? DeliveryMethods { get; set; }
-
+        public DeliveryMethod? DeliveryMethod { get; set; }
         public User? User { get; set; }
         public Address? Delivery { get; set; }
         public Coupon? Cupons { get; set; }
