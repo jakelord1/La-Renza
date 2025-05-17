@@ -18,7 +18,5 @@ namespace La_Renza.DAL.Entities
         public ICollection<Color> Colors { get; set; }
         public double? Rate { get; set; }
         public string? Bage { get; set; }
-
-
     }
 }
