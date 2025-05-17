@@ -23,8 +23,8 @@ namespace La_Renza.BLL.Services
                 Id = orderDto.Id,
                 UserId = orderDto.UserId,
                 Status = Enum.Parse<Status>(orderDto.Status),
-                AddressId = orderDto.AddressId,
-                CouponId = orderDto.CouponId,
+                DeliveryId = orderDto.DeliveryId,
+                CuponsId = orderDto.CuponsId,
                 OrderName = orderDto.OrderName,
                 CreatedAt = orderDto.CreatedAt,
                 CompletedAt = orderDto.CompletedAt,
@@ -42,8 +42,8 @@ namespace La_Renza.BLL.Services
                 Id = orderDto.Id,
                 UserId = orderDto.UserId,
                 Status = Enum.Parse<Status>(orderDto.Status),
-                AddressId = orderDto.AddressId,
-                CouponId = orderDto.CouponId,
+                DeliveryId = orderDto.DeliveryId,
+                CuponsId = orderDto.CuponsId,
                 OrderName = orderDto.OrderName,
                 CreatedAt = orderDto.CreatedAt,
                 CompletedAt = orderDto.CompletedAt,
@@ -70,16 +70,16 @@ namespace La_Renza.BLL.Services
                 Id = order.Id,
                 UserId = order.UserId,
                 Status = order.Status.ToString(),
-                AddressId = order.AddressId,
-                CouponId = order.CouponId,
+                DeliveryId = order.DeliveryId,
+                CuponsId = order.CuponsId,
                 OrderName = order.OrderName,
                 CreatedAt = order.CreatedAt,
                 CompletedAt = order.CompletedAt,
                 PaymentMethod = order.PaymentMethod,
                 DeliveryMethodId = order.DeliveryMethodId,
                 User = order.User.Email,
-                Address = order.Address.City,
-                Coupon = order.Coupon.Name
+                Delivery = order.Delivery.City,
+                Cupons = order.Cupons.Name
             };
         }
 
@@ -88,8 +88,8 @@ namespace La_Renza.BLL.Services
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<Order, OrderDTO>()
             .ForMember("User", opt => opt.MapFrom(c => c.User.Email))
-            .ForMember("Address", opt => opt.MapFrom(c => c.Address.City))
-            .ForMember("Coupon", opt => opt.MapFrom(c => c.Coupon.Name)));
+            .ForMember("Delivery", opt => opt.MapFrom(c => c.Delivery.City))
+            .ForMember("Cupons", opt => opt.MapFrom(c => c.Cupons.Name)));
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
         }

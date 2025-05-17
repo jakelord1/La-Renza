@@ -18,7 +18,6 @@ namespace La_Renza.DAL.Repositories
         public async Task<IEnumerable<Category>> GetAll()
         {
             return await db.Category
-             .Include(c => c.ImageId)
              .ToListAsync();
         }
 

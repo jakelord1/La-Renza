@@ -19,7 +19,6 @@ namespace La_Renza.DAL.Repositories
         {
             return await db.Color
                   .Include(c => c.Model)
-                  .Include(c => c.Image)
                   .ToListAsync();
         }
 
@@ -27,7 +26,6 @@ namespace La_Renza.DAL.Repositories
         {
             var colors = await db.Color
                 .Include(c => c.Model)
-                .Include(c => c.Image)
                 .Where(a => a.Id == id).ToListAsync();
             Color? color = colors?.FirstOrDefault();
             return color!;
@@ -37,7 +35,6 @@ namespace La_Renza.DAL.Repositories
         {         
             var colors = await db.Color
                 .Include(c => c.Model)
-                .Include(c => c.Image)
                 .Where(a => a.Name == name).ToListAsync();
             Color? color = colors?.FirstOrDefault();
             return color!;

@@ -11,5 +11,7 @@ namespace La_Renza.DAL.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public double DeliveryPrice { get; set; }
+
+        public ICollection<Order> Orders { get; set; }
     }
 }
