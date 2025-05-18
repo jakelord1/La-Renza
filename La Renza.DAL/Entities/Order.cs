@@ -19,6 +19,7 @@ namespace La_Renza.DAL.Entities
         public int PaymentMethod { get; set; }
         public int DeliveryMethodId { get; set; }
         public string Phonenumber { get; set; }
+
         public ICollection<OrderItem>? OrderItems { get; set; }
         public DeliveryMethod? DeliveryMethod { get; set; }
         public User? User { get; set; }

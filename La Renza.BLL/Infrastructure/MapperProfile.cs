@@ -29,6 +29,8 @@ namespace La_Renza.BLL.Infrastructure
                 .ReverseMap();
             CreateMap<Image, ImageDTO>()
                 .ReverseMap();
+            CreateMap<Model, ModelDTO>()
+                .ReverseMap();
         }
     }
 }

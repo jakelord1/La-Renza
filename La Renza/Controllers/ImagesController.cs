@@ -4,93 +4,74 @@ using La_Renza.DAL.Interfaces;
 using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 
-namespace La_Renza.BLL.Services
+namespace La_Renza.Controllers
 {
-    public class AddressService : IAddressService
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ImagesController : ControllerBase
     {
-        IUnitOfWork Database { get; set; }
-
-        public AddressService(IUnitOfWork uow)
+        private readonly IImageService _imageService;
+        public ImagesController(IImageService imageService)
         {
-            Database = uow;
+            _imageService = imageService;
+        }
+        // GET: api/image
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ImageDTO>>> Getimages()
+        {
+            var s = await _imageService.GetImages();
+            return Ok(s);
         }
 
-        public async Task CreateAddress(AddressDTO adressDto)
+        // GET: api/image/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ImageDTO>> Getimage(int id)
         {
-            var adress = new Address
+            ImageDTO image = await _imageService.GetImage(id);
+            if (image == null)
             {
-
-                Id = adressDto.Id,
-                UserId = adressDto.UserId,
-                SecondName = adressDto.SecondName,
-                FullName = adressDto.FullName,
-                Street = adressDto.Street,
-                City = adressDto.City,
-                HouseNum = adressDto.HouseNum,
-                PostIndex = adressDto.PostIndex,
-                AdditionalInfo = adressDto.AdditionalInfo,
-                PhoneNumber = adressDto.PhoneNumber
-            };
-            await Database.Addresses.Create(adress);
-            await Database.Save();
+                return NotFound();
+            }
+            return Ok();
         }
 
-        public async Task UpdateAddress(AddressDTO adressDto)
+        // PUT: api/image/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Putimage(int id, ImageDTO image)
         {
-            var adress = new Address
+            if (!ModelState.IsValid)
             {
-
-                Id = adressDto.Id,
-                UserId = adressDto.UserId,
-                SecondName = adressDto.SecondName,
-                FullName = adressDto.FullName,
-                Street = adressDto.Street,
-                City = adressDto.City,
-                HouseNum = adressDto.HouseNum,
-                PostIndex = adressDto.PostIndex,
-                AdditionalInfo = adressDto.AdditionalInfo,
-                PhoneNumber = adressDto.PhoneNumber
-            };
-            Database.Addresses.Update(adress);
-            await Database.Save();
+                return BadRequest(ModelState);
+            }
+            await _imageService.UpdateImage(image);
+            return Ok();
         }
 
-        public async Task DeleteAddress(int id)
+        // POST: api/image
+        [HttpPost]
+        public async Task<ActionResult<ImageDTO>> Postimage(ImageDTO image)
         {
-            await Database.Addresses.Delete(id);
-            await Database.Save();
-        }
-
-        public async Task<AddressDTO> GetAddress(int id)
-        {
-            var address = await Database.Addresses.Get(id);
-            if (address == null)
-                throw new ValidationException("Wrong address!", "");
-            return new AddressDTO
+            if (!ModelState.IsValid)
             {
-                Id = address.Id,
-                UserId = address.UserId,
-                SecondName = address.SecondName,
-                FullName = address.FullName,
-                Street = address.Street,
-                City = address.City,
-                HouseNum = address.HouseNum,
-                PostIndex = address.PostIndex,
-                AdditionalInfo = address.AdditionalInfo,
-                PhoneNumber = address.PhoneNumber,
-                User = address.User.Email
-            };
+                return BadRequest(ModelState);
+            }
+            await _imageService.CreateImage(image);
+            return Ok();
         }
 
-
-        public async Task<IEnumerable<AddressDTO>> GetAddresses()
+        // DELETE: api/image/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Deleteimage(int id)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(await Database.Addresses.GetAll());
+            ImageDTO image = await _imageService.GetImage(id);
+            if (image == null)
+            {
+                return NotFound();
+            }
+            await _imageService.DeleteImage(id);
+            return Ok();
         }
-
     }
 }
