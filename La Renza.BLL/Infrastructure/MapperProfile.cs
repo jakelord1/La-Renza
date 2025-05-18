@@ -22,8 +22,6 @@ namespace La_Renza.BLL.Infrastructure
                 .ReverseMap();
             CreateMap<Size, SizeDTO>()
                 .ReverseMap();
-            CreateMap<Model, ModelDTO>()
-                .ReverseMap();
             CreateMap<Color, ColorDTO>()
                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos))
                 .ReverseMap();

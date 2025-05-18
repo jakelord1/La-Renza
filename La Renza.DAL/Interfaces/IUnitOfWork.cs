@@ -8,7 +8,6 @@ namespace La_Renza.DAL.Interfaces
         IRepository<Admin> Admins { get; }
         IRepository<Category> Categories { get; }
         IRepository<Color> Colors { get; }
-
         IRepository<Comment> Comments { get; }
         IRepository<Coupon> Coupons { get; }
         IRepository<DeliveryMethod> DeliveryMethods { get; }
