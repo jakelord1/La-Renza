@@ -23,6 +23,26 @@ const navLinks = [
     icon: 'bi-people',
     label: 'Користувачі'
   },
+  {
+    to: '/admin/categories',
+    icon: 'bi-folder2-open',
+    label: 'Категорії',
+  },
+  {
+    to: '/admin/sizes',
+    icon: 'bi-arrows-angle-expand',
+    label: 'Розміри',
+  },
+  {
+    to: '/admin/addresses',
+    icon: 'bi-geo-alt',
+    label: 'Адреси',
+  },
+  {
+    to: '/admin/images',
+    icon: 'bi-image',
+    label: 'Фото',
+  },
 ];
 
 const AdminLayout = () => {

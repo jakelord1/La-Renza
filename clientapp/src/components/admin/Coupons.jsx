@@ -10,14 +10,12 @@ const Coupons = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
 
-  // Form states
   const [code, setCode] = useState('');
   const [discount, setDiscount] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [description, setDescription] = useState('');
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
@@ -55,7 +53,6 @@ const Coupons = () => {
       
       setCoupons([...coupons, newCoupon]);
       
-      // Reset form
       resetForm();
       
       setAlert({
@@ -97,7 +94,6 @@ const Coupons = () => {
         coupon.id === editingCoupon.id ? updatedCoupon : coupon
       ));
       
-      // Reset form
       resetForm();
       
       setAlert({
@@ -141,7 +137,6 @@ const Coupons = () => {
     setDescription('');
   };
 
-  // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = coupons.slice(indexOfFirstItem, indexOfLastItem);
@@ -161,7 +156,7 @@ const Coupons = () => {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // Previous button
+
     pages.push(
       <Pagination.Prev 
         key="prev" 
@@ -170,7 +165,7 @@ const Coupons = () => {
       />
     );
 
-    // First page
+
     if (startPage > 1) {
       pages.push(
         <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
@@ -182,7 +177,7 @@ const Coupons = () => {
       }
     }
 
-    // Page numbers
+
     for (let number = startPage; number <= endPage; number++) {
       pages.push(
         <Pagination.Item 
@@ -195,7 +190,7 @@ const Coupons = () => {
       );
     }
 
-    // Last page
+
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.push(<Pagination.Ellipsis key="ellipsis2" disabled />);
@@ -207,7 +202,7 @@ const Coupons = () => {
       );
     }
 
-    // Next button
+
     pages.push(
       <Pagination.Next 
         key="next" 
