@@ -9,6 +9,11 @@ const navLinks = [
     label: 'Дашборд',
   },
   {
+    to: '/admin/orders',
+    icon: 'bi-cart-check',
+    label: 'Замовлення',
+  },
+  {
     to: '/admin/comments',
     icon: 'bi-chat-left-text',
     label: 'Коментарі',

@@ -23,7 +23,8 @@ import {
   Categories,
   Sizes,
   Images,
-  Addresses
+  Addresses,
+  Orders
 } from './components/admin';
 import './App.css';
 
@@ -43,6 +44,7 @@ function App() {
             <Route path="sizes" element={<Sizes />} />
             <Route path="addresses" element={<Addresses />} />
             <Route path="images" element={<Images />} />
+            <Route path="orders" element={<Orders />} />
           </Route>
           
           {/* Main Site Routes */}

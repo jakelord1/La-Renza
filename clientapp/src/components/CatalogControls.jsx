@@ -4,8 +4,6 @@ import { Form } from 'react-bootstrap';
 const CatalogControls = ({
   sort,
   setSort,
-  view,
-  setView,
   perPage,
   setPerPage,
   sortOptions

@@ -8,3 +8,4 @@ export { default as Categories } from './Categories';
 export { default as Sizes } from './Sizes';
 export { default as Images } from './Images';
 export { default as Addresses } from './Addresses';
+export { default as Orders } from './Orders';

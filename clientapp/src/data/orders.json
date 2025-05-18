@@ -1,0 +1,66 @@
+{
+  "orders": [
+    {
+      "id": 1,
+      "userId": 1,
+      "status": "pending",
+      "deliveryId": 1,
+      "cuponsId": null,
+      "orderName": "Іван Іванов",
+      "createdAt": "2024-05-18T16:36:58+03:00",
+      "completedAt": null,
+      "paymentMethod": "Готівка",
+      "deliveryMethod": "Нова Пошта",
+      "phonenumber": "+380971234567",
+      "items": [
+        {
+          "id": 1,
+          "orderId": 1,
+          "productId": 1,
+          "quantity": 2,
+          "price": 1500,
+          "product": {
+            "name": "Кава Arabica"
+          }
+        },
+        {
+          "id": 2,
+          "orderId": 1,
+          "productId": 2,
+          "quantity": 1,
+          "price": 999,
+          "product": {
+            "name": "Чай зі смородиною"
+          }
+        }
+      ],
+      "totalPrice": 3999
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "status": "completed",
+      "deliveryId": 2,
+      "cuponsId": 1,
+      "orderName": "Олена Петренко",
+      "createdAt": "2024-05-17T10:45:30+03:00",
+      "completedAt": "2024-05-17T16:45:30+03:00",
+      "paymentMethod": "Картка",
+      "deliveryMethod": "Кур'єр",
+      "phonenumber": "+380679876543",
+      "items": [
+        {
+          "id": 3,
+          "orderId": 2,
+          "productId": 3,
+          "quantity": 3,
+          "price": 2499,
+          "product": {
+            "name": "Шоколадні конфети"
+          }
+        }
+      ],
+      "totalPrice": 7497
+    }
+  ]
+}

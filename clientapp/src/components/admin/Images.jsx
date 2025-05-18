@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Image } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/Image';
+const API_URL = 'https://localhost:7071/api/Images';
 
 const Images = () => {
   const [images, setImages] = useState([]);
@@ -111,7 +111,7 @@ const Images = () => {
     try {
       const body = { id: editingImage.id, path };
       const res = await fetch(`${API_URL}/${editingImage.id}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
