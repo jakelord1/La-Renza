@@ -1,28 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Spinner, Alert, Table, Modal, Pagination } from 'react-bootstrap';
-import couponsData from '../../data/coupons.json';
 
-const Coupons = () => {
-  const [coupons, setCoupons] = useState([]);
+const Administrators = () => {
+  const [administrators, setAdministrators] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [editingAdmin, setEditingAdmin] = useState(null);
 
-  const [code, setCode] = useState('');
-  const [discount, setDiscount] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [description, setDescription] = useState('');
+  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
   useEffect(() => {
     setLoading(true);
+    // Здесь должен быть запрос к API
     setTimeout(() => {
-      setCoupons(couponsData.coupons);
+      setAdministrators([
+        { id: 1, email: 'admin1@example.com', identifier: 'admin1' },
+        { id: 2, email: 'admin2@example.com', identifier: 'admin2' },
+      ]);
       setLoading(false);
     }, 1000);
   }, []);
@@ -30,7 +31,7 @@ const Coupons = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!code || !discount || !startDate || !endDate) {
+    if (!email || !identifier || !password) {
       setAlert({
         show: true,
         type: 'danger',
@@ -42,23 +43,20 @@ const Coupons = () => {
     setLoading(true);
     
     setTimeout(() => {
-      const newCoupon = {
-        id: coupons.length + 1,
-        code,
-        discount: parseFloat(discount),
-        startDate,
-        endDate,
-        description
+      const newAdmin = {
+        id: administrators.length + 1,
+        email,
+        identifier,
       };
       
-      setCoupons([...coupons, newCoupon]);
+      setAdministrators([...administrators, newAdmin]);
       
       resetForm();
       
       setAlert({
         show: true,
         type: 'success',
-        message: 'Купон успішно додано!'
+        message: 'Адміністратора успішно додано!'
       });
       
       setLoading(false);
@@ -66,10 +64,10 @@ const Coupons = () => {
     }, 1000);
   };
 
-  const handleUpdateCoupon = (e) => {
+  const handleUpdateAdmin = (e) => {
     e.preventDefault();
     
-    if (!code || !discount || !startDate || !endDate) {
+    if (!email || !identifier) {
       setAlert({
         show: true,
         type: 'danger',
@@ -81,68 +79,59 @@ const Coupons = () => {
     setLoading(true);
     
     setTimeout(() => {
-      const updatedCoupon = {
-        ...editingCoupon,
-        code,
-        discount: parseFloat(discount),
-        startDate,
-        endDate,
-        description
+      const updatedAdmin = {
+        ...editingAdmin,
+        email,
+        identifier,
       };
       
-      setCoupons(coupons.map(coupon => 
-        coupon.id === editingCoupon.id ? updatedCoupon : coupon
+      setAdministrators(administrators.map(admin => 
+        admin.id === editingAdmin.id ? updatedAdmin : admin
       ));
-      
       
       resetForm();
       
       setAlert({
         show: true,
         type: 'success',
-        message: 'Купон успішно оновлено!'
+        message: 'Адміністратора успішно оновлено!'
       });
       
       setLoading(false);
       setShowEditModal(false);
-      setEditingCoupon(null);
+      setEditingAdmin(null);
     }, 1000);
   };
 
-  const handleDeleteCoupon = (id) => {
-    if (window.confirm('Ви впевнені, що хочете видалити цей купон?')) {
-      setCoupons(coupons.filter(coupon => coupon.id !== id));
+  const handleDeleteAdmin = (id) => {
+    if (window.confirm('Ви впевнені, що хочете видалити цього адміністратора?')) {
+      setAdministrators(administrators.filter(admin => admin.id !== id));
       setAlert({
         show: true,
         type: 'success',
-        message: 'Купон видалено!'
+        message: 'Адміністратора видалено!'
       });
     }
   };
 
-  const handleEditCoupon = (coupon) => {
-    setEditingCoupon(coupon);
-    setCode(coupon.code);
-    setDiscount(coupon.discount.toString());
-    setStartDate(coupon.startDate);
-    setEndDate(coupon.endDate);
-    setDescription(coupon.description);
+  const handleEditAdmin = (admin) => {
+    setEditingAdmin(admin);
+    setEmail(admin.email);
+    setIdentifier(admin.identifier);
     setShowEditModal(true);
   };
 
   const resetForm = () => {
-    setCode('');
-    setDiscount('');
-    setStartDate('');
-    setEndDate('');
-    setDescription('');
+    setEmail('');
+    setIdentifier('');
+    setPassword('');
   };
 
   // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = coupons.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(coupons.length / itemsPerPage);
+  const currentItems = administrators.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(administrators.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -158,7 +147,6 @@ const Coupons = () => {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // Previous button
     pages.push(
       <Pagination.Prev 
         key="prev" 
@@ -167,7 +155,6 @@ const Coupons = () => {
       />
     );
 
-    // First page
     if (startPage > 1) {
       pages.push(
         <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
@@ -179,7 +166,6 @@ const Coupons = () => {
       }
     }
 
-    // Page numbers
     for (let number = startPage; number <= endPage; number++) {
       pages.push(
         <Pagination.Item 
@@ -192,7 +178,6 @@ const Coupons = () => {
       );
     }
 
-    // Last page
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.push(<Pagination.Ellipsis key="ellipsis2" disabled />);
@@ -204,7 +189,6 @@ const Coupons = () => {
       );
     }
 
-    // Next button
     pages.push(
       <Pagination.Next 
         key="next" 
@@ -218,7 +202,7 @@ const Coupons = () => {
 
   return (
     <div>
-      <h2 className="mb-4 fw-bold" style={{fontSize: '2.1rem'}}>Купони</h2>
+      <h2 className="mb-4 fw-bold" style={{fontSize: '2.1rem'}}>Адміністратори</h2>
       {alert.show && (
         <Alert 
           variant={alert.type} 
@@ -230,7 +214,7 @@ const Coupons = () => {
       )}
       <Card className="shadow rounded-4 border-0 bg-white bg-opacity-100 p-5 mb-4" style={{maxWidth: 1200, margin: '0 auto'}}>
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-          <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі купони</h4>
+          <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі адміністратори</h4>
           <Button
             variant="primary"
             style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
@@ -249,40 +233,29 @@ const Coupons = () => {
           <>
             <div style={{ minHeight: '340px' }}>
               {currentItems.length === 0 ? (
-                <div className="text-muted text-center py-5">Купонів ще немає</div>
+                <div className="text-muted text-center py-5">Адміністраторів ще немає</div>
               ) : (
                 <Table hover className="align-middle">
                   <thead>
                     <tr>
-                      <th>Код</th>
-                      <th>Опис</th>
-                      <th>Знижка</th>
-                      <th>Дії</th>
+                      <th>Email</th>
+                      <th>Identifier</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentItems.map(coupon => (
-                      <tr key={coupon.id}>
+                    {currentItems.map(admin => (
+                      <tr key={admin.id}>
                         <td>
-                          <div className="fw-bold">{coupon.code}</div>
+                          <div className="fw-bold">{admin.email}</div>
                         </td>
-                        <td>{coupon.description}</td>
-                        <td>
-                          <span className="text-success">{coupon.discount} ₴</span>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            <Button variant="link" size="sm" onClick={() => handleEditCoupon(coupon)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
-                            <Button variant="link" size="sm" onClick={() => handleDeleteCoupon(coupon.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
-                          </div>
-                        </td>
+                        <td>{admin.identifier}</td>
                       </tr>
                     ))}
                   </tbody>
                 </Table>
               )}
             </div>
-            {coupons.length > itemsPerPage && (
+            {administrators.length > itemsPerPage && (
               <div className="d-flex justify-content-center mt-4">
                 <Pagination className="mb-0">
                   {renderPagination()}
@@ -295,29 +268,21 @@ const Coupons = () => {
 
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
-          <Modal.Title className="fw-bold">Додати новий купон</Modal.Title>
+          <Modal.Title className="fw-bold">Додати нового адміністратора</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit} className="row g-3">
             <div className="col-12">
-              <label htmlFor="code" className="form-label text-secondary small mb-1">Код купона</label>
-              <Form.Control type="text" id="code" value={code} onChange={e => setCode(e.target.value)} placeholder="Наприклад: WELCOME10" disabled={loading} className="rounded-3" />
+              <label htmlFor="email" className="form-label text-secondary small mb-1">Email</label>
+              <Form.Control type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Введіть email" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
-              <label htmlFor="discount" className="form-label text-secondary small mb-1">Розмір знижки</label>
-              <Form.Control type="number" id="discount" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="Наприклад: 100" disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="startDate" className="form-label text-secondary small mb-1">Дата початку</label>
-              <Form.Control type="date" id="startDate" value={startDate} onChange={e => setStartDate(e.target.value)} disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="endDate" className="form-label text-secondary small mb-1">Дата закінчення</label>
-              <Form.Control type="date" id="endDate" value={endDate} onChange={e => setEndDate(e.target.value)} disabled={loading} className="rounded-3" />
+              <label htmlFor="identifier" className="form-label text-secondary small mb-1">Identifier</label>
+              <Form.Control type="text" id="identifier" value={identifier} onChange={e => setIdentifier(e.target.value)} placeholder="Введіть identifier" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
-              <label htmlFor="description" className="form-label text-secondary small mb-1">Опис</label>
-              <Form.Control as="textarea" id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Опис купона" style={{ minHeight: 80, resize: 'none' }} disabled={loading} className="rounded-3" />
+              <label htmlFor="password" className="form-label text-secondary small mb-1">Пароль</label>
+              <Form.Control type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Введіть пароль" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12 mt-2">
               <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
@@ -330,32 +295,20 @@ const Coupons = () => {
 
       <Modal show={showEditModal} onHide={() => {
         setShowEditModal(false);
-        setEditingCoupon(null);
+        setEditingAdmin(null);
       }} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
-          <Modal.Title className="fw-bold">Редагувати купон</Modal.Title>
+          <Modal.Title className="fw-bold">Редагувати адміністратора</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleUpdateCoupon} className="row g-3">
+          <Form onSubmit={handleUpdateAdmin} className="row g-3">
             <div className="col-12">
-              <label htmlFor="edit-code" className="form-label text-secondary small mb-1">Код купона</label>
-              <Form.Control type="text" id="edit-code" value={code} onChange={e => setCode(e.target.value)} placeholder="Наприклад: WELCOME10" disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-12">
-              <label htmlFor="edit-discount" className="form-label text-secondary small mb-1">Розмір знижки</label>
-              <Form.Control type="number" id="edit-discount" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="Наприклад: 100" disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="edit-startDate" className="form-label text-secondary small mb-1">Дата початку</label>
-              <Form.Control type="date" id="edit-startDate" value={startDate} onChange={e => setStartDate(e.target.value)} disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="edit-endDate" className="form-label text-secondary small mb-1">Дата закінчення</label>
-              <Form.Control type="date" id="edit-endDate" value={endDate} onChange={e => setEndDate(e.target.value)} disabled={loading} className="rounded-3" />
+              <label htmlFor="edit-email" className="form-label text-secondary small mb-1">Email</label>
+              <Form.Control type="email" id="edit-email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Введіть email" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
-              <label htmlFor="edit-description" className="form-label text-secondary small mb-1">Опис</label>
-              <Form.Control as="textarea" id="edit-description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Опис купона" style={{ minHeight: 80, resize: 'none' }} disabled={loading} className="rounded-3" />
+              <label htmlFor="edit-identifier" className="form-label text-secondary small mb-1">Identifier</label>
+              <Form.Control type="text" id="edit-identifier" value={identifier} onChange={e => setIdentifier(e.target.value)} placeholder="Введіть identifier" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12 mt-2">
               <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
@@ -369,4 +322,4 @@ const Coupons = () => {
   );
 };
 
-export default Coupons; 
+export default Administrators; 

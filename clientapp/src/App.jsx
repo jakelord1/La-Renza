@@ -21,6 +21,7 @@ import {
   Coupons,
   Users
 } from './components/admin';
+import Administrators from './components/admin/Administrators';
 import './App.css';
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route path="comments" element={<Comments />} />
             <Route path="coupons" element={<Coupons />} />
             <Route path="users" element={<Users />} />
+            <Route path="administrators" element={<Administrators />} />
           </Route>
           
           {/* Main Site Routes */}

@@ -23,6 +23,11 @@ const navLinks = [
     icon: 'bi-people',
     label: 'Користувачі'
   },
+  {
+    to: '/admin/administrators',
+    icon: 'bi-shield-lock',
+    label: 'Адміністратори'
+  },
 ];
 
 const AdminLayout = () => {
