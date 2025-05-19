@@ -1,3 +1,6 @@
+using La_Renza.BLL;
+using La_Renza.DAL;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -14,7 +17,8 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
-
+builder.Services.AddLaRenzaDAL(builder.Configuration.GetConnectionString("DefaultConnection")!);
+builder.Services.AddLaRenzaBLL();
 var app = builder.Build();
 
 

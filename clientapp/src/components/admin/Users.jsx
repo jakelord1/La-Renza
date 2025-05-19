@@ -69,7 +69,6 @@ const Users = () => {
   const [availableCoupons, setAvailableCoupons] = useState([]);
   const [selectedCoupons, setSelectedCoupons] = useState([]);
 
-  // Form states
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fullName, setFullName] = useState('');
@@ -79,7 +78,6 @@ const Users = () => {
   const [newsOn, setNewsOn] = useState(false);
   const [laRenzaPoints, setLaRenzaPoints] = useState('');
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
@@ -209,7 +207,6 @@ const Users = () => {
     setLaRenzaPoints('');
   };
 
-  // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = users.slice(indexOfFirstItem, indexOfLastItem);
@@ -340,7 +337,6 @@ const Users = () => {
         )}
       </Card>
 
-      {/* Add Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Додати користувача</Modal.Title>
@@ -392,7 +388,7 @@ const Users = () => {
         </Modal.Body>
       </Modal>
 
-      {/* Edit Modal */}
+
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Редагувати користувача</Modal.Title>

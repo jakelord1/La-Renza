@@ -19,7 +19,12 @@ import {
   Dashboard,
   Comments,
   Coupons,
-  Users
+  Users,
+  Categories,
+  Sizes,
+  Images,
+  Addresses,
+  Orders
 } from './components/admin';
 import Administrators from './components/admin/Administrators';
 import './App.css';
@@ -36,6 +41,11 @@ function App() {
             <Route path="comments" element={<Comments />} />
             <Route path="coupons" element={<Coupons />} />
             <Route path="users" element={<Users />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="sizes" element={<Sizes />} />
+            <Route path="addresses" element={<Addresses />} />
+            <Route path="images" element={<Images />} />
+            <Route path="orders" element={<Orders />} />
             <Route path="administrators" element={<Administrators />} />
           </Route>
           

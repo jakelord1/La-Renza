@@ -1,0 +1,61 @@
+{
+  "Comment": {
+    "data": [
+      {
+        "id": 1,
+        "ProductId": 101,
+        "UserId": 1,
+        "Text": "Very comfortable t-shirt! Fast delivery, highly recommend!",
+        "Rating": 5,
+        "Date": "2025-04-06T14:30:00",
+        "LikesAmount": 2,
+        "ColorId": 1,
+        "SizeId": 1,
+        "ImageId": 1
+      },
+      {
+        "id": 2,
+        "ProductId": 102,
+        "UserId": 2,
+        "Text": "The color is great, but the size didn't quite fit.",
+        "Rating": 4,
+        "Date": "2025-04-05T17:45:00",
+        "LikesAmount": 1,
+        "ColorId": 2,
+        "SizeId": 2,
+        "ImageId": 2
+      }
+    ]
+  },
+  "Like": {
+    "data": [
+      {
+        "id": 1,
+        "UserId": 2,
+        "CommentId": 1
+      },
+      {
+        "id": 2,
+        "UserId": 1,
+        "CommentId": 2
+      },
+      {
+        "id": 3,
+        "UserId": 2,
+        "CommentId": 1
+      }
+    ]
+  },
+  "CommentImage": {
+    "data": [
+      {
+        "id": 1,
+        "Path": ""
+      },
+      {
+        "id": 2,
+        "Path": ""
+      }
+    ]
+  }
+}
