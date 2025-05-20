@@ -306,14 +306,6 @@ const Coupons = () => {
               <label htmlFor="discount" className="form-label text-secondary small mb-1">Розмір знижки</label>
               <Form.Control type="number" id="discount" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="Наприклад: 100" disabled={loading} className="rounded-3" />
             </div>
-            <div className="col-6">
-              <label htmlFor="startDate" className="form-label text-secondary small mb-1">Дата початку</label>
-              <Form.Control type="date" id="startDate" value={startDate} onChange={e => setStartDate(e.target.value)} disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="endDate" className="form-label text-secondary small mb-1">Дата закінчення</label>
-              <Form.Control type="date" id="endDate" value={endDate} onChange={e => setEndDate(e.target.value)} disabled={loading} className="rounded-3" />
-            </div>
             <div className="col-12">
               <label htmlFor="description" className="form-label text-secondary small mb-1">Опис</label>
               <Form.Control as="textarea" id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Опис купона" style={{ minHeight: 80, resize: 'none' }} disabled={loading} className="rounded-3" />
