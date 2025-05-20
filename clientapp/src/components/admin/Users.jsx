@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Spinner, Alert, Table, Modal, Pagination } from 'react-bootstrap';
+import { Card, Form, Button, Spinner, Alert, Table, Modal, Pagination, Badge } from 'react-bootstrap';
 import usersData from '../../data/users.json';
+import couponsData from '../../data/coupons.json';
 
 const genderOptions = [
   { value: 0, label: 'Жіночий' },
@@ -8,13 +9,65 @@ const genderOptions = [
   { value: 2, label: 'Інше' }
 ];
 
+// Добавим кастомные стили прямо в компонент
+const customStyles = `
+  .coupon-plus-btn {
+    border-color: #6f42c1 !important;
+    color: #6f42c1 !important;
+    background: transparent !important;
+    transition: background 0.2s, color 0.2s;
+  }
+  .coupon-plus-btn:disabled {
+    background: #ede7f6 !important;
+    color: #6f42c1 !important;
+    border-color: #6f42c1 !important;
+    opacity: 0.7;
+  }
+  .coupon-plus-btn .bi-plus {
+    color: #6f42c1 !important;
+    transition: color 0.2s;
+  }
+  .coupon-plus-btn:not(:disabled):hover, .coupon-plus-btn:not(:disabled):focus {
+    background: #59359c !important;
+    color: #fff !important;
+    border-color: #6f42c1 !important;
+  }
+  .coupon-plus-btn:not(:disabled):hover .bi-plus, .coupon-plus-btn:not(:disabled):focus .bi-plus {
+    color: #fff !important;
+  }
+  .btn-purple {
+    background: #6f42c1 !important;
+    color: #fff !important;
+    border: none !important;
+  }
+  .btn-purple:hover, .btn-purple:focus {
+    background: #59359c !important;
+    color: #fff !important;
+  }
+  .btn-outline-danger .bi-trash {
+    color: #dc3545 !important;
+    transition: color 0.2s;
+  }
+  .btn-outline-danger:hover .bi-trash, .btn-outline-danger:focus .bi-trash {
+    color: #fff !important;
+  }
+  .coupons-list-fixed {
+    height: 400px;
+    overflow-y: auto;
+  }
+`;
+
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showCouponsModal, setShowCouponsModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+  const [selectedCoupons, setSelectedCoupons] = useState([]);
 
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -22,7 +75,6 @@ const Users = () => {
   const [surname, setSurname] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState(0);
-  const [password, setPassword] = useState('');
   const [newsOn, setNewsOn] = useState(false);
   const [laRenzaPoints, setLaRenzaPoints] = useState('');
 
@@ -32,14 +84,19 @@ const Users = () => {
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
-      setUsers(usersData.users);
+      const usersWithCoupons = usersData.users.map(user => ({
+        ...user,
+        coupons: user.coupons || []
+      }));
+      setUsers(usersWithCoupons);
+      setAvailableCoupons(couponsData.coupons);
       setLoading(false);
     }, 1000);
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !phoneNumber || !fullName || !surname || !birthDate || !password) {
+    if (!email || !phoneNumber || !fullName || !surname || !birthDate) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
       return;
     }
@@ -53,9 +110,9 @@ const Users = () => {
         surname,
         birthDate,
         gender: parseInt(gender),
-        password,
         newsOn: newsOn ? 1 : 0,
-        laRenzaPoints: parseInt(laRenzaPoints) || 0
+        laRenzaPoints: parseInt(laRenzaPoints) || 0,
+        coupons: []
       };
       setUsers([...users, newUser]);
       resetForm();
@@ -67,7 +124,7 @@ const Users = () => {
 
   const handleUpdateUser = (e) => {
     e.preventDefault();
-    if (!email || !phoneNumber || !fullName || !surname || !birthDate || !password) {
+    if (!email || !phoneNumber || !fullName || !surname || !birthDate) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
       return;
     }
@@ -81,7 +138,6 @@ const Users = () => {
         surname,
         birthDate,
         gender: parseInt(gender),
-        password,
         newsOn: newsOn ? 1 : 0,
         laRenzaPoints: parseInt(laRenzaPoints) || 0
       };
@@ -109,10 +165,35 @@ const Users = () => {
     setSurname(user.surname);
     setBirthDate(user.birthDate);
     setGender(user.gender);
-    setPassword(user.password);
     setNewsOn(!!user.newsOn);
     setLaRenzaPoints(user.laRenzaPoints.toString());
     setShowEditModal(true);
+  };
+
+  const handleManageCoupons = (user) => {
+    setSelectedUser(user);
+    setSelectedCoupons(user.coupons || []);
+    setShowCouponsModal(true);
+  };
+
+  const handleSaveCoupons = () => {
+    setUsers(users.map(user => 
+      user.id === selectedUser.id 
+        ? { ...user, coupons: selectedCoupons }
+        : user
+    ));
+    setAlert({ show: true, type: 'success', message: 'Купони користувача оновлено!' });
+    setShowCouponsModal(false);
+  };
+
+  const handleAddCoupon = (coupon) => {
+    if (!selectedCoupons.find(c => c.id === coupon.id)) {
+      setSelectedCoupons([...selectedCoupons, coupon]);
+    }
+  };
+
+  const handleRemoveCoupon = (couponId) => {
+    setSelectedCoupons(selectedCoupons.filter(c => c.id !== couponId));
   };
 
   const resetForm = () => {
@@ -122,7 +203,6 @@ const Users = () => {
     setSurname('');
     setBirthDate('');
     setGender(0);
-    setPassword('');
     setNewsOn(false);
     setLaRenzaPoints('');
   };
@@ -199,7 +279,7 @@ const Users = () => {
                       <th>Прізвище</th>
                       <th>Дата народження</th>
                       <th>Гендер</th>
-                      <th>Пароль</th>
+                      <th>Купони</th>
                       <th>Розсилка</th>
                       <th>Поінти</th>
                       <th>Дії</th>
@@ -214,7 +294,26 @@ const Users = () => {
                         <td>{user.surname}</td>
                         <td>{user.birthDate}</td>
                         <td>{genderOptions.find(g => g.value === user.gender)?.label || '-'}</td>
-                        <td><span style={{letterSpacing:2}}>{maskPassword(user.password)}</span></td>
+                        <td>
+                          <div className="d-flex flex-wrap gap-1">
+                            {(user.coupons || []).map(coupon => (
+                              <span
+                                key={coupon.id}
+                                className="badge rounded-pill bg-primary"
+                              >
+                                {coupon.code}
+                              </span>
+                            ))}
+                            <Button 
+                              variant="link" 
+                              size="sm" 
+                              onClick={() => handleManageCoupons(user)}
+                              className="p-0 ms-1"
+                            >
+                              <i className="bi bi-plus-circle"></i>
+                            </Button>
+                          </div>
+                        </td>
                         <td>{user.newsOn ? 'Так' : 'Ні'}</td>
                         <td>{user.laRenzaPoints}</td>
                         <td>
@@ -273,10 +372,6 @@ const Users = () => {
               </Form.Select>
             </div>
             <div className="col-12">
-              <label htmlFor="password" className="form-label text-secondary small mb-1">Пароль</label>
-              <Form.Control type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль" />
-            </div>
-            <div className="col-12">
               <label htmlFor="newsOn" className="form-check-label text-secondary small mb-1">Розсилка</label>
               <Form.Check type="checkbox" id="newsOn" checked={newsOn} onChange={e => setNewsOn(e.target.checked)} />
             </div>
@@ -329,10 +424,6 @@ const Users = () => {
               </Form.Select>
             </div>
             <div className="col-12">
-              <label htmlFor="password" className="form-label text-secondary small mb-1">Пароль</label>
-              <Form.Control type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль" />
-            </div>
-            <div className="col-12">
               <label htmlFor="newsOn" className="form-check-label text-secondary small mb-1">Розсилка</label>
               <Form.Check type="checkbox" id="newsOn" checked={newsOn} onChange={e => setNewsOn(e.target.checked)} style={{ accentColor: '#6f42c1', width: 20, height: 20 }} />
             </div>
@@ -347,6 +438,69 @@ const Users = () => {
             </div>
           </Form>
         </Modal.Body>
+      </Modal>
+
+      {/* Coupons Modal */}
+      <Modal show={showCouponsModal} onHide={() => setShowCouponsModal(false)} centered size="lg">
+        <style>{customStyles}</style>
+        <Modal.Header closeButton className="border-0">
+          <Modal.Title className="fw-bold" style={{ color: '#6f42c1' }}>Управління купонами користувача</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="row">
+            <div className="col-md-6">
+              <h5 className="mb-3" style={{ color: '#6f42c1' }}>Доступні купони</h5>
+              <div className="list-group coupons-list-fixed">
+                {availableCoupons
+                  .filter(coupon => !selectedCoupons.some(selected => selected.id === coupon.id))
+                  .map(coupon => (
+                    <div key={coupon.id} className="list-group-item d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>{coupon.code}</strong>
+                        <div className="text-muted small">{coupon.description}</div>
+                      </div>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => handleAddCoupon(coupon)}
+                        className="coupon-plus-btn"
+                      >
+                        <i className="bi bi-plus"></i>
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <div className="col-md-6">
+              <h5 className="mb-3" style={{ color: '#6f42c1' }}>Вибрані купони</h5>
+              <div className="list-group coupons-list-fixed">
+                {selectedCoupons.map(coupon => (
+                  <div key={coupon.id} className="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{coupon.code}</strong>
+                      <div className="text-muted small">{coupon.description}</div>
+                    </div>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => handleRemoveCoupon(coupon.id)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowCouponsModal(false)}>
+            Скасувати
+          </Button>
+          <Button className="btn-purple" onClick={handleSaveCoupons}>
+            Зберегти
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );

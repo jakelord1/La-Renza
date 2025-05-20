@@ -14,6 +14,11 @@ const navLinks = [
     label: 'Замовлення',
   },
   {
+    to: '/admin/invoices',
+    icon: 'bi-receipt',
+    label: 'Інвойси',
+  },
+  {
     to: '/admin/comments',
     icon: 'bi-chat-left-text',
     label: 'Коментарі',
@@ -47,6 +52,11 @@ const navLinks = [
     to: '/admin/images',
     icon: 'bi-image',
     label: 'Фото',
+  },
+  {
+    to: '/admin/administrators',
+    icon: 'bi-shield-lock',
+    label: 'Адміністратори'
   },
 ];
 

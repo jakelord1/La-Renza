@@ -94,6 +94,7 @@ const Coupons = () => {
         coupon.id === editingCoupon.id ? updatedCoupon : coupon
       ));
       
+      
       resetForm();
       
       setAlert({
@@ -226,7 +227,7 @@ const Coupons = () => {
           {alert.message}
         </Alert>
       )}
-      <Card className="shadow rounded-4 border-0 bg-white bg-opacity-100 p-4 mb-4" style={{maxWidth: 900, margin: '0 auto'}}>
+      <Card className="shadow rounded-4 border-0 bg-white bg-opacity-100 p-5 mb-4" style={{maxWidth: 1200, margin: '0 auto'}}>
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
           <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі купони</h4>
           <Button
@@ -245,7 +246,7 @@ const Coupons = () => {
           </div>
         ) : (
           <>
-            <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            <div style={{ minHeight: '340px' }}>
               {currentItems.length === 0 ? (
                 <div className="text-muted text-center py-5">Купонів ще немає</div>
               ) : (
@@ -255,7 +256,6 @@ const Coupons = () => {
                       <th>Код</th>
                       <th>Опис</th>
                       <th>Знижка</th>
-                      <th>Період дії</th>
                       <th>Дії</th>
                     </tr>
                   </thead>
@@ -268,10 +268,6 @@ const Coupons = () => {
                         <td>{coupon.description}</td>
                         <td>
                           <span className="text-success">{coupon.discount} ₴</span>
-                        </td>
-                        <td>
-                          <div>{coupon.startDate}</div>
-                          <div className="text-muted small">до {coupon.endDate}</div>
                         </td>
                         <td>
                           <div className="d-flex gap-2">
@@ -309,14 +305,6 @@ const Coupons = () => {
             <div className="col-12">
               <label htmlFor="discount" className="form-label text-secondary small mb-1">Розмір знижки</label>
               <Form.Control type="number" id="discount" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="Наприклад: 100" disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="startDate" className="form-label text-secondary small mb-1">Дата початку</label>
-              <Form.Control type="date" id="startDate" value={startDate} onChange={e => setStartDate(e.target.value)} disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="endDate" className="form-label text-secondary small mb-1">Дата закінчення</label>
-              <Form.Control type="date" id="endDate" value={endDate} onChange={e => setEndDate(e.target.value)} disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
               <label htmlFor="description" className="form-label text-secondary small mb-1">Опис</label>
