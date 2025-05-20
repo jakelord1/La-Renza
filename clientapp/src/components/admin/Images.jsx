@@ -16,7 +16,7 @@ const Images = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewKey, setPreviewKey] = useState(0); // Add this line
+  const [previewKey, setPreviewKey] = useState(0);
 
   const fetchImages = async () => {
     setLoading(true);
@@ -43,28 +43,24 @@ const Images = () => {
 
   const formatImageUrl = (path) => {
     if (!path) return '';
-    // If it's already a full URL, return as is
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
       return path;
     }
-    // If it's a local path, make sure it starts with a slash
     return path.startsWith('/') ? path : `/${path}`;
   };
 
   const getFullImageUrl = (path) => {
     if (!path) return '';
-    // If it's already a full URL, return as is
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
       return path;
     }
-    // For local paths, prepend the base URL if needed
     return path.startsWith('/') ? `${window.location.origin}${path}` : `${window.location.origin}/${path}`;
   };
 
   const handlePreviewImage = (imagePath) => {
     const formattedPath = formatImageUrl(imagePath);
     setPreviewImage(formattedPath);
-    setPreviewKey(prev => prev + 1); // Force reload the image
+    setPreviewKey(prev => prev + 1);
     setShowPreview(true);
   };
 
@@ -328,7 +324,6 @@ const Images = () => {
         </Modal.Body>
       </Modal>
 
-      {/* Image Preview Modal */}
       <Modal show={showPreview} onHide={() => setShowPreview(false)} centered size="lg">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Перегляд зображення</Modal.Title>
