@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using La_Renza.BLL.DTO;
 using La_Renza.BLL.Services;
 using La_Renza.DAL.Entities;
+using La_Renza.BLL;
 
 namespace La_Renza.Controllers
 {
@@ -58,16 +59,42 @@ namespace La_Renza.Controllers
 
         // POST: api/Users
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user)
+        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user, [FromServices] PasswordHasher hasher)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            user.Password = hasher.HashPassword(user.Password);
             await _userService.CreateUser(user);
             return Ok(user);
         }
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            UserDTO user = await _userService.GetUserByLogin(logon.Email);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
+            if (!passwordService.VerifyPassword(logon.Password, user.Password))
+            {
+                return Unauthorized(new { message = "Invalid login or password" });
+            }
+            if (logon.RememberMe)
+            {
+                CookieOptions option = new CookieOptions();
+                option.Expires = DateTime.Now.AddDays(10);
+                Response.Cookies.Append("login", logon.Email, option);
+            }
+            HttpContext.Session.SetString("Login", user.Email);
+            return Ok();
+        }
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
