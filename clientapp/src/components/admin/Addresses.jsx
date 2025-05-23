@@ -177,11 +177,6 @@ const Addresses = () => {
     }
   };
 
-  const getUserName = (userId) => {
-    const user = users.find(u => u.id === userId);
-    return user ? `${user.firstName} ${user.lastName}` : 'Невідомий користувач';
-  };
-
   return (
     <div>
       <h2 className="mb-4 fw-bold" style={{fontSize: '2.1rem'}}>Адреси</h2>

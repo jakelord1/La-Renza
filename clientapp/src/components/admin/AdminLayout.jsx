@@ -58,6 +58,11 @@ const navLinks = [
     icon: 'bi-shield-lock',
     label: 'Адміністратори'
   },
+  {
+    to: '/admin/colors',
+    icon: 'bi-palette',
+    label: 'Кольори'
+  },
 ];
 
 const AdminLayout = () => {
