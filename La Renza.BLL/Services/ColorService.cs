@@ -23,12 +23,12 @@ namespace La_Renza.BLL.Services
         public async Task CreateColor(ColorDTO colorDto)
         {
             var photos = _mapper.Map<IEnumerable<ImageDTO>>(colorDto.Photos);
-            var color = new Color 
+            var color = new Color
             {
                 Name = colorDto.Name,
                 ModelId = colorDto.ModelId,
                 ImageId = colorDto.ImageId,
-                Photos = (ICollection<Image>)photos
+                Photos = _mapper.Map<ICollection<Image>>(photos)
             };
             await _db.Colors.Create(color);
             await _db.Save();
@@ -42,7 +42,7 @@ namespace La_Renza.BLL.Services
                 Name = colorDto.Name,
                 ModelId = colorDto.ModelId,
                 ImageId = colorDto.ImageId,
-                Photos = (ICollection<Image>)photos
+                Photos = _mapper.Map<ICollection<Image>>(photos)
             };
             var Saved = await _db.Colors.Get(colorDto.Id);
             if (Saved != null)

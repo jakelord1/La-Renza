@@ -9,7 +9,7 @@ namespace La_Renza.DAL.Entities
     public class InvoiceInfo
     {
         public int Id { get; set; }
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
         public string FullName { get; set; }
         public string SecondName { get; set; }
         public string City { get; set; }
@@ -18,7 +18,7 @@ namespace La_Renza.DAL.Entities
         public string HouseNumber { get; set; }
         public bool IsDigital { get; set; }
 
-        public User? User { get; set; }
+        public User User { get; set; }
 
     }
 }
