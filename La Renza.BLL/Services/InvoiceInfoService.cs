@@ -20,6 +20,7 @@ namespace La_Renza.BLL.Services
         {
             var invoiceInfo = new InvoiceInfo
             {
+                Id = invoiceInfoDto.Id,
                 UserId = invoiceInfoDto.UserId,
                 FullName = invoiceInfoDto.FullName,
                 SecondName = invoiceInfoDto.SecondName,
@@ -37,6 +38,7 @@ namespace La_Renza.BLL.Services
         {
             var invoiceInfo = new InvoiceInfo
             {
+                Id = invoiceInfoDto.Id,
                 UserId = invoiceInfoDto.UserId,
                 FullName = invoiceInfoDto.FullName,
                 SecondName = invoiceInfoDto.SecondName,
@@ -63,6 +65,7 @@ namespace La_Renza.BLL.Services
                 throw new ValidationException("Wrong invoices!", "");
             return new InvoiceInfoDTO
             {
+                Id = invoiceInfoDto.Id,
                 UserId = invoiceInfo.UserId,
                 FullName = invoiceInfo.FullName,
                 SecondName = invoiceInfo.SecondName,
