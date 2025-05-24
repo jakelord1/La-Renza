@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using La_Renza.BLL.DTO;
+using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using La_Renza.DAL.Entities;
 using La_Renza.DAL.Interfaces;
@@ -47,9 +48,16 @@ namespace La_Renza.BLL.Services
             await _db.Images.Delete(id);
             await _db.Save();
         }
+
+
+
         public async Task<ImageDTO> GetImage(int id)
         {
-            var image = await _db.Comments.Get(id);
+           
+            var image = await _db.Images.Get(id);
+            if (image == null)
+                throw new ValidationException("Wrong image!", "");
+
             return _mapper.Map<ImageDTO>(image);
         }
         public async Task<IEnumerable<ImageDTO>> GetImages()
