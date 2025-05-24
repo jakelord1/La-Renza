@@ -4,6 +4,7 @@ using La_Renza.DAL.Interfaces;
 using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
+using Mysqlx.Crud;
 
 namespace La_Renza.BLL.Services
 {
@@ -18,18 +19,19 @@ namespace La_Renza.BLL.Services
 
         public async Task CreateOrder(OrderDTO orderDto)
         {
-            var order = new Order
+            var order = new DAL.Entities.Order
             {
                 Id = orderDto.Id,
                 UserId = orderDto.UserId,
-                Status = Enum.Parse<Status>(orderDto.Status),
+                Status = orderDto.Status,
                 DeliveryId = orderDto.DeliveryId,
                 CuponsId = orderDto.CuponsId,
                 OrderName = orderDto.OrderName,
                 CreatedAt = orderDto.CreatedAt,
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
-                DeliveryMethodId = orderDto.DeliveryMethodId
+                DeliveryMethodId = orderDto.DeliveryMethodId,
+                Phonenumber = orderDto.Phonenumber
             };
             await Database.Orders.Create(order);
             await Database.Save();
@@ -37,18 +39,19 @@ namespace La_Renza.BLL.Services
 
         public async Task UpdateOrder(OrderDTO orderDto)
         {
-            var order = new Order
+            var order = new DAL.Entities.Order
             {
                 Id = orderDto.Id,
                 UserId = orderDto.UserId,
-                Status = Enum.Parse<Status>(orderDto.Status),
+                Status = orderDto.Status,
                 DeliveryId = orderDto.DeliveryId,
                 CuponsId = orderDto.CuponsId,
                 OrderName = orderDto.OrderName,
                 CreatedAt = orderDto.CreatedAt,
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
-                DeliveryMethodId = orderDto.DeliveryMethodId
+                DeliveryMethodId = orderDto.DeliveryMethodId,
+                Phonenumber = orderDto.Phonenumber
             };
             Database.Orders.Update(order);
             await Database.Save();
@@ -69,7 +72,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = order.Id,
                 UserId = order.UserId,
-                Status = order.Status.ToString(),
+                Status = order.Status,
                 DeliveryId = order.DeliveryId,
                 CuponsId = order.CuponsId,
                 OrderName = order.OrderName,
@@ -77,21 +80,16 @@ namespace La_Renza.BLL.Services
                 CompletedAt = order.CompletedAt,
                 PaymentMethod = order.PaymentMethod,
                 DeliveryMethodId = order.DeliveryMethodId,
-                User = order.User.Email,
-                Delivery = order.Delivery.City,
-                Cupons = order.Cupons.Name
+                Phonenumber = order.Phonenumber
             };
         }
 
-   
+
         public async Task<IEnumerable<OrderDTO>> GetOrders()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Order, OrderDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email))
-            .ForMember("Delivery", opt => opt.MapFrom(c => c.Delivery.City))
-            .ForMember("Cupons", opt => opt.MapFrom(c => c.Cupons.Name)));
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<DAL.Entities.Order, OrderDTO>());
             var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
+            return mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
         }
 
 
