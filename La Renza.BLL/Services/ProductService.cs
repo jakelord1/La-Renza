@@ -60,5 +60,10 @@ namespace La_Renza.BLL.Services
             var products = await _db.Products.GetAll();
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
+
+        public async Task<bool> ExistsProduct(int id)
+        {
+            return await _db.Products.Exists(id);
+        }
     }
 }

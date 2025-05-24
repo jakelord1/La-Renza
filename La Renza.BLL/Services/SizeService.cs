@@ -25,7 +25,7 @@ namespace La_Renza.BLL.Services
             var size = new Size
             {
                 Name = sizeDto.Name,
-                CategoryId = sizeDto.CategoryId
+                CategoryId = (int)sizeDto.CategoryId
             };
             await _db.Sizes.Create(size);
             await _db.Save();
@@ -36,7 +36,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = sizeDto.Id,
                 Name = sizeDto.Name,
-                CategoryId = sizeDto.CategoryId
+                CategoryId = (int)sizeDto.CategoryId
             };
             var Saved = await _db.Sizes.Get(sizeDto.Id);
             if (Saved != null)
@@ -59,6 +59,10 @@ namespace La_Renza.BLL.Services
         {
             var size = await _db.Sizes.GetAll();
             return _mapper.Map<IEnumerable<SizeDTO>>(size);
+        }
+        public async Task<bool> ExistsSize(int id)
+        {
+            return await _db.Sizes.Exists(id);
         }
     }
 }

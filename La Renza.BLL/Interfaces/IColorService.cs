@@ -14,5 +14,6 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteColor(int id);
         Task<ColorDTO> GetColor(int id);
         Task<IEnumerable<ColorDTO>> GetColors();
+        Task<bool> ExistsColor(int id);
     }
 }

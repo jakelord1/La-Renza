@@ -46,11 +46,8 @@ namespace La_Renza.BLL.Services
                 ImageId = categoryDto.ImageId,
                 IsActive = true
             };
-            var Saved = await _db.Categories.Get(categoryDto.Id);
-            if (Saved != null)
-                Saved = category;
-            else
-                throw new Exception();
+
+            _db.Categories.Update(category);
             await _db.Save();
         }
         public async Task DeleteCategory(int id)
@@ -67,6 +64,10 @@ namespace La_Renza.BLL.Services
         {
             var categories = await _db.Categories.GetAll();
             return _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+        }
+        public async Task<bool> ExistsCategory(int id)
+        {
+            return await _db.Categories.Exists(id);
         }
     }
 }

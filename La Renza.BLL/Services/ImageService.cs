@@ -57,5 +57,10 @@ namespace La_Renza.BLL.Services
             var images = await _db.Images.GetAll();
             return _mapper.Map<IEnumerable<ImageDTO>>(images);
         }
+
+        public async Task<bool> ExistsImage(int id)
+        {
+            return await _db.Images.Exists(id);
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteInvoiceInfo(int id);
         Task<InvoiceInfoDTO> GetInvoiceInfo(int id);
         Task<IEnumerable<InvoiceInfoDTO>> GetInvoiceInfos();
+        Task<bool> ExistsInvoiceInfo(int id);
     }
 }
 

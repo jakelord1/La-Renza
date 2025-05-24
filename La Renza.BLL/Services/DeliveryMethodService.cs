@@ -68,6 +68,9 @@ namespace La_Renza.BLL.Services
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<DeliveryMethod>, IEnumerable<DeliveryMethodDTO>>(await Database.DeliveryMethods.GetAll());
         }
-
+        public async Task<bool> ExistsDeliveryMethod(int id)
+        {
+            return await Database.DeliveryMethods.Exists(id);
+        }
     }
 }

@@ -38,8 +38,8 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Admins
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAdmin(int id, AdminDTO admin)
+        [HttpPut]
+        public async Task<IActionResult> PutAdmin( AdminDTO admin)
         {
             if (!ModelState.IsValid)
             {

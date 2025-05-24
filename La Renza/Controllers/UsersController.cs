@@ -40,8 +40,8 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Users
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, UserDTO user)
+        [HttpPut]
+        public async Task<IActionResult> PutUser(UserDTO user)
         {
             if (!ModelState.IsValid)
             {
@@ -58,7 +58,7 @@ namespace La_Renza.Controllers
 
         // POST: api/Users
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user,[FromServices] IPassword passwordService)
+        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user, [FromServices] IPassword passwordService)
         {
             if (!ModelState.IsValid)
             {
@@ -88,7 +88,7 @@ namespace La_Renza.Controllers
             {
                 return NotFound();
             }
-            
+
             if (!passwordService.VerifyPassword(logon.Password, user.Password))
             {
                 return Unauthorized(new { message = "Invalid login or password" });

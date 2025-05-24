@@ -60,5 +60,10 @@ namespace La_Renza.BLL.Services
             var models = await _db.Models.GetAll();
             return _mapper.Map<IEnumerable<ModelDTO>>(models);
         }
+
+        public async Task<bool> ExistsModel(int id)
+        {
+            return await _db.Models.Exists(id);
+        }
     }
 }

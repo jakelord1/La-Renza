@@ -84,5 +84,10 @@ namespace La_Renza.BLL.Services
             return mapper.Map<IEnumerable<InvoiceInfo>, IEnumerable<InvoiceInfoDTO>>(await Database.Invoices.GetAll());
         }
 
+        public async Task<bool> ExistsInvoiceInfo(int id)
+        {
+            return await Database.Invoices.Exists(id);
+        }
+
     }
 }

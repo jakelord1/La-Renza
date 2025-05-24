@@ -66,5 +66,10 @@ namespace La_Renza.BLL.Services
             var colors = await _db.Colors.GetAll();
             return _mapper.Map<IEnumerable<ColorDTO>>(colors);
         }
+
+        public async Task<bool> ExistsColor(int id)
+        {
+            return await _db.Colors.Exists(id);
+        }
     }
 }

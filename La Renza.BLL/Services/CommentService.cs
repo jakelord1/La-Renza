@@ -71,5 +71,9 @@ namespace La_Renza.BLL.Services
             var comments = await _db.Comments.GetAll();
             return _mapper.Map<IEnumerable<CommentDTO>>(comments);
         }
+        public async Task<bool> ExistsComment(int id)
+        {
+            return await _db.Comments.Exists(id);
+        }
     }
 }
