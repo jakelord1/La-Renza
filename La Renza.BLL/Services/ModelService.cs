@@ -32,7 +32,6 @@ namespace La_Renza.BLL.Services
                 Description = modelDto.Description,
                 StartDate = modelDto.StartDate,
                 MaterialInfo = modelDto.MaterialInfo,
-                Id = modelDto.Id,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage
             };
@@ -49,7 +48,6 @@ namespace La_Renza.BLL.Services
                 Description = modelDto.Description,
                 StartDate = modelDto.StartDate,
                 MaterialInfo = modelDto.MaterialInfo,
-                Id = modelDto.Id,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage
             };
