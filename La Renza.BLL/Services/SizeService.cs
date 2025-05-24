@@ -38,11 +38,8 @@ namespace La_Renza.BLL.Services
                 Name = sizeDto.Name,
                 CategoryId = (int)sizeDto.CategoryId
             };
-            var Saved = await _db.Sizes.Get(sizeDto.Id);
-            if (Saved != null)
-                Saved = size;
-            else
-                throw new Exception();
+          
+            _db.Sizes.Update(size);
             await _db.Save();
         }
         public async Task DeleteSize(int id)
