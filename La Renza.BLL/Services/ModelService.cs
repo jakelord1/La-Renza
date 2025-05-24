@@ -35,8 +35,8 @@ namespace La_Renza.BLL.Services
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage
             };
-            await Database.Models.Create(model);
-            await Database.Save();
+            await _db.Models.Create(model);
+            await _db.Save();
         }
         public async Task UpdateModel(ModelDTO modelDto)
         {
@@ -51,8 +51,8 @@ namespace La_Renza.BLL.Services
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage
             };
-            Database.Models.Update(model);
-            await Database.Save();
+            _db.Models.Update(model);
+            await _db.Save();
 
         }
         public async Task DeleteModel(int id)
