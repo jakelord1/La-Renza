@@ -25,12 +25,9 @@ namespace La_Renza.BLL.Services
         }
         public async Task CreateModel(ModelDTO modelDto)
         {
-            
-        }
-        public async Task UpdateModel(ModelDTO modelDto)
-        {
             var model = new Model
             {
+                Id = modelDto.Id,
                 Name = modelDto.Name,
                 Description = modelDto.Description,
                 StartDate = modelDto.StartDate,
@@ -39,11 +36,26 @@ namespace La_Renza.BLL.Services
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage
             };
-            var Saved = await _db.Models.Get(modelDto.Id);
-            if (Saved != null)
-                Saved = model;
-            else
-                throw new Exception();
+            await Database.Models.Create(model);
+            await Database.Save();
+        }
+        public async Task UpdateModel(ModelDTO modelDto)
+        {
+            
+            var model = new Model
+            {
+                Id = modelDto.Id,
+                Name = modelDto.Name,
+                Description = modelDto.Description,
+                StartDate = modelDto.StartDate,
+                MaterialInfo = modelDto.MaterialInfo,
+                Id = modelDto.Id,
+                Rate = modelDto.Rate,
+                Bage = modelDto.Bage
+            };
+            Database.Models.Update(model);
+            await Database.Save();
+
         }
         public async Task DeleteModel(int id)
         {
