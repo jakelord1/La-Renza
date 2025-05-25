@@ -75,5 +75,10 @@ namespace La_Renza.BLL.Services
             return mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(await Database.ShopingCarts.GetAll());
         }
 
+        public async Task<bool> ExistsShopingCart(int id)
+        {
+            return await Database.ShopingCarts.Exists(id);
+        }
+
     }
 }

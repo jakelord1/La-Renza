@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import CartCount from './CartCount';
 import AccountPopover from './AccountPopover';
+import AuthenticatedPopover from './AuthenticatedPopover';
+import CartCount from './CartCount';
 import NavbarDropdownSection from './NavbarDropdownSection';
 import data from '../data/dropdownSectionsData.json';
 
@@ -84,7 +85,6 @@ const NavbarDropdown = ({ section, onMouseLeave }) => {
         minHeight: 440,
         height: 480,
       }}>
-
         <div style={{ width: 240, background: '#fafbfc', borderRight: '1px solid #eee', padding: '22px 0', height: '100%' }}>
           {subcategories.map((sub, idx) => (
             <div
@@ -104,7 +104,6 @@ const NavbarDropdown = ({ section, onMouseLeave }) => {
             </div>
           ))}
         </div>
-
         <NavbarDropdownSection section={section} activeSub={activeSub} />
       </div>
     </div>
@@ -114,6 +113,7 @@ const NavbarDropdown = ({ section, onMouseLeave }) => {
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const searchRef = useRef(null);
   const popoverTimeout = useRef();
 
@@ -142,13 +142,13 @@ const Navbar = () => {
     setIsCategoryHovered(true);
     setHoveredNav(catQuery);
   };
+
   const handleCategoryLeave = () => {
     setIsCategoryHovered(false);
-
   };
+
   const handleNavLeave = () => {
     setIsDropdownHovered(false);
-
   };
 
   useEffect(() => {
@@ -213,10 +213,14 @@ const Navbar = () => {
                   <i className="bi bi-person fs-5" style={{ color: '#000' }} />
                 </button>
                 {showPopover && (
-                  <AccountPopover
-                    onLogin={() => window.location.href = '/login'}
-                    onRegister={() => window.location.href = '/register'}
-                  />
+                  isAuthenticated ? (
+                    <AuthenticatedPopover onClose={() => setShowPopover(false)} />
+                  ) : (
+                    <AccountPopover
+                      onLogin={() => window.location.href = '/login'}
+                      onRegister={() => window.location.href = '/register'}
+                    />
+                  )
                 )}
               </div>
               <Link to="/cart" className="nav-link px-2 position-relative text-success">
@@ -308,7 +312,7 @@ const Navbar = () => {
               aria-label="Close"
               onClick={() => setShowSearch(false)}
             />
-            <form className=" mb-4" style={{ width: '94%' }} onSubmit={handleToggleSearch}>
+            <form className="mb-4" style={{ width: '94%' }} onSubmit={handleToggleSearch}>
               <div className="position-relative">
                 <i
                   className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"

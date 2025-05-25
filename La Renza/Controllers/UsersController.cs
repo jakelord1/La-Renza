@@ -41,8 +41,8 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Users
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, UserDTO user)
+        [HttpPut]
+        public async Task<IActionResult> PutUser(UserDTO user)
         {
             if (!ModelState.IsValid)
             {
@@ -67,10 +67,28 @@ namespace La_Renza.Controllers
             }
             user.Password = hasher.HashPassword(user.Password);
             await _userService.CreateUser(user);
+            user.Password = null;
+
             return Ok(user);
         }
         [HttpPost("login")]
         public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            UserDTO user = await _userService.GetUserByLogin(logon.Email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+
+
+        // POST: api/Users/login
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] IPassword passwordService)
         {
             if (!ModelState.IsValid)
             {

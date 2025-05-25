@@ -1,7 +1,4 @@
 ﻿using La_Renza.BLL.DTO;
-using La_Renza.DAL.Entities;
-using La_Renza.DAL.Interfaces;
-using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -21,8 +18,8 @@ namespace La_Renza.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ImageDTO>>> Getimages()
         {
-            var s = await _imageService.GetImages();
-            return Ok(s);
+            var images = await _imageService.GetImages();
+            return Ok(images);
         }
 
         // GET: api/image/5
@@ -45,6 +42,11 @@ namespace La_Renza.Controllers
             {
                 return BadRequest(ModelState);
             }
+            if (!await _imageService.ExistsImage(image.Id))
+            {
+                return NotFound();
+            }
+
             await _imageService.UpdateImage(image);
             return Ok();
         }
@@ -65,7 +67,12 @@ namespace La_Renza.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Deleteimage(int id)
         {
-            ImageDTO image = await _imageService.GetImage(id);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            ImageDTO image = await _imageService.GetImage((int)id);
+
             if (image == null)
             {
                 return NotFound();
@@ -73,5 +80,7 @@ namespace La_Renza.Controllers
             await _imageService.DeleteImage(id);
             return Ok();
         }
+
     }
 }
+

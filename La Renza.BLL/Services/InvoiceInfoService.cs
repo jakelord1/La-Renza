@@ -20,6 +20,7 @@ namespace La_Renza.BLL.Services
         {
             var invoiceInfo = new InvoiceInfo
             {
+                Id = invoiceInfoDto.Id,
                 UserId = invoiceInfoDto.UserId,
                 FullName = invoiceInfoDto.FullName,
                 SecondName = invoiceInfoDto.SecondName,
@@ -37,6 +38,7 @@ namespace La_Renza.BLL.Services
         {
             var invoiceInfo = new InvoiceInfo
             {
+                Id = invoiceInfoDto.Id,
                 UserId = invoiceInfoDto.UserId,
                 FullName = invoiceInfoDto.FullName,
                 SecondName = invoiceInfoDto.SecondName,
@@ -63,6 +65,7 @@ namespace La_Renza.BLL.Services
                 throw new ValidationException("Wrong invoices!", "");
             return new InvoiceInfoDTO
             {
+                Id = invoiceInfo.Id,
                 UserId = invoiceInfo.UserId,
                 FullName = invoiceInfo.FullName,
                 SecondName = invoiceInfo.SecondName,
@@ -82,6 +85,11 @@ namespace La_Renza.BLL.Services
             .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<InvoiceInfo>, IEnumerable<InvoiceInfoDTO>>(await Database.Invoices.GetAll());
+        }
+
+        public async Task<bool> ExistsInvoiceInfo(int id)
+        {
+            return await Database.Invoices.Exists(id);
         }
 
     }

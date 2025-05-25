@@ -1,5 +1,6 @@
 ﻿using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
+using La_Renza.DAL.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,12 +36,16 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/OrderItem/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrderItem(int id, OrderItemDTO item)
+        [HttpPut]
+        public async Task<IActionResult> PutOrderItem(OrderItemDTO item)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if (!await _orderItemService.ExistsOrderItem(item.Id))
+            {
+                return NotFound();
             }
             await _orderItemService.UpdateOrderItem(item);
             return Ok(item);

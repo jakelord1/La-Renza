@@ -9,6 +9,7 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteDeliveryMethod(int id);
         Task<DeliveryMethodDTO> GetDeliveryMethod(int id);
         Task<IEnumerable<DeliveryMethodDTO>> GetDeliveryMethods();
+        Task<bool> ExistsDeliveryMethod(int id);
     }
 }
 

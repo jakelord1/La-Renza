@@ -95,7 +95,6 @@ const Comments = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingComment, setEditingComment] = useState(null);
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
@@ -295,8 +294,7 @@ const Comments = () => {
       setAllComments(allComments.map(comment => 
         comment.id === editingComment.id ? updatedComment : comment
       ));
-      
-      // Reset form
+
       setText('');
       setAuthor('');
       setRating(5);
@@ -318,7 +316,6 @@ const Comments = () => {
     }, 1000);
   };
 
-  // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = allComments.slice(indexOfFirstItem, indexOfLastItem);
@@ -338,7 +335,6 @@ const Comments = () => {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // Previous button
     pages.push(
       <Pagination.Prev 
         key="prev" 
@@ -347,7 +343,6 @@ const Comments = () => {
       />
     );
 
-    // First page
     if (startPage > 1) {
       pages.push(
         <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
@@ -359,7 +354,6 @@ const Comments = () => {
       }
     }
 
-    // Page numbers
     for (let number = startPage; number <= endPage; number++) {
       pages.push(
         <Pagination.Item 
@@ -372,7 +366,6 @@ const Comments = () => {
       );
     }
 
-    // Last page
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.push(<Pagination.Ellipsis key="ellipsis2" disabled />);
@@ -384,7 +377,6 @@ const Comments = () => {
       );
     }
 
-    // Next button
     pages.push(
       <Pagination.Next 
         key="next" 

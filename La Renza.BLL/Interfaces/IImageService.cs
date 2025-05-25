@@ -14,5 +14,6 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteImage(int id);
         Task<ImageDTO> GetImage(int id);
         Task<IEnumerable<ImageDTO>> GetImages();
+        Task<bool> ExistsImage(int id);
     }
 }

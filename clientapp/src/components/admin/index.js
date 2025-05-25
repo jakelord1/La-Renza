@@ -1,4 +1,12 @@
 export { default as AdminLogin } from './AdminLogin';
 export { default as AdminLayout } from './AdminLayout';
 export { default as Dashboard } from './Dashboard';
-export { default as Comments } from './Comments'; 
+export { default as Comments } from './Comments';
+export { default as Coupons } from './Coupons';
+export { default as Users } from './Users';
+export { default as Categories } from './Categories';
+export { default as Sizes } from './Sizes';
+export { default as Images } from './Images';
+export { default as Addresses } from './Addresses';
+export { default as Orders } from './Orders';
+export { default as Colors } from './Colors';

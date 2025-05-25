@@ -17,8 +17,18 @@ import {
   AdminLogin,
   AdminLayout,
   Dashboard,
-  Comments
+  Comments,
+  Coupons,
+  Users,
+  Categories,
+  Sizes,
+  Images,
+  Addresses,
+  Orders,
+  Colors
 } from './components/admin';
+import Administrators from './components/admin/Administrators';
+import Invoices from './components/admin/Invoices';
 import './App.css';
 
 function App() {
@@ -30,7 +40,17 @@ function App() {
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/*" element={<AdminLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="invoices" element={<Invoices />} />
             <Route path="comments" element={<Comments />} />
+            <Route path="coupons" element={<Coupons />} />
+            <Route path="users" element={<Users />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="sizes" element={<Sizes />} />
+            <Route path="addresses" element={<Addresses />} />
+            <Route path="images" element={<Images />} />
+            <Route path="administrators" element={<Administrators />} />
+            <Route path="colors" element={<Colors />} />
           </Route>
           
           {/* Main Site Routes */}

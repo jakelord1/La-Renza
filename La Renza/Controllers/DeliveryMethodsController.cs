@@ -1,5 +1,7 @@
 ﻿using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
+using La_Renza.BLL.Services;
+using La_Renza.DAL.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,12 +37,16 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/DeliveryMethod/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDeliveryMethod(int id, DeliveryMethodDTO method)
+        [HttpPut]
+        public async Task<IActionResult> PutDeliveryMethod(DeliveryMethodDTO method)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if (!await _deliveryMethodService.ExistsDeliveryMethod(method.Id))
+            {
+                return NotFound();
             }
             await _deliveryMethodService.UpdateDeliveryMethod(method);
             return Ok(method);

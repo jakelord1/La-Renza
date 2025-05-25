@@ -39,14 +39,17 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Coupons
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCoupon(int id, CouponDTO coupon)
+        [HttpPut]
+        public async Task<IActionResult> PutCoupon(CouponDTO coupon)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-          
+            if (!await _couponService.ExistsCoupon(coupon.Id))
+            {
+                return NotFound();
+            }
             await _couponService.UpdateCoupon(coupon);
             return Ok(coupon);
         }

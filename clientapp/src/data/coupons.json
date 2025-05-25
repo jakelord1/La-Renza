@@ -1,0 +1,132 @@
+{
+  "coupons": [
+    {
+      "id": 1,
+      "code": "WELCOME10",
+      "discount": 100,
+      "startDate": "2024-03-01",
+      "endDate": "2024-12-31",
+      "description": "Знижка 100₴ на першу покупку"
+    },
+    {
+      "id": 2,
+      "code": "SUMMER20",
+      "discount": 200,
+      "startDate": "2024-06-01",
+      "endDate": "2024-08-31",
+      "description": "Знижка 200₴ на літню колекцію"
+    },
+    {
+      "id": 3,
+      "code": "SPRING15",
+      "discount": 150,
+      "startDate": "2024-03-15",
+      "endDate": "2024-05-31",
+      "description": "Весняна знижка 150₴ на всі товари"
+    },
+    {
+      "id": 4,
+      "code": "AUTUMN50",
+      "discount": 50,
+      "startDate": "2024-09-01",
+      "endDate": "2024-10-31",
+      "description": "Осіння знижка 50₴ на замовлення від 500₴"
+    },
+    {
+      "id": 5,
+      "code": "BIRTHDAY300",
+      "discount": 300,
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31",
+      "description": "300₴ до дня народження!"
+    },
+    {
+      "id": 6,
+      "code": "VIP500",
+      "discount": 500,
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31",
+      "description": "Ексклюзивна знижка 500₴ для VIP-клієнтів"
+    },
+    {
+      "id": 7,
+      "code": "BLACKFRIDAY",
+      "discount": 250,
+      "startDate": "2024-11-22",
+      "endDate": "2024-11-29",
+      "description": "Black Friday: знижка 250₴ на всі товари"
+    },
+    {
+      "id": 8,
+      "code": "NEWYEAR2025",
+      "discount": 300,
+      "startDate": "2024-12-25",
+      "endDate": "2025-01-10",
+      "description": "Новорічна знижка 300₴ на святкові покупки"
+    },
+    {
+      "id": 9,
+      "code": "FREESHIP",
+      "discount": 0,
+      "startDate": "2024-04-01",
+      "endDate": "2024-12-31",
+      "description": "Безкоштовна доставка на всі замовлення"
+    },
+    {
+      "id": 10,
+      "code": "WOMENSDAY8",
+      "discount": 180,
+      "startDate": "2024-03-07",
+      "endDate": "2024-03-09",
+      "description": "Знижка 180₴ до 8 березня"
+    },
+    {
+      "id": 11,
+      "code": "MENSDAY23",
+      "discount": 170,
+      "startDate": "2024-02-22",
+      "endDate": "2024-02-24",
+      "description": "Знижка 170₴ до 23 лютого"
+    },
+    {
+      "id": 12,
+      "code": "STUDENT100",
+      "discount": 100,
+      "startDate": "2024-09-01",
+      "endDate": "2024-09-30",
+      "description": "Знижка 100₴ для студентів у вересні"
+    },
+    {
+      "id": 13,
+      "code": "FAMILYDAY",
+      "discount": 120,
+      "startDate": "2024-05-15",
+      "endDate": "2024-05-16",
+      "description": "Сімейна знижка 120₴ до Дня сім'ї"
+    },
+    {
+      "id": 14,
+      "code": "LOYALTY250",
+      "discount": 250,
+      "startDate": "2024-01-01",
+      "endDate": "2024-12-31",
+      "description": "Бонус 250₴ для постійних клієнтів"
+    },
+    {
+      "id": 15,
+      "code": "KIDS50",
+      "discount": 50,
+      "startDate": "2024-06-01",
+      "endDate": "2024-06-10",
+      "description": "Дитяча знижка 50₴ до Дня захисту дітей"
+    },
+    {
+      "id": 16,
+      "code": "ANNIVERSARY400",
+      "discount": 400,
+      "startDate": "2024-10-01",
+      "endDate": "2024-10-10",
+      "description": "Ювілейна знижка 400₴ до дня народження магазину"
+    }
+  ]
+} 
