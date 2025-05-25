@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using La_Renza.BLL.DTO;
 using La_Renza.BLL.Services;
 using La_Renza.DAL.Entities;
+using La_Renza.BLL;
 
 namespace La_Renza.Controllers
 {
@@ -58,20 +59,30 @@ namespace La_Renza.Controllers
 
         // POST: api/Users
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user, [FromServices] IPassword passwordService)
+        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user, [FromServices] PasswordHasher hasher)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            string salt = passwordService.GenerateSalt();
-            string hashed = passwordService.HashPassword(salt, user.Password);
-            user.Password = $"{salt}:{hashed}";
+            user.Password = hasher.HashPassword(user.Password);
             await _userService.CreateUser(user);
             user.Password = null;
 
             return Ok(user);
         }
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            UserDTO user = await _userService.GetUserByLogin(logon.Email);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
 
 
@@ -102,8 +113,6 @@ namespace La_Renza.Controllers
             HttpContext.Session.SetString("Login", user.Email);
             return Ok();
         }
-
-
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
