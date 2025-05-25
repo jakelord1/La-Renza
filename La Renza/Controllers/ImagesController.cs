@@ -1,8 +1,6 @@
 ﻿using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
-using La_Renza.BLL.Services;
-using La_Renza.DAL.Entities;
-using Microsoft.AspNetCore.Http;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace La_Renza.Controllers
@@ -16,30 +14,29 @@ namespace La_Renza.Controllers
         {
             _imageService = imageService;
         }
-        // GET: api/Images
+        // GET: api/image
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages()
+        public async Task<ActionResult<IEnumerable<ImageDTO>>> Getimages()
         {
             var images = await _imageService.GetImages();
             return Ok(images);
         }
 
-        // GET: api/Images/5
+        // GET: api/image/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ImageDTO>> GetImage(int id)
+        public async Task<ActionResult<ImageDTO>> Getimage(int id)
         {
-            ImageDTO image = await _imageService.GetImage((int)id);
-
+            ImageDTO image = await _imageService.GetImage(id);
             if (image == null)
             {
                 return NotFound();
             }
-            return new ObjectResult(image);
+            return Ok();
         }
 
-        // PUT: api/Images
+        // PUT: api/image/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutImage(int id, ImageDTO image)
+        public async Task<IActionResult> Putimage(int id, ImageDTO image)
         {
             if (!ModelState.IsValid)
             {
@@ -51,24 +48,24 @@ namespace La_Renza.Controllers
             }
 
             await _imageService.UpdateImage(image);
-            return Ok(image);
+            return Ok();
         }
 
-        // POST: api/Images
+        // POST: api/image
         [HttpPost]
-        public async Task<ActionResult<ImageDTO>> PostImage(ImageDTO image)
+        public async Task<ActionResult<ImageDTO>> Postimage(ImageDTO image)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             await _imageService.CreateImage(image);
-            return Ok(image);
+            return Ok();
         }
 
-        // DELETE: api/Images/5
+        // DELETE: api/image/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteImage(int id)
+        public async Task<IActionResult> Deleteimage(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -80,10 +77,8 @@ namespace La_Renza.Controllers
             {
                 return NotFound();
             }
-
             await _imageService.DeleteImage(id);
-
-            return Ok(image);
+            return Ok();
         }
 
     }
