@@ -40,8 +40,8 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Users
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, UserDTO user)
+        [HttpPut]
+        public async Task<IActionResult> PutUser(UserDTO user)
         {
             if (!ModelState.IsValid)
             {
@@ -58,15 +58,51 @@ namespace La_Renza.Controllers
 
         // POST: api/Users
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user)
+        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user, [FromServices] IPassword passwordService)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            string salt = passwordService.GenerateSalt();
+            string hashed = passwordService.HashPassword(salt, user.Password);
+            user.Password = $"{salt}:{hashed}";
             await _userService.CreateUser(user);
+            user.Password = null;
+
             return Ok(user);
         }
+
+
+
+        // POST: api/Users/login
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] IPassword passwordService)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            UserDTO user = await _userService.GetUserByLogin(logon.Email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!passwordService.VerifyPassword(logon.Password, user.Password))
+            {
+                return Unauthorized(new { message = "Invalid login or password" });
+            }
+            if (logon.RememberMe)
+            {
+                CookieOptions option = new CookieOptions();
+                option.Expires = DateTime.Now.AddDays(10);
+                Response.Cookies.Append("login", logon.Email, option);
+            }
+            HttpContext.Session.SetString("Login", user.Email);
+            return Ok();
+        }
+
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]

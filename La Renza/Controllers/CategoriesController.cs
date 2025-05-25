@@ -41,12 +41,16 @@ namespace La_Renza.Controllers
             return new ObjectResult(category);
         }    
         // PUT: api/Categories/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCategory(int id, CategoryDTO category)
+        [HttpPut]
+        public async Task<IActionResult> PutCategory(CategoryDTO category)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if (!await _categoryService.ExistsCategory(category.Id))
+            {
+                return NotFound();
             }
             await _categoryService.UpdateCategory(category);
             return Ok(category);

@@ -9,5 +9,6 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteAddress(int id);
         Task<AddressDTO> GetAddress(int id);
         Task<IEnumerable<AddressDTO>> GetAddresses();
+        Task<bool> ExistsAddress(int id);
     }
 }

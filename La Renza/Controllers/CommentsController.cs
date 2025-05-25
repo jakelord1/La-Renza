@@ -1,4 +1,6 @@
-﻿using La_Renza.BLL.DTO;
+﻿using System.Drawing;
+using System.Xml.Linq;
+using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.Services;
 using La_Renza.DAL.Entities;
@@ -39,12 +41,16 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Comments
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, CommentDTO comment)
+        [HttpPut]
+        public async Task<IActionResult> PutComment( CommentDTO comment)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if (!await _commentService.ExistsComment(comment.Id))
+            {
+                return NotFound();
             }
             await _commentService.UpdateComment(comment);
             return Ok(comment);

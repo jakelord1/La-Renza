@@ -9,6 +9,7 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteShopingCart(int id);
         Task<ShopingCartDTO> GetShopingCart(int id);
         Task<IEnumerable<ShopingCartDTO>> GetShopingCarts();
+        Task<bool> ExistsShopingCart(int id);
     }
 }
 

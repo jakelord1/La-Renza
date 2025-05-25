@@ -38,14 +38,14 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Models/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutModel(int id, ModelDTO model)
+        [HttpPut]
+        public async Task<IActionResult> PutModel(ModelDTO model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (await _modelService.GetModel(model.Id) == null)
+            if (!await _modelService.ExistsModel(model.Id))
             {
                 return NotFound();
             }

@@ -20,8 +20,8 @@ namespace La_Renza.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages()
         {
-            var invoiceInfos = await _imageService.GetImages();
-            return Ok(invoiceInfos);
+            var images = await _imageService.GetImages();
+            return Ok(images);
         }
 
         // GET: api/Images/5
@@ -45,7 +45,7 @@ namespace La_Renza.Controllers
             {
                 return BadRequest(ModelState);
             }
-            if (await _imageService.GetImage(image.Id) == null)
+            if (!await _imageService.ExistsImage(image.Id))
             {
                 return NotFound();
             }
@@ -74,16 +74,18 @@ namespace La_Renza.Controllers
             {
                 return BadRequest(ModelState);
             }
-            ImageDTO iamge = await _imageService.GetImage((int)id);
+            ImageDTO image = await _imageService.GetImage((int)id);
 
-            if (iamge == null)
+            if (image == null)
             {
                 return NotFound();
             }
 
             await _imageService.DeleteImage(id);
 
-            return Ok(iamge);
+            return Ok(image);
         }
+
     }
 }
+

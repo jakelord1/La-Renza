@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
+import Alert from 'react-bootstrap/Alert';
+
+
+const API_URL = 'https://localhost:7071/api/Users/login';
+
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +13,12 @@ const LoginForm = () => {
     rememberMe: false
   });
 
+    const [errors, setErrors] = useState({});
+    const [alert, setAlert] = useState({ show: false, type: '', message: '' });
+    const navigate = useNavigate();
+
+
+ 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -16,13 +27,66 @@ const LoginForm = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!formData.email) {
+            newErrors.email = 'Email обязателен';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Неверный формат email';
+        }
+
+        if (!formData.password) {
+            newErrors.password = 'Пароль обязателен';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'Пароль должен быть не менее 6 символов';
+        }
+
+        setErrors(newErrors);
+        console.log('Ошибки валидации:', newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+    const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    console.log('Login data:', formData);
+      console.log('handleSubmit вызван');
+        if (!validateForm()) return;
+
+      try {
+          const res = await fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                  email: formData.email,
+                  password: formData.password,
+                  rememberMe: formData.rememberMe
+              })
+          });
+          if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.message || 'Не удалось войти');
+          }
+
+          setAlert({ show: true, type: 'success', message: 'Вход успешный!' });
+          setFormData({
+              email: '',
+              password: '',
+              rememberMe: false
+          });
+
+          navigate('/'); 
+      } catch (e) {
+          setAlert({ show: true, type: 'danger', message: e.message });
+      }
   };
 
-  return (
+    return (
+        <>
+            {alert.show && (
+                <Alert variant={alert.type} onClose={() => setAlert({ ...alert, show: false })} dismissible>
+                    {alert.message}
+                </Alert>
+            )}
     <section className="auth-page bg-light py-5">
       <div className="container">
         <div className="row justify-content-center">
@@ -102,7 +166,8 @@ const LoginForm = () => {
           </div>
         </div>
       </div>
-    </section>
+            </section>
+        </>
   );
 };
 
