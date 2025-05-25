@@ -71,19 +71,6 @@ namespace La_Renza.Controllers
 
             return Ok(user);
         }
-        [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            UserDTO user = await _userService.GetUserByLogin(logon.Email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
 
 
         // POST: api/Users/login
@@ -113,6 +100,9 @@ namespace La_Renza.Controllers
             HttpContext.Session.SetString("Login", user.Email);
             return Ok();
         }
+
+
+
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
