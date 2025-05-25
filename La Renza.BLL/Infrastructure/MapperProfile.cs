@@ -12,7 +12,7 @@ namespace La_Renza.BLL.Infrastructure
     public class MapperProfile : Profile
     {
         public MapperProfile()
-        { 
+        {
             CreateMap<Comment, CommentDTO>()
                 .ForMember(dest => dest.ImageId, opt => opt.MapFrom(src => src.Image.Id))
                 .ReverseMap();
@@ -22,14 +22,14 @@ namespace La_Renza.BLL.Infrastructure
                 .ReverseMap();
             CreateMap<Size, SizeDTO>()
                 .ReverseMap();
-            CreateMap<Model, ModelDTO>()
-                .ReverseMap();
             CreateMap<Color, ColorDTO>()
                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos))
                 .ReverseMap();
             CreateMap<Product, ProductDTO>()
                 .ReverseMap();
             CreateMap<Image, ImageDTO>()
+                .ReverseMap();
+            CreateMap<Model, ModelDTO>()
                 .ReverseMap();
         }
     }

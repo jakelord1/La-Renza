@@ -13,9 +13,9 @@ namespace La_Renza.BLL.DTO
         public string Name { get; set; }
         public string? Description { get; set; }
         public string? MaterialInfo { get; set; }
-        public DateOnly StartDate { get; set; }
-
-        public double? Rate { get; set; }
+        public DateTime StartDate { get; set; }
+        public decimal Price { get; set; }
+        public decimal? Rate { get; set; }
         public string? Bage { get; set; }
     }
 }

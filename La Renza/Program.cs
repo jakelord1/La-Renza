@@ -14,13 +14,24 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins("http://localhost:5173")
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
+
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(10); 
+    options.Cookie.Name = "Session"; 
+
+}); 
+
 builder.Services.AddLaRenzaDAL(builder.Configuration.GetConnectionString("DefaultConnection")!);
 builder.Services.AddLaRenzaBLL();
 var app = builder.Build();
-
+app.UseSession();
 
 if (app.Environment.IsDevelopment())
 {

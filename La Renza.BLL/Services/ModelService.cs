@@ -25,25 +25,35 @@ namespace La_Renza.BLL.Services
         }
         public async Task CreateModel(ModelDTO modelDto)
         {
-            
-        }
-        public async Task UpdateModel(ModelDTO modelDto)
-        {
             var model = new Model
             {
+                Id = modelDto.Id,
                 Name = modelDto.Name,
                 Description = modelDto.Description,
                 StartDate = modelDto.StartDate,
                 MaterialInfo = modelDto.MaterialInfo,
-                Id = modelDto.Id,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage
             };
-            var Saved = await _db.Models.Get(modelDto.Id);
-            if (Saved != null)
-                Saved = model;
-            else
-                throw new Exception();
+            await _db.Models.Create(model);
+            await _db.Save();
+        }
+        public async Task UpdateModel(ModelDTO modelDto)
+        {
+            
+            var model = new Model
+            {
+                Id = modelDto.Id,
+                Name = modelDto.Name,
+                Description = modelDto.Description,
+                StartDate = modelDto.StartDate,
+                MaterialInfo = modelDto.MaterialInfo,
+                Rate = modelDto.Rate,
+                Bage = modelDto.Bage
+            };
+            _db.Models.Update(model);
+            await _db.Save();
+
         }
         public async Task DeleteModel(int id)
         {
@@ -59,6 +69,11 @@ namespace La_Renza.BLL.Services
         {
             var models = await _db.Models.GetAll();
             return _mapper.Map<IEnumerable<ModelDTO>>(models);
+        }
+
+        public async Task<bool> ExistsModel(int id)
+        {
+            return await _db.Models.Exists(id);
         }
     }
 }

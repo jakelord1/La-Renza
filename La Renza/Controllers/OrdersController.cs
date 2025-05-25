@@ -39,12 +39,16 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Orders
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(int id, OrderDTO order)
+        [HttpPut]
+        public async Task<IActionResult> PutOrder( OrderDTO order)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if (!await _orderService.ExistsOrder(order.Id))
+            {
+                return NotFound();
             }
             await _orderService.UpdateOrder(order);
             return Ok(order);

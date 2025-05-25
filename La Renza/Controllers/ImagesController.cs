@@ -1,95 +1,90 @@
 ﻿using La_Renza.BLL.DTO;
-using La_Renza.DAL.Entities;
-using La_Renza.DAL.Interfaces;
-using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
-using AutoMapper;
+using La_Renza.BLL.Services;
+using La_Renza.DAL.Entities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace La_Renza.BLL.Services
+namespace La_Renza.Controllers
 {
-    public class AddressService : IAddressService
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ImagesController : ControllerBase
     {
-        IUnitOfWork Database { get; set; }
-
-        public AddressService(IUnitOfWork uow)
+        private readonly IImageService _imageService;
+        public ImagesController(IImageService imageService)
         {
-            Database = uow;
+            _imageService = imageService;
         }
 
-        public async Task CreateAddress(AddressDTO adressDto)
+        // GET: api/Images
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages()
         {
-            var adress = new Address
+            var images = await _imageService.GetImages();
+            return Ok(images);
+        }
+
+        // GET: api/Images/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ImageDTO>> GetImage(int id)
+        {
+            ImageDTO image = await _imageService.GetImage((int)id);
+
+            if (image == null)
             {
-
-                Id = adressDto.Id,
-                UserId = adressDto.UserId,
-                SecondName = adressDto.SecondName,
-                FullName = adressDto.FullName,
-                Street = adressDto.Street,
-                City = adressDto.City,
-                HouseNum = adressDto.HouseNum,
-                PostIndex = adressDto.PostIndex,
-                AdditionalInfo = adressDto.AdditionalInfo,
-                PhoneNumber = adressDto.PhoneNumber
-            };
-            await Database.Addresses.Create(adress);
-            await Database.Save();
+                return NotFound();
+            }
+            return new ObjectResult(image);
         }
 
-        public async Task UpdateAddress(AddressDTO adressDto)
+        // PUT: api/Images
+        [HttpPut]
+        public async Task<IActionResult> PutImage(ImageDTO image)
         {
-            var adress = new Address
+            if (!ModelState.IsValid)
             {
-
-                Id = adressDto.Id,
-                UserId = adressDto.UserId,
-                SecondName = adressDto.SecondName,
-                FullName = adressDto.FullName,
-                Street = adressDto.Street,
-                City = adressDto.City,
-                HouseNum = adressDto.HouseNum,
-                PostIndex = adressDto.PostIndex,
-                AdditionalInfo = adressDto.AdditionalInfo,
-                PhoneNumber = adressDto.PhoneNumber
-            };
-            Database.Addresses.Update(adress);
-            await Database.Save();
-        }
-
-        public async Task DeleteAddress(int id)
-        {
-            await Database.Addresses.Delete(id);
-            await Database.Save();
-        }
-
-        public async Task<AddressDTO> GetAddress(int id)
-        {
-            var address = await Database.Addresses.Get(id);
-            if (address == null)
-                throw new ValidationException("Wrong address!", "");
-            return new AddressDTO
+                return BadRequest(ModelState);
+            }
+            if (!await _imageService.ExistsImage(image.Id))
             {
-                Id = address.Id,
-                UserId = address.UserId,
-                SecondName = address.SecondName,
-                FullName = address.FullName,
-                Street = address.Street,
-                City = address.City,
-                HouseNum = address.HouseNum,
-                PostIndex = address.PostIndex,
-                AdditionalInfo = address.AdditionalInfo,
-                PhoneNumber = address.PhoneNumber,
-                User = address.User.Email
-            };
+                return NotFound();
+            }
+
+            await _imageService.UpdateImage(image);
+            return Ok(image);
         }
 
-
-        public async Task<IEnumerable<AddressDTO>> GetAddresses()
+        // POST: api/Images
+        [HttpPost]
+        public async Task<ActionResult<ImageDTO>> PostImage(ImageDTO image)
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(await Database.Addresses.GetAll());
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            await _imageService.CreateImage(image);
+            return Ok(image);
+        }
+
+        // DELETE: api/Images/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteImage(int id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            ImageDTO image = await _imageService.GetImage((int)id);
+
+            if (image == null)
+            {
+                return NotFound();
+            }
+
+            await _imageService.DeleteImage(id);
+
+            return Ok(image);
         }
 
     }
