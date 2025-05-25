@@ -63,6 +63,16 @@ const navLinks = [
     icon: 'bi-palette',
     label: 'Кольори'
   },
+  {
+    to: '/admin/products',
+    icon: 'bi-box-seam',
+    label: 'Товари'
+  },
+  {
+    to: '/admin/models',
+    icon: 'bi-diagram-3',
+    label: 'Моделі'
+  },
 ];
 
 const AdminLayout = () => {

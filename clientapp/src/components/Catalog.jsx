@@ -99,15 +99,6 @@ const catalogProducts = [
   },
 ];
 
-const CATEGORY_OPTIONS = [
-  { value: 'all', label: 'Усі' },
-  { value: 'clothes', label: 'Одяг' },
-  { value: 'shoes', label: 'Взуття' },
-  { value: 'accessories', label: 'Аксесуари' },
-  { value: 'home', label: 'Для дому' },
-  { value: 'kids', label: 'Дітям' },
-  { value: 'garden', label: 'Сад і балкон' },
-];
 const SIZE_OPTIONS = [
   { value: 'XS', label: 'XS' },
   { value: 'S', label: 'S' },
@@ -147,6 +138,34 @@ const initialFilters = {
 };
 
 const Catalog = () => {
+  // const [categories, setCategories] = useState([]);
+  const [categoryTree, setCategoryTree] = useState([]);
+  // ... остальной стейт
+
+  // Загрузка категорий с API
+  useEffect(() => {
+    fetch('/api/Categories')
+      .then(res => res.json())
+      .then(data => {
+        setCategoryTree(buildCategoryTree(data));
+      })
+      .catch(() => setCategoryTree([]));
+  }, []);
+
+  // Построение дерева категорий
+  function buildCategoryTree(list) {
+    const map = {};
+    const roots = [];
+    list.forEach(cat => { map[cat.id] = { ...cat, children: [] }; });
+    list.forEach(cat => {
+      if (cat.parentCategoryId) {
+        if (map[cat.parentCategoryId]) map[cat.parentCategoryId].children.push(map[cat.id]);
+      } else {
+        roots.push(map[cat.id]);
+      }
+    });
+    return roots;
+  }
   const [filters, setFilters] = useState(initialFilters);
   const [sort, setSort] = useState('default');
   const [view, setView] = useState('grid');
@@ -214,7 +233,7 @@ const Catalog = () => {
           <CatalogSidebar
             filters={filters}
             setFilters={setFilters}
-            categories={CATEGORY_OPTIONS}
+            categories={categoryTree}
             sizes={SIZE_OPTIONS}
             colors={COLOR_OPTIONS}
             brands={BRAND_OPTIONS}

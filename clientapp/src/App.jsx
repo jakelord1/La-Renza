@@ -25,7 +25,9 @@ import {
   Images,
   Addresses,
   Orders,
-  Colors
+  Colors,
+  Products,
+  Models
 } from './components/admin';
 import Administrators from './components/admin/Administrators';
 import Invoices from './components/admin/Invoices';
@@ -51,6 +53,8 @@ function App() {
             <Route path="images" element={<Images />} />
             <Route path="administrators" element={<Administrators />} />
             <Route path="colors" element={<Colors />} />
+            <Route path="products" element={<Products />} />
+            <Route path="models" element={<Models />} />
           </Route>
           
           {/* Main Site Routes */}

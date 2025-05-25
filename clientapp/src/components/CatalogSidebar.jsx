@@ -1,5 +1,6 @@
 import React from 'react';
 import { Form, Button, Collapse } from 'react-bootstrap';
+import CategoryTree from './CategoryTree';
 
 const CatalogSidebar = ({
   filters,
@@ -7,7 +8,6 @@ const CatalogSidebar = ({
   categories,
   sizes,
   colors,
-  brands,
   onReset
 }) => {
   return (
@@ -16,26 +16,19 @@ const CatalogSidebar = ({
       {/* Категорії */}
       <div className="mb-4">
         <div className="fw-semibold mb-2">Категорії</div>
-        <ul className="list-unstyled mb-0">
-          {categories.map(cat => (
-            <li key={cat.value}>
-              <Form.Check
-                type="checkbox"
-                id={`cat-${cat.value}`}
-                label={cat.label}
-                checked={filters.categories.includes(cat.value)}
-                onChange={e => {
-                  setFilters(f => ({
-                    ...f,
-                    categories: e.target.checked
-                      ? [...f.categories, cat.value]
-                      : f.categories.filter(v => v !== cat.value)
-                  }));
-                }}
-              />
-            </li>
-          ))}
-        </ul>
+        <CategoryTree
+          categories={categories}
+          selected={filters.categories}
+          onSelect={catId => setFilters(f => ({ ...f, categories: [catId] }))}
+        />
+        <button
+          type="button"
+          className="btn btn-outline-secondary btn-sm mt-2"
+          style={{width: '100%'}}
+          onClick={() => setFilters(f => ({ ...f, categories: [] }))}
+        >
+          Скинути категорію
+        </button>
       </div>
       {/* Ціна */}
       <div className="mb-4">
@@ -113,30 +106,7 @@ const CatalogSidebar = ({
           ))}
         </div>
       </div>
-      {/* Бренди */}
-      <div className="mb-4">
-        <div className="fw-semibold mb-2">Бренд</div>
-        <ul className="list-unstyled mb-0">
-          {brands.map(brand => (
-            <li key={brand.value}>
-              <Form.Check
-                type="checkbox"
-                id={`brand-${brand.value}`}
-                label={brand.label}
-                checked={filters.brands.includes(brand.value)}
-                onChange={e => {
-                  setFilters(f => ({
-                    ...f,
-                    brands: e.target.checked
-                      ? [...f.brands, brand.value]
-                      : f.brands.filter(v => v !== brand.value)
-                  }));
-                }}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
+
       <Button variant="outline-secondary" size="sm" className="w-100 mt-2" onClick={onReset}>
         Скинути фільтри
       </Button>
