@@ -38,18 +38,17 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Colors/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutColor(int id, ColorDTO color)
+        [HttpPut]
+        public async Task<IActionResult> PutColor(ColorDTO color)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (await _colorService.GetColor(color.Id) == null)
+            if (!await _colorService.ExistsColor(color.Id))
             {
                 return NotFound();
             }
-
             await _colorService.UpdateColor(color);
             return Ok(color);
         }

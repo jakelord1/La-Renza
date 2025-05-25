@@ -69,5 +69,10 @@ namespace La_Renza.BLL.Services
             return mapper.Map<IEnumerable<Coupon>, IEnumerable<CouponDTO>>(await Database.Coupons.GetAll());
         }
 
+        public async Task<bool> ExistsCoupon(int id)
+        {
+            return await Database.Coupons.Exists(id);
+        }
+
     }
 }

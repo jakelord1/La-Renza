@@ -1,5 +1,6 @@
 ﻿using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
+using La_Renza.BLL.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,12 +39,16 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Sizes/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSize(int id, SizeDTO size)
+        [HttpPut]
+        public async Task<IActionResult> PutSize(SizeDTO size)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if (!await _sizeService.ExistsSize(size.Id))
+            {
+                return NotFound();
             }
             await _sizeService.UpdateSize(size);
             return Ok(size);
