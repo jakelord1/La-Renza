@@ -16,7 +16,6 @@ namespace La_Renza.Controllers
         {
             _imageService = imageService;
         }
-
         // GET: api/Images
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ImageDTO>>> GetImages()
@@ -39,8 +38,8 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Images
-        [HttpPut]
-        public async Task<IActionResult> PutImage(ImageDTO image)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutImage(int id, ImageDTO image)
         {
             if (!ModelState.IsValid)
             {
@@ -89,3 +88,4 @@ namespace La_Renza.Controllers
 
     }
 }
+

@@ -32,26 +32,4 @@ namespace La_Renza.DAL.EF
             Database.EnsureCreated();
         }
     }
-
-    //add-migration CreateDb
-    //update-database
-    public class SampleContextFactory : IDesignTimeDbContextFactory<LaRenzaContext>
-    {
-        public LaRenzaContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<LaRenzaContext>();
-
-
-            ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.SetBasePath(Directory.GetCurrentDirectory());
-            builder.AddJsonFile("appsettings.json");
-            IConfigurationRoot config = builder.Build();
-
-
-            string connectionString = config.GetConnectionString("DefaultConnection");
-            //optionsBuilder.UseSqlServer(connectionString);
-            optionsBuilder.UseMySQL(connectionString);
-            return new LaRenzaContext(optionsBuilder.Options);
-        }
-    }
 }

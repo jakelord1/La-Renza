@@ -1,0 +1,88 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "ivanov@example.com",
+      "phoneNumber": "+380501234567",
+      "fullName": "Іван",
+      "surname": "Іванов",
+      "birthDate": "1990-05-15",
+      "gender": 1,
+      "password": "password123",
+      "newsOn": 1,
+      "laRenzaPoints": 150
+    },
+    {
+      "id": 2,
+      "email": "petrenko@example.com",
+      "phoneNumber": "+380671112233",
+      "fullName": "Олена",
+      "surname": "Петренко",
+      "birthDate": "1985-11-23",
+      "gender": 0,
+      "password": "qwerty456",
+      "newsOn": 0,
+      "laRenzaPoints": 320
+    },
+    {
+      "id": 3,
+      "email": "sergiy.koval@example.com",
+      "phoneNumber": "+380931234567",
+      "fullName": "Сергій",
+      "surname": "Коваль",
+      "birthDate": "1992-08-10",
+      "gender": 1,
+      "password": "sergiy2024",
+      "newsOn": 1,
+      "laRenzaPoints": 80
+    },
+    {
+      "id": 4,
+      "email": "anna.bondar@example.com",
+      "phoneNumber": "+380991234567",
+      "fullName": "Анна",
+      "surname": "Бондар",
+      "birthDate": "1995-03-22",
+      "gender": 0,
+      "password": "annaBondar!",
+      "newsOn": 1,
+      "laRenzaPoints": 210
+    },
+    {
+      "id": 5,
+      "email": "dmytro.shevchenko@example.com",
+      "phoneNumber": "+380661234567",
+      "fullName": "Дмитро",
+      "surname": "Шевченко",
+      "birthDate": "1988-12-01",
+      "gender": 1,
+      "password": "dmytroPass",
+      "newsOn": 0,
+      "laRenzaPoints": 500
+    },
+    {
+      "id": 6,
+      "email": "iryna.melnyk@example.com",
+      "phoneNumber": "+380731234567",
+      "fullName": "Ірина",
+      "surname": "Мельник",
+      "birthDate": "1993-07-17",
+      "gender": 0,
+      "password": "irynaM2024",
+      "newsOn": 1,
+      "laRenzaPoints": 60
+    },
+    {
+      "id": 7,
+      "email": "oleksandr.kravets@example.com",
+      "phoneNumber": "+380501112233",
+      "fullName": "Олександр",
+      "surname": "Кравець",
+      "birthDate": "1991-09-05",
+      "gender": 1,
+      "password": "kravets321",
+      "newsOn": 0,
+      "laRenzaPoints": 430
+    }
+  ]
+} 

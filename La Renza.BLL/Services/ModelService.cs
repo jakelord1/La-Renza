@@ -1,17 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using La_Renza.DAL.Interfaces;
+﻿using La_Renza.BLL.DTO;
 using La_Renza.DAL.Entities;
+using La_Renza.DAL.Interfaces;
+using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
-using La_Renza.BLL.DTO;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
-
+using AutoMapper;
 namespace La_Renza.BLL.Services
 {
     internal class ModelService : IModelService
@@ -27,14 +19,15 @@ namespace La_Renza.BLL.Services
         {
             var model = new Model
             {
-                Id = modelDto.Id,
                 Name = modelDto.Name,
                 Description = modelDto.Description,
                 StartDate = modelDto.StartDate,
                 MaterialInfo = modelDto.MaterialInfo,
+                Id = modelDto.Id,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage
             };
+
             await _db.Models.Create(model);
             await _db.Save();
         }

@@ -9,9 +9,54 @@ const navLinks = [
     label: 'Дашборд',
   },
   {
+    to: '/admin/orders',
+    icon: 'bi-cart-check',
+    label: 'Замовлення',
+  },
+  {
+    to: '/admin/invoices',
+    icon: 'bi-receipt',
+    label: 'Інвойси',
+  },
+  {
     to: '/admin/comments',
     icon: 'bi-chat-left-text',
     label: 'Коментарі',
+  },
+  {
+    to: '/admin/coupons',
+    icon: 'bi-ticket-perforated',
+    label: 'Купони',
+  },
+  {
+    to: '/admin/users',
+    icon: 'bi-people',
+    label: 'Користувачі'
+  },
+  {
+    to: '/admin/categories',
+    icon: 'bi-folder2-open',
+    label: 'Категорії',
+  },
+  {
+    to: '/admin/sizes',
+    icon: 'bi-arrows-angle-expand',
+    label: 'Розміри',
+  },
+  {
+    to: '/admin/addresses',
+    icon: 'bi-geo-alt',
+    label: 'Адреси',
+  },
+  {
+    to: '/admin/images',
+    icon: 'bi-image',
+    label: 'Фото',
+  },
+  {
+    to: '/admin/administrators',
+    icon: 'bi-shield-lock',
+    label: 'Адміністратори'
   },
 ];
 
