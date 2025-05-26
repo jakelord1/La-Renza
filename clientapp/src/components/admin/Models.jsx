@@ -56,7 +56,7 @@ const Models = () => {
     let processedValue = value;
     
     if (type === 'number') {
-      // For decimal input, allow empty string or valid number
+      
       processedValue = value === '' ? '' : parseFloat(value);
       if (isNaN(processedValue)) processedValue = '';
     }
@@ -165,7 +165,7 @@ const Models = () => {
     }
   };
 
-  // Add/Edit Modal
+  
   const renderModal = (isEdit = false) => (
     <Modal show={isEdit ? showEditModal : showAddModal} onHide={() => isEdit ? setShowEditModal(false) : setShowAddModal(false)}>
       <Modal.Header closeButton>
@@ -377,7 +377,7 @@ const Models = () => {
         )}
       </Card>
       
-      {/* Render Modals */}
+      
       {renderModal()}
       {renderModal(true)}
     </div>

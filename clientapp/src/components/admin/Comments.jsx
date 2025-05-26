@@ -82,8 +82,7 @@ const Comments = () => {
   const [colorIdToModelId, setColorIdToModelId] = useState({}); // { colorId: modelId }
   const [sizeNames, setSizeNames] = useState({}); // { sizeId: name }
   const [imagePaths, setImagePaths] = useState({}); // { imageId: path }
-  const [productMap, setProductMap] = useState({}); // { productId: { colorId, sizeId, ... } }
-  // productNames больше не нужен, теперь используем modelNames
+  const [productMap, setProductMap] = useState({}); // { productId: { colorId, sizeId } }
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
@@ -108,7 +107,6 @@ const Comments = () => {
 
   useEffect(() => {
     setLoading(true);
-    // Mock products remain as before
     const mockProducts = [
       {
         id: 1,
@@ -144,7 +142,6 @@ const Comments = () => {
       }
     ];
     setProducts(mockProducts);
-    // Fetch comments from backend
     fetch(API_URL)
       .then(res => {
         if (!res.ok) throw new Error('Помилка завантаження коментарів');
@@ -152,20 +149,17 @@ const Comments = () => {
       })
       .then(async (data) => {
         setAllComments(data);
-        // Собираем уникальные id
         const userIds = Array.from(new Set(data.map(c => c.userId).filter(Boolean)));
         const productIds = Array.from(new Set(data.map(c => c.productId).filter(Boolean)));
         const imageIds = Array.from(new Set(data.map(c => c.imageId).filter(Boolean)));
-        // Получаем пользователей
         const userReqs = userIds.map(id => fetch(`/api/Users/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const userResults = await Promise.all(userReqs);
         const userMap = {};
         userResults.forEach((u, i) => { if (u && u.fullName) userMap[userIds[i]] = u.fullName; });
         setUserNames(userMap);
-        // Получаем продукты
         const prodReqs = productIds.map(id => fetch(`/api/Products/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const prodResults = await Promise.all(prodReqs);
-        const prodMap = {}; // productId -> { colorId, sizeId }
+        const prodMap = {};
         const colorIds = new Set();
         const sizeIds = new Set();
         prodResults.forEach((p, i) => {
@@ -176,11 +170,10 @@ const Comments = () => {
           }
         });
         setProductMap(prodMap);
-        // Получаем цвета
         const colorIdArr = Array.from(colorIds);
         const colorReqs = colorIdArr.map(id => fetch(`/api/Colors/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const colorResults = await Promise.all(colorReqs);
-        const colorMap = {}; // colorId -> { name, modelId }
+        const colorMap = {};
         const modelIds = new Set();
         colorResults.forEach((c, i) => {
           if (c) {
@@ -190,17 +183,14 @@ const Comments = () => {
         });
         setColorNames(Object.fromEntries(colorIdArr.map((id, i) => [id, colorResults[i]?.name || '-'])));
         setColorIdToModelId(Object.fromEntries(colorIdArr.map((id, i) => [id, colorResults[i]?.modelId || null])));
-        // Получаем размеры
         const sizeIdArr = Array.from(sizeIds);
         const sizeReqs = sizeIdArr.map(id => fetch(`/api/Sizes/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const sizeResults = await Promise.all(sizeReqs);
         setSizeNames(Object.fromEntries(sizeIdArr.map((id, i) => [id, sizeResults[i]?.name || '-'])));
-        // Получаем модели
         const modelIdArr = Array.from(modelIds);
         const modelReqs = modelIdArr.map(id => fetch(`/api/Models/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const modelResults = await Promise.all(modelReqs);
         setModelNames(Object.fromEntries(modelIdArr.map((id, i) => [id, modelResults[i]?.name || '-'])));
-        // Получаем пути к картинкам
         const imageReqs = imageIds.map(id => fetch(`/api/Images/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const imageResults = await Promise.all(imageReqs);
         setImagePaths(Object.fromEntries(imageIds.map((id, i) => [id, imageResults[i]?.path || imageResults[i]?.url || ''])));
@@ -268,7 +258,6 @@ const Comments = () => {
       setRating(5);
       setImage(null);
       setImagePreview(null);
-      // Refresh comments
       const commentsRes = await fetch(API_URL);
       const updatedComments = await commentsRes.json();
       setAllComments(updatedComments);
@@ -292,7 +281,6 @@ const Comments = () => {
         const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error('Не вдалося видалити коментар');
         setAlert({ show: true, type: 'success', message: 'Коментар видалено!' });
-        // Refresh comments
         const commentsRes = await fetch(API_URL);
         const updatedComments = await commentsRes.json();
         setAllComments(updatedComments);
@@ -359,7 +347,6 @@ const Comments = () => {
       setAlert({ show: true, type: 'success', message: 'Коментар оновлено!' });
       setShowEditModal(false);
       setEditingComment(null);
-      // Refresh comments
       const commentsRes = await fetch(API_URL);
       const updatedComments = await commentsRes.json();
       setAllComments(updatedComments);
@@ -482,7 +469,7 @@ const Comments = () => {
   <div key={comment.id} className="d-flex align-items-start gap-3 p-3 rounded-4 shadow-sm bg-light position-relative" style={{minHeight: 90}}>
       <div style={{width:48, height:48, borderRadius:12, background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px #0001', flexShrink:0}}>
         {comment.imageId && imagePaths[comment.imageId] ? (
-          <img src={imagePaths[comment.imageId]} alt="фото відгуку" style={{width: 32, height: 32, objectFit: 'cover', borderRadius: 8}} />
+          <img src={"/api/Images/" + comment.imageId + (imagePaths[comment.imageId].startsWith('/') ? imagePaths[comment.imageId] : '')} alt="фото відгуку" style={{width: 32, height: 32, objectFit: 'cover', borderRadius: 8}} />
         ) : (
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Question_Mark.svg" alt="?" style={{width: 32, height: 32, objectFit: 'contain'}} />
         )}

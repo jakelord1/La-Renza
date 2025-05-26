@@ -164,10 +164,10 @@ const Invoices = () => {
     }
   };
 
-  const getUserName = (userId) => {
-    const user = users.find(u => u.id === userId);
-    return user ? `${user.firstName} ${user.lastName}` : 'Невідомий користувач';
-  };
+  // const getUserName = (userId) => {
+  //   const user = users.find(u => u.id === userId);
+  //   return user ? `${user.firstName} ${user.lastName}` : 'Невідомий користувач';
+  // };
 
   return (
     <div>

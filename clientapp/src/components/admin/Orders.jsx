@@ -105,7 +105,7 @@ const Orders = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Validate form
+    
     const errors = {};
     if (!formData.userId) errors.userId = 'Оберіть клієнта';
     if (!formData.status) errors.status = 'Вкажіть статус';
@@ -168,7 +168,7 @@ const Orders = () => {
         message: 'Статус замовлення успішно оновлено!'
       });
       
-      // Refresh the orders list
+      
       fetchOrders();
     } catch (e) {
       setAlert({ show: true, type: 'danger', message: e.message });
@@ -178,7 +178,7 @@ const Orders = () => {
   };
 
   const handleViewDetails = (order) => {
-    // Make sure we have all the order details
+    
     const orderWithDefaults = {
       ...order,
       items: order.items || [],
@@ -287,7 +287,7 @@ const Orders = () => {
         </Alert>
       )}
       
-      {/* Order Details Modal */}
+      
       <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} size="lg" centered>
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Деталі замовлення #{selectedOrder?.id}</Modal.Title>
@@ -390,7 +390,7 @@ const Orders = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Add/Edit Order Modal */}
+      
       <Modal show={showEditModal} onHide={() => { setShowEditModal(false); setSelectedOrder(null); }} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Редагувати замовлення</Modal.Title>

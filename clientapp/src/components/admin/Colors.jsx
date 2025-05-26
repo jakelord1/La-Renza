@@ -18,7 +18,7 @@ const Colors = () => {
   const [availableImages, setAvailableImages] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [imagePage, setImagePage] = useState(1);
-  const [imagesPerPage] = useState(12); // Увеличиваем количество изображений на странице
+  const [imagesPerPage] = useState(12); 
   
   const [formData, setFormData] = useState({
     name: '',
@@ -29,7 +29,7 @@ const Colors = () => {
   
   const [previewLoading, setPreviewLoading] = useState(false);
 
-  // Fetch available images
+  
   useEffect(() => {
     const fetchAvailableImages = async () => {
       try {
@@ -44,14 +44,14 @@ const Colors = () => {
     fetchAvailableImages();
   }, []);
 
-  // Filter and paginate images
+  
   const filteredImages = searchQuery
     ? availableImages.filter(img => 
         img.path.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : availableImages;
 
-  // Calculate pagination
+  
   const indexOfLastImage = imagePage * imagesPerPage;
   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
   const currentImages = filteredImages.slice(indexOfFirstImage, indexOfLastImage);
@@ -149,12 +149,12 @@ const Colors = () => {
     
     setLoading(true);
     
-    // Find all selected images from available images
+    
     const selectedImages = availableImages.filter(img => 
       formData.selectedImageIds.includes(img.id)
     );
     
-    // Generate photos array with sequential IDs starting from 0
+    
     const photos = selectedImages.map((img, index) => ({
       id: 12345 + index,
       path: img.path
@@ -216,7 +216,7 @@ const Colors = () => {
       name: formData.name,
       modelId: Number(formData.modelId),
       imageId: Number(formData.selectedImageId),
-      photos: [] // Add empty photos array to match the expected format
+      photos: [] 
     };
     
     try {
@@ -245,7 +245,7 @@ const Colors = () => {
     }
   };
 
-  // Pagination logic
+  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = colors.slice(indexOfFirstItem, indexOfLastItem);
@@ -414,7 +414,7 @@ const Colors = () => {
         )}
       </Card>
 
-      {/* Add Color Modal */}
+      
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Додати новий колір</Modal.Title>
@@ -630,7 +630,7 @@ const Colors = () => {
         </Modal.Body>
       </Modal>
 
-      {/* Edit Color Modal */}
+      
       <Modal show={showEditModal} onHide={() => { setShowEditModal(false); setEditingColor(null); }} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Редагувати колір</Modal.Title>

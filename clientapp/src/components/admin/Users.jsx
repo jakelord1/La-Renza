@@ -246,7 +246,7 @@ const Users = () => {
     return pages;
   };
 
-  const maskPassword = (password) => '•'.repeat(Math.max(password.length, 6));
+  // const maskPassword = (password) => '•'.repeat(Math.max(password.length, 6));
 
   return (
     <div>
