@@ -3,6 +3,7 @@ using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.Services;
 using La_Renza.DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Mysqlx.Crud;
 
 namespace La_Renza.Controllers
 {
@@ -38,14 +39,14 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Products/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProduct(int id, ProductDTO product)
+        [HttpPut]
+        public async Task<IActionResult> PutProduct( ProductDTO product)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (await _productService.GetProduct(product.Id) == null)
+            if (!await _productService.ExistsProduct(product.Id))
             {
                 return NotFound();
             }

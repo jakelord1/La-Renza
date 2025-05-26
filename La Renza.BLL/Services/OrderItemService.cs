@@ -79,5 +79,9 @@ namespace La_Renza.BLL.Services
             return mapper.Map<IEnumerable<OrderItem>, IEnumerable<OrderItemDTO>>(await Database.OrderItems.GetAll());
         }
 
+        public async Task<bool> ExistsOrderItem(int id)
+        {
+            return await Database.OrderItems.Exists(id);
+        }
     }
 }

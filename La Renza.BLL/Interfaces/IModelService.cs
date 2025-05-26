@@ -14,5 +14,6 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteModel(int id);
         Task<ModelDTO> GetModel(int id);
         Task<IEnumerable<ModelDTO>> GetModels();
+        Task<bool> ExistsModel(int id);
     }
 }

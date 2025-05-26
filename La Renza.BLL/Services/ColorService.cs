@@ -35,7 +35,8 @@ namespace La_Renza.BLL.Services
         }
         public async Task UpdateColor(ColorDTO colorDto)
         {
-            var photos = _mapper.Map<IEnumerable<ImageDTO>>(colorDto.Photos);
+
+            var photos = _mapper.Map<IEnumerable<Image>>(colorDto.Photos); 
             var color = new Color
             {
                 Id = colorDto.Id,
@@ -51,6 +52,8 @@ namespace La_Renza.BLL.Services
                 throw new Exception();
             await _db.Save();
         }
+
+
         public async Task DeleteColor(int id)
         {
             await _db.Colors.Delete(id);
@@ -65,6 +68,11 @@ namespace La_Renza.BLL.Services
         {
             var colors = await _db.Colors.GetAll();
             return _mapper.Map<IEnumerable<ColorDTO>>(colors);
+        }
+
+        public async Task<bool> ExistsColor(int id)
+        {
+            return await _db.Colors.Exists(id);
         }
     }
 }

@@ -14,5 +14,6 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteCategory(int id);
         Task<CategoryDTO> GetCategory(int id);
         Task<IEnumerable<CategoryDTO>> GetCategories();
+        Task<bool> ExistsCategory(int id);
     }
 }

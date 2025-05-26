@@ -10,10 +10,11 @@ namespace La_Renza.BLL.Services
     public class UserService: IUserService
     {
         IUnitOfWork Database { get; set; }
-
-        public UserService(IUnitOfWork uow)
+        PasswordHasher Hasher { get; set; }
+        public UserService(IUnitOfWork uow, PasswordHasher hash)
         {
             Database = uow;
+            Hasher = hash;
         }
 
         public async Task CreateUser(UserDTO userDto)
@@ -27,7 +28,7 @@ namespace La_Renza.BLL.Services
                 SurName = userDto.SurName,    
                 BirthDate = userDto.BirthDate, 
                 Gender = userDto.Gender,     
-                Password = userDto.Password,  
+                Password = Hasher.HashPassword(userDto.Password),  
                 NewsOn = userDto.NewsOn,     
                 LaRenzaPoints = userDto.LaRenzaPoints
             };
@@ -46,7 +47,7 @@ namespace La_Renza.BLL.Services
                 SurName = userDto.SurName,
                 BirthDate = userDto.BirthDate,
                 Gender = userDto.Gender,
-                Password = userDto.Password,
+                Password = Hasher.HashPassword(userDto.Password),
                 NewsOn = userDto.NewsOn,
                 LaRenzaPoints = userDto.LaRenzaPoints
             };
@@ -74,7 +75,7 @@ namespace La_Renza.BLL.Services
                 SurName = user.SurName,
                 BirthDate = user.BirthDate,
                 Gender = user.Gender,
-                Password = user.Password,
+                Password = Hasher.HashPassword(user.Password),
                 NewsOn = user.NewsOn,
                 LaRenzaPoints = user.LaRenzaPoints
             };

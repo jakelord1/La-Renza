@@ -92,5 +92,10 @@ namespace La_Renza.BLL.Services
             return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(await Database.Addresses.GetAll());
         }
 
+        public async Task<bool> ExistsAddress(int id)
+        {
+            return await Database.Addresses.Exists(id);
+        }
+
     }
 }
