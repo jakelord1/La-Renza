@@ -38,14 +38,14 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/InvoiceInfos
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutInvoiceInfo(int id, InvoiceInfoDTO invoiceInfo)
+        [HttpPut]
+        public async Task<IActionResult> PutInvoiceInfo(InvoiceInfoDTO invoiceInfo)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (await _invoiceInfoService.GetInvoiceInfo(invoiceInfo.Id) == null)
+            if (!await _invoiceInfoService.ExistsInvoiceInfo(invoiceInfo.Id))
             {
                 return NotFound();
             }

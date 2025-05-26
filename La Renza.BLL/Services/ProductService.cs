@@ -33,17 +33,17 @@ namespace La_Renza.BLL.Services
         }
         public async Task UpdateProduct(ProductDTO productDto)
         {
+           
             var product = new Product
             {
+                Id = productDto.Id,
                 ColorId = productDto.ColorId,
                 SizeId = productDto.SizeId,
                 Quantity = productDto.Quantity
             };
-            var Saved = await _db.Products.Get(productDto.Id);
-            if (Saved != null)
-                Saved = product;
-            else
-                throw new Exception();
+            _db.Products.Update(product);
+            await _db.Save();
+
         }
         public async Task DeleteProduct(int id)
         {
@@ -59,6 +59,11 @@ namespace La_Renza.BLL.Services
         {
             var products = await _db.Products.GetAll();
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
+        }
+
+        public async Task<bool> ExistsProduct(int id)
+        {
+            return await _db.Products.Exists(id);
         }
     }
 }

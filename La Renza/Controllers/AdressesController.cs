@@ -39,14 +39,14 @@ namespace La_Renza.Controllers
         }
 
         // PUT: api/Addresses
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAddress(int id, AddressDTO address)
+        [HttpPut]
+        public async Task<IActionResult> PutAddress(AddressDTO address)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (await _addressService.GetAddress(address.Id) == null)
+            if (!await _addressService.ExistsAddress(address.Id))
             {
                 return NotFound();
             }

@@ -14,5 +14,6 @@ namespace La_Renza.BLL.Interfaces
         public Task DeleteComment(int id);
         public Task<CommentDTO> GetComment(int id);
         public Task<IEnumerable<CommentDTO>> GetComments();
+        Task<bool> ExistsComment(int id);
     }
 }
