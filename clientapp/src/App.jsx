@@ -12,7 +12,8 @@ import Catalog from './components/Catalog';
 import Favorites from './components/Favorites';
 import Cart from './components/Cart';
 import PromoBanner from './components/PromoBanner';
-import ProductDetailsWrapper from './components/ProductDetailsWrapper.jsx'; 
+import ProductDetailsWrapper from './components/ProductDetailsWrapper.jsx';
+import NotFound from './components/NotFound';
 import { 
   AdminLogin,
   AdminLayout,
@@ -24,7 +25,8 @@ import {
   Sizes,
   Images,
   Addresses,
-  Orders
+  Orders,
+  DeliveryMethods
 } from './components/admin';
 import Administrators from './components/admin/Administrators';
 import Invoices from './components/admin/Invoices';
@@ -46,6 +48,7 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="categories" element={<Categories />} />
             <Route path="sizes" element={<Sizes />} />
+            <Route path="delivery-methods" element={<DeliveryMethods />} />
             <Route path="addresses" element={<Addresses />} />
             <Route path="images" element={<Images />} />
             <Route path="administrators" element={<Administrators />} />
@@ -66,8 +69,9 @@ function App() {
                   <Route path="/account/*" element={<Account />} />
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/cart" element={<Cart />} />
-                  <Route path="/product/:id" element={<ProductDetailsWrapper />} /> 
+                  <Route path="/product/:id" element={<ProductDetailsWrapper />} />
                   {/* <Route path="/reset-password/:token" element={<ResetPasswordForm />} /> */}
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
               <Footer />

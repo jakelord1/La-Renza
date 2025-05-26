@@ -44,6 +44,11 @@ const navLinks = [
     label: 'Розміри',
   },
   {
+    to: '/admin/delivery-methods',
+    icon: 'bi-truck',
+    label: 'Доставка',
+  },
+  {
     to: '/admin/addresses',
     icon: 'bi-geo-alt',
     label: 'Адреси',
