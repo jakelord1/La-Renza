@@ -42,7 +42,7 @@ namespace La_Renza.Controllers
 
         // PUT: api/Users
         [HttpPut]
-        public async Task<IActionResult> PutUser(UserDTO user)
+        public async Task<IActionResult> PutUser(UserDTO user, [FromServices] PasswordHasher hasher)
         {
             if (!ModelState.IsValid)
             {
@@ -52,7 +52,7 @@ namespace La_Renza.Controllers
             {
                 return NotFound();
             }
-
+            user.Password = hasher.HashPassword(user.Password);
             await _userService.UpdateUser(user);
             return Ok(user);
         }
@@ -67,15 +67,13 @@ namespace La_Renza.Controllers
             }
             user.Password = hasher.HashPassword(user.Password);
             await _userService.CreateUser(user);
-            user.Password = null;
-
             return Ok(user);
         }
 
 
         // POST: api/Users/login
         [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel logon, [FromServices] IPassword passwordService)
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher hasher)
         {
             if (!ModelState.IsValid)
             {
@@ -87,7 +85,7 @@ namespace La_Renza.Controllers
                 return NotFound();
             }
 
-            if (!passwordService.VerifyPassword(logon.Password, user.Password))
+            if (!hasher.VerifyPassword(logon.Password, user.Password))
             {
                 return Unauthorized(new { message = "Invalid login or password" });
             }
@@ -98,10 +96,17 @@ namespace La_Renza.Controllers
                 Response.Cookies.Append("login", logon.Email, option);
             }
             HttpContext.Session.SetString("Login", user.Email);
-            return Ok();
+            return Ok(new { message = "Login successful" });
         }
 
+        [HttpGet]
+        public async Task<ActionResult> Logout()
+        {
+            HttpContext.Session.Clear();
+            Response.Cookies.Delete("login");
+            return Ok(new { message = "Logout successful" });
 
+        }
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
