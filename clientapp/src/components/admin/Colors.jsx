@@ -156,7 +156,7 @@ const Colors = () => {
     
     
     const photos = selectedImages.map((img, index) => ({
-      id: 12345 + index,
+      id: index,
       path: img.path
     }));
     
@@ -205,20 +205,23 @@ const Colors = () => {
   
   const handleUpdateColor = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.modelId || !formData.selectedImageId) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля та оберіть зображення' });
+    if (!formData.name || !formData.modelId) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
       return;
     }
-    
-    setLoading(true);
+    // Якщо не вибрано нове зображення, залишаємо старий imageId
+    let imageIdToSend = formData.selectedImageId;
+    if (!imageIdToSend && editingColor && editingColor.imageId) {
+      imageIdToSend = editingColor.imageId;
+    }
     const requestBody = {
       id: Number(editingColor.id),
       name: formData.name,
       modelId: Number(formData.modelId),
-      imageId: Number(formData.selectedImageId),
-      photos: [] 
+      imageId: imageIdToSend ? Number(imageIdToSend) : null,
+      photos: []
     };
-    
+    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/${editingColor.id}`, {
         method: 'PUT',
@@ -360,27 +363,29 @@ const Colors = () => {
                         </td>
                         <td>{color.modelId}</td>
                         <td>
-                          <div className="d-flex gap-1" style={{maxWidth: '150px', flexWrap: 'wrap'}}>
-                            {color.photos && color.photos.length > 0 ? (
-                              color.photos.map((photo, idx) => (
-                                <img 
-                                  key={idx}
-                                  src={photo.path} 
-                                  alt={`Фото ${idx + 1}`}
-                                  style={{
-                                    width: '30px',
-                                    height: '30px',
-                                    objectFit: 'cover',
-                                    borderRadius: '4px',
-                                    border: '1px solid #dee2e6'
-                                  }}
-                                />
-                              ))
-                            ) : (
-                              <span className="text-muted">Немає</span>
-                            )}
-                          </div>
-                        </td>
+  <div className="d-flex gap-1" style={{maxWidth: '150px', flexWrap: 'wrap'}}>
+    {Array.isArray(color.photos) && color.photos.length > 0 ? (
+      color.photos.map((p, idx) => (
+        p && p.path ? (
+          <img
+            key={idx}
+            src={p.path}
+            alt={`Фото ${idx + 1}`}
+            style={{
+              width: '30px',
+              height: '30px',
+              objectFit: 'cover',
+              borderRadius: '4px',
+              border: '1px solid #dee2e6'
+            }}
+          />
+        ) : null
+      ))
+    ) : (
+      <span className="text-muted">Немає</span>
+    )}
+  </div>
+</td>
                         <td>
                           <div className="d-flex gap-2">
                             <Button 

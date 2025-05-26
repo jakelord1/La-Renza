@@ -397,41 +397,64 @@ const Orders = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubmit} className="row g-3">
-            <div className="col-12">
-              <Form.Label className="mb-1 fw-medium">Клієнт <span className="text-danger">*</span></Form.Label>
-              <Form.Select
-                name="userId"
-                value={formData.userId}
-                onChange={handleInputChange}
-                className={errorFields.userId ? 'is-invalid' : ''}
-                disabled={loading}
-              >
-                <option value="">Виберіть клієнта</option>
-                {users.map(user => (
-                  <option key={user.id} value={user.id}>
-                    {user.name || `Користувач #${user.id}`}
-                  </option>
-                ))}
-              </Form.Select>
-              {errorFields.userId && <div className="invalid-feedback">{errorFields.userId}</div>}
-            </div>
-            <div className="col-12">
-              <Form.Label className="mb-1 fw-medium">Статус <span className="text-danger">*</span></Form.Label>
-              <Form.Select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className={errorFields.status ? 'is-invalid' : ''}
-                disabled={loading}
-              >
-                <option value="">Виберіть статус</option>
-                <option value="Нове">Нове</option>
-                <option value="В обробці">В обробці</option>
-                <option value="Відправлено">Відправлено</option>
-                <option value="Доставлено">Доставлено</option>
-                <option value="Скасовано">Скасовано</option>
-              </Form.Select>
-              {errorFields.status && <div className="invalid-feedback">{errorFields.status}</div>}
+  <div className="col-12">
+    <Form.Label className="mb-1 fw-medium">ID замовлення</Form.Label>
+    <FormControl
+      type="text"
+      name="id"
+      value={formData.id || ''}
+      readOnly
+      disabled
+    />
+  </div>
+  <div className="col-12">
+    <Form.Label className="mb-1 fw-medium">Клієнт <span className="text-danger">*</span></Form.Label>
+<Form.Select
+  name="userId"
+  value={formData.userId || ''}
+  onChange={handleInputChange}
+  className={errorFields.userId ? 'is-invalid' : ''}
+  disabled={loading}
+>
+  <option value="">Оберіть клієнта</option>
+  {users.map(user => (
+    <option key={user.id} value={user.id}>
+      {user.fullName || user.email || `ID: ${user.id}`}
+    </option>
+  ))}
+</Form.Select>
+{errorFields.userId && <div className="invalid-feedback">{errorFields.userId}</div>}
+  </div>
+  <div className="col-12">
+    <Form.Label className="mb-1 fw-medium">Статус <span className="text-danger">*</span></Form.Label>
+<Form.Select
+  name="status"
+  value={formData.status}
+  onChange={e => {
+    const map = {
+      'Нове': 'New',
+      'В процесі': 'InProgress',
+      'Готово': 'Ready',
+      'New': 'New',
+      'InProgress': 'InProgress',
+      'Ready': 'Ready'
+    };
+    handleInputChange({
+      target: {
+        name: 'status',
+        value: map[e.target.value] || e.target.value
+      }
+    });
+  }}
+  className={errorFields.status ? 'is-invalid' : ''}
+  disabled={loading}
+>
+  <option value="">Виберіть статус</option>
+  <option value="Нове">Нове</option>
+  <option value="В процесі">В процесі</option>
+  <option value="Готово">Готово</option>
+</Form.Select>
+{errorFields.status && <div className="invalid-feedback">{errorFields.status}</div>}
             </div>
             <div className="col-12">
               <Form.Label className="mb-1 fw-medium">ID доставки</Form.Label>
@@ -473,21 +496,19 @@ const Orders = () => {
               {errorFields.orderName && <div className="invalid-feedback">{errorFields.orderName}</div>}
             </div>
             <div className="col-12">
-              <Form.Label className="mb-1 fw-medium">Метод оплати</Form.Label>
-              <Form.Select
-                name="paymentMethod"
-                value={formData.paymentMethod || ''}
-                onChange={handleInputChange}
-                className={errorFields.paymentMethod ? 'is-invalid' : ''}
-                disabled={loading}
-              >
-                <option value="">Виберіть спосіб оплати</option>
-                <option value="Готівка">Готівка</option>
-                <option value="Картка">Картка</option>
-                <option value="Онлайн оплата">Онлайн оплата</option>
-              </Form.Select>
-              {errorFields.paymentMethod && <div className="invalid-feedback">{errorFields.paymentMethod}</div>}
-            </div>
+  <Form.Label className="mb-1 fw-medium">Метод оплати (код)</Form.Label>
+  <FormControl
+    type="number"
+    name="paymentMethod"
+    value={formData.paymentMethod || ''}
+    onChange={handleInputChange}
+    className={errorFields.paymentMethod ? 'is-invalid' : ''}
+    disabled={loading}
+    placeholder="Введіть код методу оплати"
+    min="0"
+  />
+  {errorFields.paymentMethod && <div className="invalid-feedback">{errorFields.paymentMethod}</div>}
+</div>
             <div className="col-12">
               <Form.Label className="mb-1 fw-medium">ID методу доставки</Form.Label>
               <FormControl
@@ -562,68 +583,73 @@ const Orders = () => {
                 <div className="text-muted text-center py-5">Замовлень ще немає</div>
               ) : (
                 <Table hover className="align-middle">
-                  <thead>
-                    <tr>
-                      <th>Номер замовлення</th>
-                      <th>Статус</th>
-                      <th>Дата замовлення</th>
-                      <th>Сума</th>
-                      <th>Метод оплати</th>
-                      <th>Метод доставки</th>
-                      <th>Дії</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.map(order => (
-                      <tr key={order.id}>
-                        <td>
-                          <div className="fw-bold">#{order.id}</div>
-                          <div className="text-muted small">Клієнт: {order.userId || 'Невідомо'}</div>
-                        </td>
-                        <td>
-                          <Badge bg={getStatusColor(order.status)}>{order.status}</Badge>
-                        </td>
-                        <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                        <td>
-                          <span className="text-success">{order.totalPrice} ₴</span>
-                        </td>
-                        <td>{order.paymentMethod || 'Невказано'}</td>
-                        <td>{order.deliveryMethodId ? `ID: ${order.deliveryMethodId}` : 'Невказано'}</td>
-                        <td>
-                          <div className="d-flex gap-2">
-                            <Button 
-                              variant="link" 
-                              size="sm" 
-                              onClick={() => handleViewDetails(order)} 
-                              title="Деталі"
-                              className="p-0"
-                            >
-                              <i className="bi bi-eye"></i>
-                            </Button>
-                            <Button 
-                              variant="link" 
-                              size="sm" 
-                              onClick={() => handleEditOrder(order)}
-                              title="Редагувати"
-                              className="p-0"
-                            >
-                              <i className="bi bi-pencil text-primary"></i>
-                            </Button>
-                            <Button 
-                              variant="link" 
-                              size="sm" 
-                              onClick={() => handleUpdateStatus(order.id, 'Скасовано')}
-                              title="Скасувати"
-                              className="p-0"
-                            >
-                              <i className="bi bi-x-lg text-danger"></i>
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Клієнт</th>
+      <th>Статус</th>
+      <th>Назва замовлення</th>
+      <th>Дата створення</th>
+      <th>Дата виконання</th>
+      <th>Метод оплати</th>
+      <th>ID методу доставки</th>
+      <th>ID доставки</th>
+      <th>ID купона</th>
+      <th>Телефон</th>
+      <th>Дії</th>
+    </tr>
+  </thead>
+  <tbody>
+    {currentItems.map(order => (
+      <tr key={order.id}>
+        <td>{order.id}</td>
+        <td>{order.userId || 'Невідомо'}</td>
+        <td><Badge bg={getStatusColor(order.status)}>{
+  order.status === 'New' ? 'Нове' : order.status === 'InProgress' ? 'В процесі' : order.status === 'Ready' ? 'Готово' : order.status
+}</Badge></td>
+        <td>{order.orderName || ''}</td>
+        <td>{order.createdAt ? new Date(order.createdAt).toLocaleString() : ''}</td>
+        <td>{order.completedAt ? new Date(order.completedAt).toLocaleString() : ''}</td>
+        <td>{order.paymentMethod || ''}</td>
+        <td>{order.deliveryMethodId || ''}</td>
+        <td>{order.deliveryId || ''}</td>
+        <td>{order.cuponsId || ''}</td>
+        <td>{order.phonenumber || ''}</td>
+        <td>
+          <div className="d-flex gap-2">
+            <Button 
+              variant="link" 
+              size="sm" 
+              onClick={() => handleViewDetails(order)} 
+              title="Деталі"
+              className="p-0"
+            >
+              <i className="bi bi-eye"></i>
+            </Button>
+            <Button 
+              variant="link" 
+              size="sm" 
+              onClick={() => handleEditOrder(order)}
+              title="Редагувати"
+              className="p-0"
+            >
+              <i className="bi bi-pencil text-primary"></i>
+            </Button>
+            <Button 
+              variant="link" 
+              size="sm" 
+              onClick={() => handleUpdateStatus(order.id, 'Скасовано')}
+              title="Скасувати"
+              className="p-0"
+            >
+              <i className="bi bi-x-lg text-danger"></i>
+            </Button>
+          </div>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</Table>
               )}
             </div>
             {orders.length > itemsPerPage && (
@@ -703,16 +729,12 @@ const Orders = () => {
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'Нове':
+    case 'New':
       return 'primary';
-    case 'В обробці':
+    case 'InProgress':
       return 'warning';
-    case 'Відправлено':
-      return 'info';
-    case 'Доставлено':
+    case 'Ready':
       return 'success';
-    case 'Скасовано':
-      return 'danger';
     default:
       return 'secondary';
   }

@@ -127,8 +127,11 @@ const Models = () => {
     
     setLoading(true);
     try {
-      const modelData = prepareModelData(formData);
-      const res = await fetch(`${API_URL}/${editingModel.id}`, {
+      const modelData = {
+        ...prepareModelData(formData),
+        id: editingModel.id
+      };
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(modelData)

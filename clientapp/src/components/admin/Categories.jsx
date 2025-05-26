@@ -96,7 +96,7 @@ const Categories = () => {
         isGlobal,
         imageId: imageId ? Number(imageId) : null
       };
-      const res = await fetch(`${API_URL}/${editingCategory.id}`, {
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

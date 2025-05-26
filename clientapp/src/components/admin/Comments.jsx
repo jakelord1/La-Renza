@@ -107,41 +107,13 @@ const Comments = () => {
 
   useEffect(() => {
     setLoading(true);
-    const mockProducts = [
-      {
-        id: 1,
-        name: 'Плед "Soft Home"',
-        sku: 'TS-001',
-        sizes: ['S', 'M', 'L'],
-        colors: ['Сірий'],
-        images: [
-          'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-          'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80'
-        ]
-      },
-      {
-        id: 2,
-        name: 'Набір рушників',
-        sku: 'JN-002',
-        sizes: ['M', 'L'],
-        colors: ['Білий'],
-        images: [
-          'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-          'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80'
-        ]
-      },
-      {
-        id: 3,
-        name: 'Декоративна подушка',
-        sku: 'HD-003',
-        sizes: ['S', 'M'],
-        colors: ['Бежевий'],
-        images: [
-          'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80'
-        ]
-      }
-    ];
-    setProducts(mockProducts);
+    fetch('/api/Products')
+  .then(res => {
+    if (!res.ok) throw new Error('Помилка завантаження товарів');
+    return res.json();
+  })
+  .then(data => setProducts(data))
+  .catch(() => setProducts([]));
     fetch(API_URL)
       .then(res => {
         if (!res.ok) throw new Error('Помилка завантаження коментарів');
@@ -639,11 +611,11 @@ const Comments = () => {
           <div className="col-12">
             <label htmlFor="edit-product" className="form-label text-secondary small mb-1">Товар</label>
             <Form.Select id="edit-product" className="form-select-lg custom-select" onChange={handleProductChange} disabled={loading} value={selectedProduct?.id || ''}>
-              <option value="">Оберіть товар</option>
-              {products.map(product => (
-                <option key={product.id} value={product.id}>{product.name}</option>
-              ))}
-            </Form.Select>
+  <option value="">Оберіть товар</option>
+  {products.map(product => (
+    <option key={product.id} value={product.id}>{product.name}</option>
+  ))}
+</Form.Select>
           </div>
           {selectedProduct && (
             <>

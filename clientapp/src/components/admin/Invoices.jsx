@@ -131,7 +131,7 @@ const Invoices = () => {
         houseNumber,
         isDigital: Boolean(isDigital)
       };
-      const res = await fetch(`${API_URL}/${editingInvoice.id}`, {
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

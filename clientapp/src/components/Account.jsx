@@ -5,6 +5,7 @@ import AccountOrders from './account/AccountOrders';
 import AccountAddresses from './account/AccountAddresses';
 import AccountWishlist from './account/AccountWishlist';
 import AccountSettings from './account/AccountSettings';
+import AccountClub from './account/AccountClub';
 
 const Account = () => {
   const location = useLocation();
@@ -17,6 +18,7 @@ const Account = () => {
             <div className="account-sidebar">
               <h4 className="mb-4">Мій кабінет</h4>
               <ul className="nav flex-column">
+                
                 <li className="nav-item">
                   <Link 
                     to="/account" 
@@ -51,6 +53,14 @@ const Account = () => {
                 </li>
                 <li className="nav-item">
                   <Link 
+                    to="/account/club" 
+                    className={`nav-link ${location.pathname === '/account/club' ? 'active' : ''}`}
+                  >
+                    Клуб
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link 
                     to="/account/settings" 
                     className={`nav-link ${location.pathname === '/account/settings' ? 'active' : ''}`}
                   >
@@ -63,6 +73,7 @@ const Account = () => {
           <div className="col-md-9">
             <Routes>
               <Route index element={<AccountProfile />} />
+              <Route path="club" element={<AccountClub />} />
               <Route path="orders" element={<AccountOrders />} />
               <Route path="addresses" element={<AccountAddresses />} />
               <Route path="wishlist" element={<AccountWishlist />} />

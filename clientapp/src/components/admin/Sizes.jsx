@@ -102,7 +102,7 @@ const Sizes = () => {
         categoryId: Number(categoryId),
         name
       };
-      const res = await fetch(`${API_URL}/${editingSize.id}`, {
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

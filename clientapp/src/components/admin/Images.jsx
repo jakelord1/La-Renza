@@ -106,7 +106,7 @@ const Images = () => {
     setLoading(true);
     try {
       const body = { id: editingImage.id, path };
-      const res = await fetch(`${API_URL}/${editingImage.id}`, {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
