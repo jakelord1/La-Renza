@@ -5,6 +5,7 @@ using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
 using Mysqlx.Crud;
+using La_Renza.DAL.Entities;
 
 namespace La_Renza.BLL.Services
 {
@@ -52,6 +53,7 @@ namespace La_Renza.BLL.Services
                 PaymentMethod = orderDto.PaymentMethod,
                 DeliveryMethodId = orderDto.DeliveryMethodId,
                 Phonenumber = orderDto.Phonenumber
+
             };
             Database.Orders.Update(order);
             await Database.Save();
@@ -80,16 +82,30 @@ namespace La_Renza.BLL.Services
                 CompletedAt = order.CompletedAt,
                 PaymentMethod = order.PaymentMethod,
                 DeliveryMethodId = order.DeliveryMethodId,
-                Phonenumber = order.Phonenumber
+                Phonenumber = order.Phonenumber,
+                User = order.User?.Email
             };
         }
 
+        public async Task<IEnumerable<OrderDTO>> GetOrdersByUserId(int userId)
+        {
+            var orders = await Database.Orders.GetAll();
+            var userOrders = orders.Where(o => o.UserId == userId);
+
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<DAL.Entities.Order, OrderDTO>()
+                .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
+            var mapper = new Mapper(config);
+
+            return mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(userOrders);
+        }
 
         public async Task<IEnumerable<OrderDTO>> GetOrders()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DAL.Entities.Order, OrderDTO>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<DAL.Entities.Order, OrderDTO>()
+            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
+
         }
 
 

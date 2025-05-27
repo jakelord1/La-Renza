@@ -82,6 +82,18 @@ namespace La_Renza.BLL.Services
                 User = address.User?.Email
             };
         }
+        public async Task<IEnumerable<AddressDTO>> GetAddressesByUserId(int userId)
+        {
+            var addresses = await Database.Addresses.GetAll();
+            var userAddresses = addresses.Where(a => a.UserId == userId);
+
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>()
+                .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
+            var mapper = new Mapper(config);
+
+            return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(userAddresses);
+        }
+
 
 
         public async Task<IEnumerable<AddressDTO>> GetAddresses()

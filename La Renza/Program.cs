@@ -24,14 +24,12 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(10); 
-    options.Cookie.Name = "Session"; 
-
+    options.Cookie.Name = "Session";
 }); 
 
 builder.Services.AddLaRenzaDAL(builder.Configuration.GetConnectionString("DefaultConnection")!);
 builder.Services.AddLaRenzaBLL();
 var app = builder.Build();
-app.UseSession();
 
 if (app.Environment.IsDevelopment())
 {
@@ -42,6 +40,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors();
+
+app.UseSession();
 
 app.UseAuthorization();
 

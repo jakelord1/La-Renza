@@ -70,6 +70,29 @@ namespace La_Renza.Controllers
             return Ok(user);
         }
 
+        // POST: api/Users/changePassword
+        [HttpPost("changePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model, [FromServices] PasswordHasher hasher)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            string? email = HttpContext.Session.GetString("Login");
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!hasher.VerifyPassword(model.CurrentPassword, user.Password))
+                return Unauthorized(new { message = "Current password is incorrect." });
+
+            user.Password = hasher.HashPassword(model.NewPassword);
+            await _userService.UpdateUser(user);
+
+            return Ok(new { message = "Password changed successfully." });
+        }
 
         // POST: api/Users/login
         [HttpPost("login")]
@@ -94,12 +117,14 @@ namespace La_Renza.Controllers
                 CookieOptions option = new CookieOptions();
                 option.Expires = DateTime.Now.AddDays(10);
                 Response.Cookies.Append("login", logon.Email, option);
+
             }
             HttpContext.Session.SetString("Login", user.Email);
+            HttpContext.Session.SetString("UserName", user.FullName);
             return Ok(new { message = "Login successful" });
         }
 
-        [HttpGet]
+        [HttpGet("logout")]
         public async Task<ActionResult> Logout()
         {
             HttpContext.Session.Clear();
@@ -107,6 +132,49 @@ namespace La_Renza.Controllers
             return Ok(new { message = "Logout successful" });
 
         }
+
+        [HttpGet("accountProfile")]
+        public async Task<ActionResult> GetUserInfo()
+        {
+            string email = HttpContext.Session.GetString("Login");
+           
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
+        [HttpGet("accountAddresses")]
+        public async Task<ActionResult> GetUserAddresses([FromServices] IAddressService addressService)
+        {
+            string email = HttpContext.Session.GetString("Login");
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var addresses = await addressService.GetAddressesByUserId(user.Id);
+            return Ok(addresses);
+        }
+
+        [HttpGet("accountOrders")]
+        public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)
+        {
+            string email = HttpContext.Session.GetString("Login");
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var orders = await orderService.GetOrdersByUserId(user.Id);
+            return Ok(orders);
+        }
+
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
