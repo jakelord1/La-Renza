@@ -11,10 +11,12 @@ namespace La_Renza.BLL.Services
     {
         IUnitOfWork Database { get; set; }
         PasswordHasher Hasher { get; set; }
-        public UserService(IUnitOfWork uow, PasswordHasher hash)
+        private readonly IMapper _mapper;
+        public UserService(IUnitOfWork uow, PasswordHasher hash, IMapper mapper)
         {
             Database = uow;
             Hasher = hash;
+            _mapper = mapper;
         }
 
         public async Task CreateUser(UserDTO userDto)
@@ -24,13 +26,15 @@ namespace La_Renza.BLL.Services
                 Id = userDto.Id,
                 Email = userDto.Email,
                 PhoneNumber = userDto.PhoneNumber,
-                FullName = userDto.FullName,  
-                SurName = userDto.SurName,    
-                BirthDate = userDto.BirthDate, 
-                Gender = userDto.Gender,     
-                Password = Hasher.HashPassword(userDto.Password),  
-                NewsOn = userDto.NewsOn,     
-                LaRenzaPoints = userDto.LaRenzaPoints
+                FullName = userDto.FullName,
+                SurName = userDto.SurName,
+                BirthDate = userDto.BirthDate,
+                Gender = userDto.Gender,
+                Password = Hasher.HashPassword(userDto.Password),
+                NewsOn = userDto.NewsOn,
+                Addresses = new List<Address>(),
+                Invoices = new List<InvoiceInfo>()
+                
             };
             await Database.Users.Create(user);
             await Database.Save();
@@ -49,7 +53,8 @@ namespace La_Renza.BLL.Services
                 Gender = userDto.Gender,
                 Password = Hasher.HashPassword(userDto.Password),
                 NewsOn = userDto.NewsOn,
-                LaRenzaPoints = userDto.LaRenzaPoints
+                Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses),
+                Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices)
             };
             Database.Users.Update(user);
             await Database.Save();
@@ -66,6 +71,7 @@ namespace La_Renza.BLL.Services
             var user = await Database.Users.Get(id);
             if (user == null)
                 throw new ValidationException("Wrong user!", "");
+
             return new UserDTO
             {
                 Id = user.Id,
@@ -75,16 +81,17 @@ namespace La_Renza.BLL.Services
                 SurName = user.SurName,
                 BirthDate = user.BirthDate,
                 Gender = user.Gender,
-                Password = Hasher.HashPassword(user.Password),
+                Password = user.Password,
                 NewsOn = user.NewsOn,
-                LaRenzaPoints = user.LaRenzaPoints
+                LaRenzaPoints = user.LaRenzaPoints,
+                Addresses = _mapper.Map<List<AddressDTO>>(user.Addresses),
+                Invoices = _mapper.Map<List<InvoiceInfoDTO>>(user.Invoices)
             };
         }
 
         public async Task<IEnumerable<UserDTO>> GetUsers()
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<User, UserDTO>()).CreateMapper();
-            return mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(await Database.Users.GetAll());
+            return _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(await Database.Users.GetAll());
         }
 
         public async Task<bool> ExistsUser(int id)

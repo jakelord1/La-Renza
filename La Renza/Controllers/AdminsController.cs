@@ -1,4 +1,5 @@
-﻿using La_Renza.BLL.DTO;
+﻿using La_Renza.BLL;
+using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.Services;
 using La_Renza.DAL.Entities;
@@ -12,6 +13,7 @@ namespace La_Renza.Controllers
     public class AdminsController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly PasswordHasher Hash;
         public AdminsController (IAdminService adminService)
         {
             _adminService = adminService;
@@ -36,10 +38,35 @@ namespace La_Renza.Controllers
             }
             return new ObjectResult(admin);
         }
+        // POST: api/Users/login
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            AdminDTO user = await _adminService.GetAdminByLogin(logon.Email);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
+            if (!passwordService.VerifyPassword(logon.Password, user.Password))
+            {
+                return Unauthorized(new { message = "Invalid login or password" });
+            }
+            if (logon.RememberMe)
+            {
+                CookieOptions option = new CookieOptions();
+                Response.Cookies.Append("login", logon.Email, option);
+            }
+            HttpContext.Session.SetString("Login", user.Email);
+            return Ok();
+        }
         // PUT: api/Admins
         [HttpPut]
-        public async Task<IActionResult> PutAdmin( AdminDTO admin)
+        public async Task<IActionResult> PutAdmin(AdminDTO admin)
         {
             if (!ModelState.IsValid)
             {

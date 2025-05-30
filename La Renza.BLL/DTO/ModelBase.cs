@@ -1,5 +1,4 @@
-﻿using La_Renza.DAL.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    public class ModelDTO
+    public class ModelBase
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -17,9 +16,5 @@ namespace La_Renza.BLL.DTO
         public decimal Price { get; set; }
         public decimal? Rate { get; set; }
         public string? Bage { get; set; }
-
-        public ICollection<ColorDTO> Colors { get; set; }
-        public ICollection<ImageDTO> Photos { get; set; }
-        public int CategoryId { get; set; }
     }
 }

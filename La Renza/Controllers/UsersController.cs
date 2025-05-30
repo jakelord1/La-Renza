@@ -71,24 +71,10 @@ namespace La_Renza.Controllers
 
             return Ok(user);
         }
-        [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            UserDTO user = await _userService.GetUserByLogin(logon.Email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-
 
         // POST: api/Users/login
         [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel logon, [FromServices] IPassword passwordService)
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
         {
             if (!ModelState.IsValid)
             {

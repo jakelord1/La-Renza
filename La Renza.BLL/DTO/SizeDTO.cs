@@ -12,5 +12,6 @@ namespace La_Renza.BLL.DTO
         public int? CategoryId {  get; set; }
         public string Name { get; set; }
 
+        public CategoryDTO Category { get; set; }
     }
 }

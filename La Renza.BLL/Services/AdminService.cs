@@ -10,6 +10,7 @@ namespace La_Renza.BLL.Services
     public class AdminService : IAdminService
     {
         IUnitOfWork Database { get; set; }
+        PasswordHasher Hash { get; set; }
 
         public AdminService(IUnitOfWork uow)
         {
@@ -22,7 +23,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = adminDto.Id,
                 Email = adminDto.Email,
-                Password = adminDto.Password,
+                Password =  Hash.HashPassword(adminDto.Password),
                 Identifier = adminDto.Identifier
             };
             await Database.Admins.Create(admin);
@@ -35,7 +36,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = adminDto.Id,
                 Email = adminDto.Email,
-                Password = adminDto.Password,
+                Password = Hash.HashPassword(adminDto.Password),
                 Identifier = adminDto.Identifier
             };
             Database.Admins.Update(admin);
@@ -66,6 +67,19 @@ namespace La_Renza.BLL.Services
         {
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<Admin, AdminDTO>()).CreateMapper();
             return mapper.Map<IEnumerable<Admin>, IEnumerable<AdminDTO>>(await Database.Admins.GetAll());
+        }
+        public async Task<AdminDTO> GetAdminByLogin(string login)
+        {
+            var user = await Database.Admins.Get(login);
+            if (user == null)
+                throw new ValidationException("Wrong user!", "");
+
+            return new AdminDTO
+            {
+                Email = user.Email,
+                Identifier = user.Identifier,
+                Password = user.Password,
+            };
         }
 
         public async Task<bool> ExistsAdmin(int id)

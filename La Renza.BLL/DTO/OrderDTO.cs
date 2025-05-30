@@ -16,6 +16,8 @@ namespace La_Renza.BLL.DTO
         public int PaymentMethod { get; set; }
         public int DeliveryMethodId { get; set; }
         public string Phonenumber { get; set; }
+
+        public List<OrderItemDTO> orderItems { get; set; }
     }
  
 }

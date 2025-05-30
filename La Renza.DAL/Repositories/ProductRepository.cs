@@ -18,7 +18,11 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Product>> GetAll()
         {
-            return await db.Product.ToListAsync();
+            return await db.Product
+                .Include(p => p.Color)
+                .Include(p => p.Size)
+                .Include(p => p.Comments)
+                .ToListAsync();
         }
 
         public async Task<Product> Get(int id)
@@ -31,6 +35,9 @@ namespace La_Renza.DAL.Repositories
         {
             var products = await db.Product
                                    .Where(p => p.Color.Name == color)
+                                   .Include(p => p.Color)
+                .Include(p => p.Size)
+                .Include(p => p.Comments)
                                    .ToListAsync();
             Product? product = products?.FirstOrDefault();
             return product!;
@@ -38,6 +45,9 @@ namespace La_Renza.DAL.Repositories
         public async Task<Product> GetBySize(string size)
         {
             var products = await db.Product
+                .Include(p => p.Color)
+                .Include(p => p.Size)
+                .Include(p => p.Comments)
                                    .Where(p => p.Size.Name == size)
                                    .ToListAsync();
             Product? product = products?.FirstOrDefault();
@@ -60,8 +70,6 @@ namespace La_Renza.DAL.Repositories
             if (product != null)
                 db.Product.Remove(product);
         }
-
-
         public async Task<bool> Exists(int id)
         {
             return await db.Product.AnyAsync(product => product.Id == id);

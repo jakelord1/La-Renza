@@ -31,7 +31,7 @@ namespace La_Renza.Controllers
             {
                 return NotFound();
             }
-            return Ok();
+            return Ok(image);
         }
 
         // PUT: api/image/5

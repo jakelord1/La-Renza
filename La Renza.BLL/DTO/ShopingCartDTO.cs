@@ -10,8 +10,7 @@ namespace La_Renza.BLL.DTO
         public int ProductId { get; set; }
         public int Quantity { get; set; }
 
-        public string User { get; set; }
-        public string Product { get; set; }
+        public ProductDTO Product { get; set; }
     }
 
 }

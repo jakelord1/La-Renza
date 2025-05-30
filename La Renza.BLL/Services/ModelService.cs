@@ -17,6 +17,7 @@ namespace La_Renza.BLL.Services
         }
         public async Task CreateModel(ModelDTO modelDto)
         {
+            var photos = _mapper.Map<IEnumerable<Image>>(modelDto.Photos);
             var model = new Model
             {
                 Name = modelDto.Name,
@@ -25,7 +26,8 @@ namespace La_Renza.BLL.Services
                 MaterialInfo = modelDto.MaterialInfo,
                 Id = modelDto.Id,
                 Rate = modelDto.Rate,
-                Bage = modelDto.Bage
+                Bage = modelDto.Bage,
+                Photos = _mapper.Map<ICollection<Image>>(photos)
             };
 
             await _db.Models.Create(model);
@@ -33,7 +35,7 @@ namespace La_Renza.BLL.Services
         }
         public async Task UpdateModel(ModelDTO modelDto)
         {
-            
+            var photos = _mapper.Map<IEnumerable<Image>>(modelDto.Photos);
             var model = new Model
             {
                 Id = modelDto.Id,
@@ -42,7 +44,8 @@ namespace La_Renza.BLL.Services
                 StartDate = modelDto.StartDate,
                 MaterialInfo = modelDto.MaterialInfo,
                 Rate = modelDto.Rate,
-                Bage = modelDto.Bage
+                Bage = modelDto.Bage,
+                Photos = _mapper.Map<ICollection<Image>>(photos)
             };
             _db.Models.Update(model);
             await _db.Save();

@@ -18,6 +18,9 @@ namespace La_Renza.DAL.Repositories
         public async Task<IEnumerable<Category>> GetAll()
         {
             return await db.Category
+                .Include(c => c.Models)
+                .Include(c => c.CategoryImage)
+                .Include(c => c.SizeOptions)
              .ToListAsync();
         }
 
@@ -25,6 +28,8 @@ namespace La_Renza.DAL.Repositories
         {
             var categories = await db.Category
              .Include(c => c.CategoryImage)
+             .Include(c => c.Models)
+             .Include(c => c.SizeOptions)
              .Where(a => a.Id == id).ToListAsync();
             Category? category = categories?.FirstOrDefault();
             return category!;
@@ -33,7 +38,9 @@ namespace La_Renza.DAL.Repositories
         public async Task<Category> Get(string name)
         {         
             var categories = await db.Category
+                .Include(c => c.Models)
                 .Include(c => c.CategoryImage)
+                .Include(c => c.SizeOptions)
                 .Where(a => a.Name == name).ToListAsync();
             Category? category = categories?.FirstOrDefault();
             return category!;
