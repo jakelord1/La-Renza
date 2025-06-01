@@ -807,7 +807,7 @@ body {
   box-shadow: 0 4px 32px rgba(162,89,230,0.07);
   border: none;
   padding: 32px 0 24px 0;
-  min-height: 88vh;
+  min-height: 70vh;
   max-width: 260px;
   width: 100%;
   position: sticky;
@@ -895,4 +895,22 @@ body {
 .modal-narrow .modal-dialog {
   max-width: 480px;
   width: 100%;
+}
+
+/* ==== Admin Sidebar Custom Scrollbar ==== */
+.admin-sidebar-scroll {
+  max-height: 550px; /* для 9 кнопок меню */
+  overflow-y: auto;
+  width: 100%;
+  padding-right: 8px;
+}
+.admin-sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--purple, #6f42c1);
+  border-radius: 4px;
+}
+.admin-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
