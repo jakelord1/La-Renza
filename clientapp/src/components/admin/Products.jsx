@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Image, Row, Col } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/Products';
-const COLORS_API_URL = 'https://localhost:7071/api/Colors';
-const SIZES_API_URL = 'https://localhost:7071/api/Sizes';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Products`;
+const COLORS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Colors`;
+const SIZES_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Sizes`;
 
 const Products = () => {
   const [products, setProducts] = useState([]);

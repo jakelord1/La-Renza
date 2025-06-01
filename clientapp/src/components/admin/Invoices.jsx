@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Spinner, Alert, Table, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/InvoiceInfos';
-const USERS_API_URL = 'https://localhost:7071/api/Users';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/InvoiceInfos`;
+const USERS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);

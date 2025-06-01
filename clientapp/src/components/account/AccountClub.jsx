@@ -110,7 +110,6 @@ function CouponCarousel({ coupons }) {
             </button>
           </div>
         ))}
-        {/* Кнопка справа як окремий елемент */}
         <div
           style={{
             minWidth:280,
@@ -169,6 +168,7 @@ function CouponCarousel({ coupons }) {
 
 
 const AccountClub = () => {
+  const [showClubModal, setShowClubModal] = useState(false);
   return (
     <div className="account-content">
       <h2 className="mb-4">Акаунт учасника клубу</h2>
@@ -201,9 +201,29 @@ const AccountClub = () => {
       </div>
       <CouponCarousel coupons={coupons} />
       <div className="d-flex justify-content-end mt-4" style={{gap:32}}>
-        <a href="#" style={{color:'var(--purple, #7c3aed)',fontWeight:600,textDecoration:'none'}}>ІСТОРІЯ БАЛІВ</a>
-        <a href="#" style={{color:'var(--purple, #7c3aed)',fontWeight:600,textDecoration:'none'}}>ПРО La'Renza CLUB</a>
+        {/* <a href="#" style={{color:'var(--purple, #7c3aed)',fontWeight:600,textDecoration:'none'}}>ІСТОРІЯ БАЛІВ</a> */}
+        <a href="#" onClick={e => {e.preventDefault(); setShowClubModal(true);}} style={{color:'var(--purple, #7c3aed)',fontWeight:600,textDecoration:'none'}}>ПРО La'Renza CLUB</a>
       </div>
+
+      {showClubModal && (
+        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.4)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{background:'#fff',borderRadius:18,maxWidth:440,width:'90%',padding:'32px 24px 24px 24px',boxShadow:'0 8px 32px rgba(0,0,0,0.15)',position:'relative'}}>
+            <button onClick={()=>setShowClubModal(false)} style={{position:'absolute',top:0,right:7,fontSize:26,background:'none',border:'none',cursor:'pointer',color:'#222',zIndex:2}} aria-label="Закрити">&times;</button>
+
+            <div style={{marginTop:32}}>
+              <img src="/images/larenza-club-logo.png" alt="LaRenza Club" style={{maxWidth:200,display:'block',margin:'0 auto 18px auto'}}/>
+              <div style={{fontWeight:700,fontSize:20,color:'#7c3aed',marginBottom:12,textAlign:'center'}}>З нами ви завжди виграєте</div>
+              <div style={{fontSize:15,color:'#222',marginBottom:18,textAlign:'center'}}>
+                LaRenza Club – це програма лояльності, заснована на співпраці. Ми цінуємо різні форми вашої участі і пропонуємо швидкі, конкретні вигоди з першої взаємодії. Участь у програмі дає вам легкий доступ до привабливих переваг, спеціальних пропозицій та акцій тільки для членів клубу.
+              </div>
+              <div style={{display:'flex',justifyContent:'center',gap:12,marginBottom:12}}>
+                <div style={{background:'#f3eafe',borderRadius:20,padding:'8px 18px',fontWeight:600,fontSize:15,color:'#7c3aed'}}>150 балів на старт</div>
+                <div style={{background:'#f3eafe',borderRadius:20,padding:'8px 18px',fontWeight:600,fontSize:15,color:'#7c3aed'}}>10 UAH = 1 бал</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

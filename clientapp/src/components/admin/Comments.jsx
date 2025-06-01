@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Spinner, Alert, Table, Modal, Pagination } from 'react-bootstrap';
-const API_URL = 'https://localhost:7071/api/Comments';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Comments`;
 
 function StarRating({ value, onChange, disabled }) {
   return (

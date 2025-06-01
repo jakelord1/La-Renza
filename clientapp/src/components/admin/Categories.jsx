@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Accordion } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/Categories';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories`;
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Spinner, Alert, Table, Modal, Pagination, Badge, FormControl } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/Orders';
-const USERS_API_URL = 'https://localhost:7071/api/Users';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Orders`;
+const USERS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);

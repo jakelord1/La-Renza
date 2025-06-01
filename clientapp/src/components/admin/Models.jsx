@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Badge } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/Models';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Models`;
 
 const Models = () => {
   const [models, setModels] = useState([]);

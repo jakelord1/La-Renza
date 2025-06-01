@@ -3,7 +3,7 @@ import { Card, Button, Spinner, Alert, Table, Badge, Pagination, Modal, Form, In
 import Image from 'react-bootstrap/Image';
 import { Link } from 'react-router-dom';
 
-const API_URL = 'https://localhost:7071/api/Colors';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Colors`;
 
 const Colors = () => {
   const [colors, setColors] = useState([]);
@@ -33,7 +33,7 @@ const Colors = () => {
   useEffect(() => {
     const fetchAvailableImages = async () => {
       try {
-        const res = await fetch('https://localhost:7071/api/Images');
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Images`);
         if (!res.ok) throw new Error('Помилка завантаження зображень');
         const data = await res.json();
         setAvailableImages(data);
