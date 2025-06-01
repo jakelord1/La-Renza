@@ -82,8 +82,7 @@ namespace La_Renza.BLL.Services
                 CompletedAt = order.CompletedAt,
                 PaymentMethod = order.PaymentMethod,
                 DeliveryMethodId = order.DeliveryMethodId,
-                Phonenumber = order.Phonenumber,
-                User = order.User?.Email
+                Phonenumber = order.Phonenumber
             };
         }
 
