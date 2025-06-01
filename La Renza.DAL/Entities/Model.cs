@@ -17,7 +17,8 @@ namespace La_Renza.DAL.Entities
         public string? Bage { get; set; }
         public decimal Price { get; set; }
 
-        public ICollection<Category> Categories { get; set; }
+        public int CategoryId { get; set; }
         public ICollection<Color> Colors { get; set; }
+        public ICollection<Image> Photos { get; set; }
     }
 }

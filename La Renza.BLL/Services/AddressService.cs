@@ -20,7 +20,6 @@ namespace La_Renza.BLL.Services
         {
             var adress = new Address
             {
-
                 Id = adressDto.Id,
                 UserId = adressDto.UserId,
                 SecondName = adressDto.SecondName,
@@ -32,6 +31,7 @@ namespace La_Renza.BLL.Services
                 AdditionalInfo = adressDto.AdditionalInfo,
                 PhoneNumber = adressDto.PhoneNumber
             };
+
             await Database.Addresses.Create(adress);
             await Database.Save();
         }
@@ -40,7 +40,6 @@ namespace La_Renza.BLL.Services
         {
             var adress = new Address
             {
-
                 Id = adressDto.Id,
                 UserId = adressDto.UserId,
                 SecondName = adressDto.SecondName,
@@ -78,8 +77,7 @@ namespace La_Renza.BLL.Services
                 HouseNum = address.HouseNum,
                 PostIndex = address.PostIndex,
                 AdditionalInfo = address.AdditionalInfo,
-                PhoneNumber = address.PhoneNumber,
-                User = address.User?.Email
+                PhoneNumber = address.PhoneNumber
             };
         }
         public async Task<IEnumerable<AddressDTO>> GetAddressesByUserId(int userId)
@@ -98,8 +96,7 @@ namespace La_Renza.BLL.Services
 
         public async Task<IEnumerable<AddressDTO>> GetAddresses()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>());
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(await Database.Addresses.GetAll());
         }

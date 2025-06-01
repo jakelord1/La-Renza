@@ -17,7 +17,7 @@ namespace La_Renza.BLL.DTO
         public int? DeliveryMethodId { get; set; }
         public string Phonenumber { get; set; }
 
-        public string? User { get; set; }
+        public List<OrderItemDTO> orderItems { get; set; }
     }
  
 }

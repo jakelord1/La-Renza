@@ -15,7 +15,5 @@ namespace La_Renza.BLL.DTO
         public string PostIndex { get; set; }
         public string AdditionalInfo { get; set; }
         public string PhoneNumber { get; set; }
-        public string? User { get; set; }
-
     }
 }

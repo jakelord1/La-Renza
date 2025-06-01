@@ -6,13 +6,10 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    public class ColorDTO
+    public class SizeBase
     {
         public int Id { get; set; }
+        public int? CategoryId { get; set; }
         public string Name { get; set; }
-        public int ImageId { get; set; }
-        public ImageDTO Image { get; set; }
-        public ICollection<ImageDTO> Photos { get; set; }
-        public int ModelId { get; set; }
     }
 }

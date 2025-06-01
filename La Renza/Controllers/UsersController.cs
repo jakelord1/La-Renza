@@ -70,9 +70,9 @@ namespace La_Renza.Controllers
             return Ok(user);
         }
 
-        // POST: api/Users/changePassword
-        [HttpPost("changePassword")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model, [FromServices] PasswordHasher hasher)
+        // POST: api/Users/login
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -85,30 +85,7 @@ namespace La_Renza.Controllers
                 return NotFound();
             }
 
-            if (!hasher.VerifyPassword(model.CurrentPassword, user.Password))
-                return Unauthorized(new { message = "Current password is incorrect." });
-
-            user.Password = hasher.HashPassword(model.NewPassword);
-            await _userService.UpdateUser(user);
-
-            return Ok(new { message = "Password changed successfully." });
-        }
-
-        // POST: api/Users/login
-        [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher hasher)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            UserDTO user = await _userService.GetUserByLogin(logon.Email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            if (!hasher.VerifyPassword(logon.Password, user.Password))
+            if (!passwordService.VerifyPassword(logon.Password, user.Password))
             {
                 return Unauthorized(new { message = "Invalid login or password" });
             }
