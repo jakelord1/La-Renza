@@ -10,12 +10,10 @@ namespace La_Renza.BLL.Services
     public class UserService: IUserService
     {
         IUnitOfWork Database { get; set; }
-        PasswordHasher Hasher { get; set; }
         private readonly IMapper _mapper;
         public UserService(IUnitOfWork uow, PasswordHasher hash, IMapper mapper)
         {
             Database = uow;
-            Hasher = hash;
             _mapper = mapper;
         }
 
@@ -30,7 +28,7 @@ namespace La_Renza.BLL.Services
                 SurName = userDto.SurName,
                 BirthDate = userDto.BirthDate,
                 Gender = userDto.Gender,
-                Password = Hasher.HashPassword(userDto.Password),
+                Password = userDto.Password,
                 NewsOn = userDto.NewsOn,
                 Addresses = new List<Address>(),
                 Invoices = new List<InvoiceInfo>()
@@ -52,7 +50,7 @@ namespace La_Renza.BLL.Services
             user.SurName = userDto.SurName;
             user.BirthDate = userDto.BirthDate;
             user.Gender = userDto.Gender;
-            user.Password = Hasher.HashPassword(userDto.Password);
+            user.Password = userDto.Password;
             user.NewsOn = userDto.NewsOn;
 
             user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);

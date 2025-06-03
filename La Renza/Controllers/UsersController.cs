@@ -18,6 +18,17 @@ namespace La_Renza.Controllers
         {
             _userService = userService;
         }
+        private string GetCurrentUserEmail()
+        {
+            string? email = HttpContext.Session.GetString("Login");
+
+            if (string.IsNullOrEmpty(email) && Request.Cookies.ContainsKey("login"))
+            {
+                email = Request.Cookies["login"];
+            }
+
+            return email;
+        }
 
         // GET: api/Users
         [HttpGet]
@@ -77,15 +88,24 @@ namespace La_Renza.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-
             UserDTO user = await _userService.GetUserByLogin(logon.Email);
+            Console.WriteLine($"User email from DB: {user.Email}");
+            Console.WriteLine($"Login email: {logon.Email}");
+
             if (user == null)
             {
                 return NotFound();
             }
-
+            Console.WriteLine(
+    BCrypt.Net.BCrypt.Verify("marya101204", "$2a$11$f30PXVTgk6OYzkKfvB4HO.zIx2S5uNJ1.Ffw8NFfcn030PxzeocgC")
+);
             if (!passwordService.VerifyPassword(logon.Password, user.Password))
             {
+                Console.WriteLine($"Password hash from DB: '{user.Password}'");
+                Console.WriteLine($"Length of password hash: {user.Password?.Length}");
+                Console.WriteLine($"Input password: '{logon.Password}'");
+                Console.WriteLine($"Input password length: {logon.Password?.Length}");
+
                 return Unauthorized(new { message = "Invalid login or password" });
             }
             if (logon.RememberMe)
@@ -114,7 +134,10 @@ namespace La_Renza.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string? email = HttpContext.Session.GetString("Login");
+            //string? email = HttpContext.Session.GetString("Login");
+            string email = GetCurrentUserEmail();
+            if (email == null)
+                return Unauthorized(new { message = "User not logged in." });
 
             UserDTO user = await _userService.GetUserByLogin(email);
             if (user == null)
@@ -137,8 +160,11 @@ namespace La_Renza.Controllers
         [HttpGet("accountProfile")]
         public async Task<ActionResult> GetUserInfo()
         {
-            string email = HttpContext.Session.GetString("Login");
-           
+            //string email = HttpContext.Session.GetString("Login");
+            string email = GetCurrentUserEmail();
+            if (email == null)
+                return Unauthorized(new { message = "User not logged in." });
+
             UserDTO user = await _userService.GetUserByLogin(email);
             if (user == null)
             {
@@ -151,7 +177,10 @@ namespace La_Renza.Controllers
         [HttpGet("accountAddresses")]
         public async Task<ActionResult> GetUserAddresses([FromServices] IAddressService addressService)
         {
-            string email = HttpContext.Session.GetString("Login");
+            //string email = HttpContext.Session.GetString("Login");
+            string? email = GetCurrentUserEmail();
+            if (email == null)
+                return Unauthorized(new { message = "User not logged in." });
 
             UserDTO user = await _userService.GetUserByLogin(email);
             if (user == null)
@@ -165,7 +194,10 @@ namespace La_Renza.Controllers
         [HttpGet("accountOrders")]
         public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)
         {
-            string email = HttpContext.Session.GetString("Login");
+            //string email = HttpContext.Session.GetString("Login");
+            string? email = GetCurrentUserEmail();
+            if (email == null)
+                return Unauthorized(new { message = "User not logged in." });
 
             UserDTO user = await _userService.GetUserByLogin(email);
             if (user == null)
