@@ -243,6 +243,39 @@ namespace La_Renza.Controllers
             await _addressService.CreateAddress(addressDto);
             return Ok();
         }
+        [HttpPut("accountAddresses/{id}")]
+        public async Task<IActionResult> UpdateUserAddress(int id, [FromBody] AccountAddressModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            string email = GetCurrentUserEmail();
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new { message = "User not logged in." });
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            var addresses = await _addressService.GetAddressesByUserId(user.Id);
+            var newAddress = addresses.FirstOrDefault(a => a.Id == id);
+
+            if (newAddress == null)
+                return NotFound(new { message = "Address not found." });
+
+            newAddress.SecondName = model.SecondName;
+            newAddress.FullName = model.FullName;
+            newAddress.Street = model.Street;
+            newAddress.City = model.City;
+            newAddress.HouseNum = model.HouseNum;
+            newAddress.PostIndex = model.PostIndex;
+            newAddress.AdditionalInfo = model.AdditionalInfo;
+            newAddress.PhoneNumber = model.PhoneNumber;
+
+            await _addressService.UpdateAddress(newAddress);
+
+            return Ok(new { message = "Address updated successfully." });
+        }
 
 
         [HttpGet("accountOrders")]
@@ -301,6 +334,26 @@ namespace La_Renza.Controllers
             Response.Cookies.Delete("login");
 
             return Ok(new { message = "Account deleted successfully." });
+        }
+        // DELETE: api/Users/accountAddresses/5
+        [HttpDelete("accountAddresses/{id}")]
+        public async Task<IActionResult> DeleteUserAddress(int id)
+        {
+            string email = GetCurrentUserEmail();
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new { message = "User not logged in." });
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            var address = await _addressService.GetAddress(id);
+            if (address == null || address.UserId != user.Id)
+                return NotFound(new { message = "Address not found or access denied." });
+
+            await _addressService.DeleteAddress(id);
+
+            return Ok(new { message = "Address deleted successfully." });
         }
 
     }
