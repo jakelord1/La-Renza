@@ -5,7 +5,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -79,4 +79,71 @@ button:focus-visible {
 }
 .navbar {
   padding-bottom: 0 !important;
+}
+
+.btn-purple {
+  background: #6f42c1;
+  color: #fff;
+  border: 1px solid #6f42c1;
+  transition: background 0.3s, color 0.3s, border 0.3s;
+  border-radius: 8px;
+}
+.btn-purple:hover, .btn-purple:focus {
+  background: #fff;
+  color: #6f42c1;
+  border: 1px solid #6f42c1;
+}
+
+/* Кастомный чекбокс для footer-privacy */
+#footer-privacy {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #fff !important;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+  transition: border 0.2s, background 0.2s;
+  vertical-align: middle;
+}
+
+#footer-privacy:checked {
+  background: #6f42c1 !important;
+  border-color: #6f42c1;
+}
+
+#footer-privacy:after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 6px;
+  border-left: 2.5px solid #fff;
+  border-bottom: 2.5px solid #fff;
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  opacity: 0;
+  transform: scale(0.8) rotate(-45deg);
+  transition: opacity 0.2s;
+}
+
+#footer-privacy:checked:after {
+  opacity: 1;
+}
+
+#footer-privacy ~ label a {
+  color: #6f42c1;
+}
+#footer-privacy ~ label a:hover {
+  color: #4b2a8a;
+}
+
+input:focus, textarea:focus, select:focus,
+input:active, textarea:active, select:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #dee2e6 !important;
 }

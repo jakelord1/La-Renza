@@ -1,16 +1,14 @@
-import React from 'react';
-
-const tabs = [
-  'Усі',
-  'Одяг',
-  'Взуття',
-  'Аксесуари',
-  'Для дому',
-  'Дітям',
-  'Сад і балкон',
-];
+import React, { useEffect, useState } from 'react';
 
 const CategoryTabs = ({ active, setActive }) => {
+  const [tabs, setTabs] = useState(['Усі']);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setTabs(['Усі', ...data.map(cat => cat.name)]))
+      .catch(() => setTabs(['Усі']));
+  }, []);
+
   const handleClick = (tab, e) => {
     e.preventDefault();
     setActive(tab);

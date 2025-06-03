@@ -154,7 +154,7 @@ const [loading, setLoading] = useState(true);
                 </div>
               </div>
             </div>
-            <button type="submit" className="btn btn-purple">Зберегти зміни</button>
+            <button type="submit" className="btn-purple">Зберегти зміни</button>
           </form>
         </div>
       </div>
