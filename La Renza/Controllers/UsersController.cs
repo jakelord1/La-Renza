@@ -283,6 +283,25 @@ namespace La_Renza.Controllers
 
             return Ok(user);
         }
-       
+        // DELETE: api/Users/deleteAccount
+        [HttpDelete("deleteAccount")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            string email = GetCurrentUserEmail();
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new { message = "User not logged in." });
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            await _userService.DeleteUser(user.Id);
+
+            HttpContext.Session.Clear();
+            Response.Cookies.Delete("login");
+
+            return Ok(new { message = "Account deleted successfully." });
+        }
+
     }
 }

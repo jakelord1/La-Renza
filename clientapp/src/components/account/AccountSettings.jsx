@@ -46,6 +46,35 @@ const AccountSettings = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+  if (!window.confirm("Ви дійсно хочете видалити свій акаунт? Ця дія необоротна.")) {
+    return;
+  }
+  try {
+    const response = await fetch(`${API_URL}/deleteAccount`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      setAlert({ show: true, type: 'danger', message: errorData.message || 'Не вдалося видалити акаунт.' });
+      return;
+    }
+
+    const data = await response.json();
+    setAlert({ show: true, type: 'success', message: data.message || 'Акаунт успішно видалено.' });
+
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
+
+  } catch (err) {
+    setAlert({ show: true, type: 'danger', message: 'Не вдалося підключитися до сервера.' });
+  }
+};
+
+
   return (
     <div className="account-content">
       <h2 className="mb-4">Налаштування акаунта</h2>
@@ -159,7 +188,7 @@ const AccountSettings = () => {
         <div className="card-body">
           <h5 className="card-title text-danger">Видалити обліковий запис</h5>
           <p className="card-text">Якщо ви видалите обліковий запис, повернення буде неможливим. Будь ласка, переконайтесь, що ви дійсно цього хочете.</p>
-          <button className="btn btn-outline-danger">
+          <button className="btn btn-outline-danger"  onClick={handleDeleteAccount}>
             <i className="bi bi-exclamation-triangle me-2"></i>Видалити обліковий запис
           </button>
         </div>

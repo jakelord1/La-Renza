@@ -16,8 +16,8 @@ namespace La_Renza.BLL.DTO
         public bool NewsOn { get; set; }
         public int LaRenzaPoints { get; set; }
 
-        public List<AddressDTO> Addresses { get; set; }
-        public List<InvoiceInfoDTO> Invoices { get; set; }
+        public List<AddressDTO>? Addresses { get; set; }
+        public List<InvoiceInfoDTO>? Invoices { get; set; }
     }
 
 }
