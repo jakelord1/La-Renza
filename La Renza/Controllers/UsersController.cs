@@ -14,9 +14,11 @@ namespace La_Renza.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
+        private readonly IAddressService _addressService;
+        public UsersController(IUserService userService,IAddressService addressService)
         {
             _userService = userService;
+            _addressService = addressService;
         }
         private string GetCurrentUserEmail()
         {
@@ -190,6 +192,31 @@ namespace La_Renza.Controllers
             var addresses = await addressService.GetAddressesByUserId(user.Id);
             return Ok(addresses);
         }
+        [HttpPost("accountAddresses")]
+        public async Task<IActionResult> AddUserAddress([FromBody] AccountAddressModel model)
+        {
+            string email = GetCurrentUserEmail();
+            if (string.IsNullOrEmpty(email))  return Unauthorized();
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+                return NotFound(new { message = "User not found." });
+
+            var addressDto = new AddressDTO
+            {
+                UserId = user.Id,
+                SecondName = model.SecondName,
+                FullName = model.FullName,
+                Street = model.Street,
+                City = model.City,
+                HouseNum = model.HouseNum,
+                PostIndex = model.PostIndex,
+                AdditionalInfo = model.AdditionalInfo,
+                PhoneNumber = model.PhoneNumber
+            };
+            await _addressService.CreateAddress(addressDto);
+            return Ok();
+        }
+
 
         [HttpGet("accountOrders")]
         public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)
@@ -204,6 +231,7 @@ namespace La_Renza.Controllers
             {
                 return NotFound();
             }
+
             var orders = await orderService.GetOrdersByUserId(user.Id);
             return Ok(orders);
         }

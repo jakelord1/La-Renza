@@ -1,35 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Alert from 'react-bootstrap/Alert';
 
-const mockAddresses = [
-  {
-    id: 1,
-    secondName: 'Іваненко',
-    fullName: 'Іван Іваненко',
-    street: 'Вулиця Шевченка',
-    city: 'Київ',
-    houseNum: '10А',
-    postIndex: '01001',
-    additionalInfo: 'Квартира 12',
-    phoneNumber: '+380991234567',
-    user: 'ivan@domain.com',
-  },
-  {
-    id: 2,
-    secondName: 'Петренко',
-    fullName: 'Петро Петренко',
-    street: 'Вулиця Січових Стрільців',
-    city: 'Львів',
-    houseNum: '22',
-    postIndex: '79000',
-    additionalInfo: '',
-    phoneNumber: '+380981234567',
-    user: 'petro@domain.com',
-  }
-];
+const API_URL = 'https://localhost:7071/api/Users';
 
 const AccountAddresses = () => {
-  const [addresses, setAddresses] = useState(mockAddresses);
-  const [showModal, setShowModal] = useState(false);
+ const [addresses, setAddresses] = useState([]);
+ const [showModal, setShowModal] = useState(false);
+  const [alert, setAlert] = useState({ show: false, type: '', message: '' });
+
   const [form, setForm] = useState({
     secondName: '',
     fullName: '',
@@ -39,8 +17,26 @@ const AccountAddresses = () => {
     postIndex: '',
     additionalInfo: '',
     phoneNumber: '',
-    user: '',
   });
+
+  
+ const fetchAddresses = async () => {
+    try {
+      const res = await fetch(`${API_URL}/accountAddresses`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Не вдалося отримати адреси');
+      const data = await res.json();
+      setAddresses(data);
+    } catch (err) {
+      setAlert({ show: true, type: 'danger', message: err.message });
+    }
+  };
+
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
 
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
@@ -49,27 +45,56 @@ const AccountAddresses = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setAddresses([
-      ...addresses,
-      { ...form, id: Date.now() },
-    ]);
-    setForm({
-      secondName: '',
-      fullName: '',
-      street: '',
-      city: '',
-      houseNum: '',
-      postIndex: '',
-      additionalInfo: '',
-      phoneNumber: '',
-      user: '',
-    });
-    handleCloseModal();
-  };
 
+    try {
+      const res = await fetch(`${API_URL}/accountAddresses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        let errorMessage = 'Не вдалося додати адресу';
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+        }
+        throw new Error(errorMessage);
+      }
+
+      await fetchAddresses();
+
+      setForm({
+        secondName: '',
+        fullName: '',
+        street: '',
+        city: '',
+        houseNum: '',
+        postIndex: '',
+        additionalInfo: '',
+        phoneNumber: '',
+      });
+
+      handleCloseModal();
+
+      setAlert({ show: true, type: 'success', message: 'Адресу додано успішно' });
+    } catch (err) {
+      setAlert({ show: true, type: 'danger', message: err.message });
+    }
+  };
   return (
+         <>
+                {alert.show && (
+                    <Alert variant={alert.type} onClose={() => setAlert({ ...alert, show: false })} dismissible>
+                        {alert.message}
+                    </Alert>
+                )}
     <div className="account-content">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">Адреси доставки</h2>
@@ -90,7 +115,6 @@ const AccountAddresses = () => {
                 <div className="mb-1">{address.street} {address.houseNum}, {address.city}, {address.postIndex}</div>
                 {address.additionalInfo && <div className="mb-1"><span className="fw-bold">Додаткова інформація:</span> {address.additionalInfo}</div>}
                 <div className="mb-1"><span className="fw-bold">Телефон:</span> {address.phoneNumber}</div>
-                <div className="mb-2"><span className="fw-bold">Користувач:</span> {address.user}</div>
               </div>
               <div className="address-actions d-flex gap-2 mt-auto">
                 <button className="btn btn-sm btn-outline-secondary">
@@ -147,10 +171,7 @@ const AccountAddresses = () => {
                     <label className="form-label">Телефон</label>
                     <input type="text" className="form-control" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} required />
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label">Користувач</label>
-                    <input type="text" className="form-control" name="user" value={form.user} onChange={handleChange} required />
-                  </div>
+
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Скасувати</button>
@@ -162,6 +183,7 @@ const AccountAddresses = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
