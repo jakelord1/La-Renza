@@ -8,7 +8,7 @@ const API_URL = 'https://localhost:7071/api/Users';
 const AccountProfile = () => {
    const [formData, setFormData] = useState({
     firstName: '',
-    lastName: '',
+    surName : '',
     email: '',
     phoneNumber: '',
     birthDate: '',
@@ -17,7 +17,6 @@ const AccountProfile = () => {
 
 const [alert, setAlert] = useState({ show: false, type: '', message: '' });
 const [loading, setLoading] = useState(true);
-
 
  useEffect(() => {
     const fetchUserInfo = async () => {
@@ -32,8 +31,8 @@ const [loading, setLoading] = useState(true);
         const data = await res.json();
 
         setFormData({
-          firstName: data.fullName ? data.fullName.split(' ')[0] || '' : '',
-          lastName: data.surName || '',
+        firstName: data.fullName ? data.fullName.split(' ')[0] || '' : '',
+        surName: data.surName || '',
           email: data.email || '',
           phoneNumber: data.phoneNumber || '',
           birthDate: data.birthDate ? data.birthDate.substring(0, 10) : '',
@@ -59,27 +58,35 @@ const [loading, setLoading] = useState(true);
       }));
     };
   
-    
-      const handleSubmit = async (e) => {
-      e.preventDefault();
-        try {
-            const res = await fetch(API_URL, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(formData),
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || 'Не удалось изменить');
-            }
-  
-            setAlert({ show: true, type: 'success', message: 'Успешные изменения!' });
-         
-        } catch (e) {
-            setAlert({ show: true, type: 'danger', message: e.message });
-        }
-    };
+    const handleSubmit = async (e) => {
+  e.preventDefault();
+  let genderBool = null;
+  if (formData.gender === 'male') genderBool = true;
+  else if (formData.gender === 'female') genderBool = false;
+  else genderBool = null;
+  const submitData = {
+    ...formData,
+    gender: genderBool,
+  };
+  try {
+    const res = await fetch(`${API_URL}/changeAccountProfile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(submitData),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Не вдалося змінити профіль');
+    }
+
+    setAlert({ show: true, type: 'success', message: 'Успішні зміни!' });
+  } catch (e) {
+    setAlert({ show: true, type: 'danger', message: e.message });
+  }
+};
+
   
 
   return (
@@ -103,10 +110,10 @@ const [loading, setLoading] = useState(true);
                   onChange={handleChange} />
               </div>
               <div className="col-md-6">
-                <label htmlFor="lastName" className="form-label">Прізвище</label>
-                <input type="text" className="form-control" id="lastName" 
-                 name="lastName"
-                  value={formData.lastName}
+                <label htmlFor="surName" className="form-label">Прізвище</label>
+                <input type="text" className="form-control" id="surName" 
+                 name="surName"
+                  value={formData.surName}
                   onChange={handleChange}/>
               </div>
             </div>

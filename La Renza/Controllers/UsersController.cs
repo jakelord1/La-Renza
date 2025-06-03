@@ -77,9 +77,8 @@ namespace La_Renza.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string? email = HttpContext.Session.GetString("Login");
 
-            UserDTO user = await _userService.GetUserByLogin(email);
+            UserDTO user = await _userService.GetUserByLogin(logon.Email);
             if (user == null)
             {
                 return NotFound();
@@ -108,6 +107,31 @@ namespace La_Renza.Controllers
             Response.Cookies.Delete("login");
             return Ok(new { message = "Logout successful" });
 
+        }
+        [HttpPost("changeAccountProfile")]
+        public async Task<IActionResult> ChangeSomeUser([FromBody] ChangeAccountProfilveModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            string? email = HttpContext.Session.GetString("Login");
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Email = model.Email;
+            user.PhoneNumber = model.PhoneNumber;
+            user.FullName = $"{model.FirstName} {model.SurName}";
+            user.SurName = model.SurName;
+            user.BirthDate = model.BirthDate;
+            user.Gender = model.Gender;
+
+            await _userService.UpdateUser(user);
+
+            return Ok(new { message = "Profile updated successfully." });
         }
 
         [HttpGet("accountProfile")]
