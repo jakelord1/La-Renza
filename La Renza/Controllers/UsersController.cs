@@ -91,23 +91,13 @@ namespace La_Renza.Controllers
                 return BadRequest(ModelState);
 
             UserDTO user = await _userService.GetUserByLogin(logon.Email);
-            Console.WriteLine($"User email from DB: {user.Email}");
-            Console.WriteLine($"Login email: {logon.Email}");
-
+      
             if (user == null)
             {
                 return NotFound();
             }
-            Console.WriteLine(
-    BCrypt.Net.BCrypt.Verify("marya101204", "$2a$11$f30PXVTgk6OYzkKfvB4HO.zIx2S5uNJ1.Ffw8NFfcn030PxzeocgC")
-);
             if (!passwordService.VerifyPassword(logon.Password, user.Password))
             {
-                Console.WriteLine($"Password hash from DB: '{user.Password}'");
-                Console.WriteLine($"Length of password hash: {user.Password?.Length}");
-                Console.WriteLine($"Input password: '{logon.Password}'");
-                Console.WriteLine($"Input password length: {logon.Password?.Length}");
-
                 return Unauthorized(new { message = "Invalid login or password" });
             }
             if (logon.RememberMe)
@@ -130,6 +120,34 @@ namespace La_Renza.Controllers
             return Ok(new { message = "Logout successful" });
 
         }
+
+        [HttpPost("changeUserPassword")]
+        public async Task<IActionResult> ChangeUserPassword([FromBody] ChangePasswordModel model, [FromServices]PasswordHasher hasher)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            //string? email = HttpContext.Session.GetString("Login");
+            string email = GetCurrentUserEmail();
+            if (email == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            if (!hasher.VerifyPassword(model.CurrentPassword, user.Password))
+            {
+                return BadRequest(new { message = "Current password is incorrect." });
+            }
+            user.Password = hasher.HashPassword(model.NewPassword);
+
+            await _userService.UpdateUser(user);
+
+            return Ok(new { message = "Profile updated successfully." });
+        }
+
         [HttpPost("changeAccountProfile")]
         public async Task<IActionResult> ChangeSomeUser([FromBody] ChangeAccountProfilveModel model)
         {
