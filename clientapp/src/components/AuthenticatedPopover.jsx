@@ -7,11 +7,12 @@ const AuthenticatedPopover = ({ onClose }) => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({ userName: '', email: '' });
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
  useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const res = await fetch('https://localhost:7071/api/Users/userFromSession', {
+        const res = await fetch('https://localhost:7071/api/Users/accountProfile', {
           method: 'GET',
           credentials: 'include', 
         });
@@ -29,6 +30,7 @@ const AuthenticatedPopover = ({ onClose }) => {
           userName: "Ім'я користувача",
           email: "user@example.com",
      });
+       setIsGuest(true);
       } finally {
         setLoading(false);
       }
@@ -177,9 +179,9 @@ const AuthenticatedPopover = ({ onClose }) => {
         <i className="bi bi-gear me-2" style={{ color: PURPLE }}></i>
         Налаштування
       </div>
-
-      <button
-        style={{
+  {isGuest ? (
+  <button
+    style={{
           width: '100%',
           background: '#fff',
           color: PURPLE,
@@ -196,10 +198,38 @@ const AuthenticatedPopover = ({ onClose }) => {
         //   onClose();
         //   console.log('Logout clicked');
         // }}
-         onClick={handleLogout}
-      >
-        ВИЙТИ
-      </button>
+    onClick={() => {
+      onClose();
+      navigate('/login');
+    }}
+  >
+    УВІЙТИ
+  </button>
+) : (
+  <button
+    style={{
+          width: '100%',
+          background: '#fff',
+          color: PURPLE,
+          fontWeight: 600,
+          fontSize: '0.95rem',
+          border: `2px solid ${PURPLE}`,
+          borderRadius: 4,
+          padding: '10px 0',
+          cursor: 'pointer',
+          letterSpacing: 0.2,
+          transition: 'background 0.15s, color 0.15s',
+        }}
+        // onClick={() => {
+        //   onClose();
+        //   console.log('Logout clicked');
+        // }}
+    onClick={handleLogout}
+  >
+    ВИЙТИ
+  </button>
+)}
+
     </div>
   );
 };
