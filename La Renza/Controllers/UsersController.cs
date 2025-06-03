@@ -31,6 +31,15 @@ namespace La_Renza.Controllers
 
             return email;
         }
+        [HttpGet("isAuthenticated")]
+        public async Task<ActionResult> IsAuthenticated()
+        {
+            string email = GetCurrentUserEmail();
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new { isAuthenticated = false });
+
+            return Ok(new { isAuthenticated = true, email });
+        }
 
         // GET: api/Users
         [HttpGet]
@@ -274,5 +283,6 @@ namespace La_Renza.Controllers
 
             return Ok(user);
         }
+       
     }
 }
