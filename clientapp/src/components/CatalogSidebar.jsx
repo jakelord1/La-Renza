@@ -13,7 +13,7 @@ const CatalogSidebar = ({
   return (
     <aside className="catalog-sidebar pe-2" style={{minWidth: 240, maxWidth: 320}}>
       <h5 className="fw-bold mb-3">Фільтри</h5>
-      {/* Категорії */}
+
       <div className="mb-4">
         <div className="fw-semibold mb-2">Категорії</div>
         <CategoryTree
@@ -30,13 +30,13 @@ const CatalogSidebar = ({
           Скинути категорію
         </button>
       </div>
-      {/* Ціна */}
+
       <div className="mb-4">
         <div className="fw-semibold mb-2">Ціна</div>
         <div className="d-flex align-items-center gap-2">
           <Form.Control
             size="sm"
-            type="number"
+            type="text"
             placeholder="Від"
             value={filters.priceMin}
             onChange={e => setFilters(f => ({ ...f, priceMin: e.target.value }))}
@@ -45,7 +45,7 @@ const CatalogSidebar = ({
           <span>-</span>
           <Form.Control
             size="sm"
-            type="number"
+            type="text"
             placeholder="До"
             value={filters.priceMax}
             onChange={e => setFilters(f => ({ ...f, priceMax: e.target.value }))}
@@ -53,7 +53,7 @@ const CatalogSidebar = ({
           />
         </div>
       </div>
-      {/* Кольори */}
+
       <div className="mb-4">
         <div className="fw-semibold mb-2">Колір</div>
         <div className="d-flex flex-wrap gap-2">
@@ -83,7 +83,7 @@ const CatalogSidebar = ({
           ))}
         </div>
       </div>
-      {/* Розміри */}
+
       <div className="mb-4">
         <div className="fw-semibold mb-2">Розмір</div>
         <div className="d-flex flex-wrap gap-2">
@@ -110,6 +110,8 @@ const CatalogSidebar = ({
       <Button variant="outline-secondary" size="sm" className="w-100 mt-2" onClick={onReset}>
         Скинути фільтри
       </Button>
+
+
     </aside>
   );
 };

@@ -13,7 +13,6 @@ const Products = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // Form states
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -24,10 +23,8 @@ const Products = () => {
   const [sizeId, setSizeId] = useState('');
   const [quantity, setQuantity] = useState('');
   
-  // Data for dropdowns
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
-  // Loading state for data fetching
   const [_loadingData, setLoadingData] = useState(false);
 
   const fetchProducts = async () => {
@@ -48,19 +45,16 @@ const Products = () => {
     const fetchInitialData = async () => {
       setLoadingData(true);
       try {
-        // Fetch colors
         const colorsRes = await fetch(COLORS_API_URL);
         if (!colorsRes.ok) throw new Error('Помилка завантаження кольорів');
         const colorsData = await colorsRes.json();
         setColors(colorsData);
-        
-        // Fetch sizes
+
         const sizesRes = await fetch(SIZES_API_URL);
         if (!sizesRes.ok) throw new Error('Помилка завантаження розмірів');
         const sizesData = await sizesRes.json();
         setSizes(sizesData);
-        
-        // Fetch products
+
         await fetchProducts();
       } catch (e) {
         setAlert({ show: true, type: 'danger', message: e.message });
@@ -86,8 +80,8 @@ const Products = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    
-    // Validate required fields
+
+
     const errors = [];
     if (!colorId) errors.push('колір');
     if (!sizeId) errors.push('розмір');
@@ -155,7 +149,7 @@ const Products = () => {
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
     
-    // Validate required fields
+
     const errors = [];
     if (!colorId) errors.push('колір');
     if (!sizeId) errors.push('розмір');
@@ -225,7 +219,6 @@ const Products = () => {
     }
   };
 
-  // Modal for adding/editing product
   const _renderProductModal = (isEdit = false) => {
     const ModalComponent = isEdit ? Modal : Modal;
     const handleSubmit = isEdit ? handleUpdateProduct : handleAddProduct;
@@ -415,8 +408,7 @@ const Products = () => {
           </div>
         )}
       </Card>
-      
-      {/* Add Product Modal */}
+
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered size="md">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Додати новий товар</Modal.Title>
@@ -487,7 +479,6 @@ const Products = () => {
         </Modal.Body>
       </Modal>
 
-      {/* Edit Product Modal */}
       <Modal show={showEditModal} onHide={() => { setShowEditModal(false); setEditingProduct(null); }} centered size="md">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Редагувати товар</Modal.Title>

@@ -1,4 +1,22 @@
 import React, { useState, useMemo, useEffect } from 'react';
+
+// Створення дерева категорій з flat-списку
+function buildCategoryTree(list) {
+  const map = {};
+  const roots = [];
+  list.forEach(cat => {
+    map[cat.id] = { ...cat, children: [] };
+  });
+  list.forEach(cat => {
+    if (cat.parentCategoryId) {
+      if (map[cat.parentCategoryId]) map[cat.parentCategoryId].children.push(map[cat.id]);
+    } else {
+      roots.push(map[cat.id]);
+    }
+  });
+  return roots;
+}
+
 import Breadcrumbs from './Breadcrumbs';
 import CatalogSidebar from './CatalogSidebar';
 import CatalogControls from './CatalogControls';
@@ -99,21 +117,9 @@ const catalogProducts = [
   },
 ];
 
-const SIZE_OPTIONS = [
-  { value: 'XS', label: 'XS' },
-  { value: 'S', label: 'S' },
-  { value: 'M', label: 'M' },
-  { value: 'L', label: 'L' },
-  { value: 'XL', label: 'XL' },
-];
-const COLOR_OPTIONS = [
-  { value: 'white', label: 'Білий', hex: '#fff' },
-  { value: 'black', label: 'Чорний', hex: '#222' },
-  { value: 'pink', label: 'Рожевий', hex: '#ffb6d5' },
-  { value: 'blue', label: 'Блакитний', hex: '#b4d8fa' },
-  { value: 'beige', label: 'Бежевий', hex: '#f5e3c0' },
-  { value: 'green', label: 'Зелений', hex: '#b7e3b7' },
-];
+const SIZES_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Sizes`;
+const COLORS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Colors`;
+
 const BRAND_OPTIONS = [
   { value: 'brand1', label: 'Brand1' },
   { value: 'brand2', label: 'Brand2' },
@@ -121,9 +127,8 @@ const BRAND_OPTIONS = [
 ];
 
 const SORT_OPTIONS = [
-  { value: 'default', label: 'За замовчуванням' },
-  { value: 'newest', label: 'Від найновіших' },
-  { value: 'oldest', label: 'Від найстарших' },
+  { value: 'newest', label: 'Новинки' },
+  { value: 'oldest', label: 'Старі' },
   { value: 'price_low', label: 'Від дешевих до дорогих' },
   { value: 'price_high', label: 'Від дорогих до дешевих' },
 ];
@@ -138,12 +143,30 @@ const initialFilters = {
 };
 
 const Catalog = () => {
-  // const [categories, setCategories] = useState([]);
-  const [categoryTree, setCategoryTree] = useState([]);
-  // ... остальной стейт
+  const [categoryTree, setCategoryTree] = React.useState([]);
+  const [filters, setFilters] = React.useState(initialFilters);
+  const [sort, setSort] = React.useState('newest');
+  const [view, setView] = React.useState('grid');
+  const [page, setPage] = React.useState(1);
+  const [sizes, setSizes] = React.useState([]);
+  const [colors, setColors] = React.useState([]);
+  const perPage = 12;
 
-  // Загрузка категорий с API
-  useEffect(() => {
+  React.useEffect(() => {
+    fetch(SIZES_API_URL)
+      .then(res => res.json())
+      .then(data => setSizes(data.map(s => ({ value: s.name, label: s.name }))))
+      .catch(() => setSizes([]));
+  }, []);
+
+  React.useEffect(() => {
+    fetch(COLORS_API_URL)
+      .then(res => res.json())
+      .then(data => setColors(data.map(c => ({ value: c.name, label: c.name, hex: c.hex || '#eee' }))))
+      .catch(() => setColors([]));
+  }, []);
+
+  React.useEffect(() => {
     fetch('/api/Categories')
       .then(res => res.json())
       .then(data => {
@@ -152,39 +175,17 @@ const Catalog = () => {
       .catch(() => setCategoryTree([]));
   }, []);
 
-  // Построение дерева категорий
-  function buildCategoryTree(list) {
-    const map = {};
-    const roots = [];
-    list.forEach(cat => { map[cat.id] = { ...cat, children: [] }; });
-    list.forEach(cat => {
-      if (cat.parentCategoryId) {
-        if (map[cat.parentCategoryId]) map[cat.parentCategoryId].children.push(map[cat.id]);
-      } else {
-        roots.push(map[cat.id]);
-      }
-    });
-    return roots;
-  }
-  const [filters, setFilters] = useState(initialFilters);
-  const [sort, setSort] = useState('default');
-  const [view, setView] = useState('grid');
-  const [perPage, setPerPage] = useState(12);
-  const [page, setPage] = useState(1);
-
   // Breadcrumbs example
   const breadcrumbs = [
-    { label: 'Головна', to: '/' },
-    { label: 'Каталог' },
+    { label: 'Головна', href: '/' },
+    { label: 'Каталог', href: '/catalog' },
   ];
 
   // Filtering
-  const filteredProducts = useMemo(() => {
-    let arr = [...catalogProducts];
+  const filteredProducts = React.useMemo(() => {
+    let arr = catalogProducts;
     // Category filter
-    if (filters.categories.length && !filters.categories.includes('all')) {
-      arr = arr.filter(p => filters.categories.includes(p.category));
-    }
+    if (filters.categories.length) arr = arr.filter(p => filters.categories.includes(p.category));
     // Price filter
     if (filters.priceMin) arr = arr.filter(p => Number(p.price) >= Number(filters.priceMin));
     if (filters.priceMax) arr = arr.filter(p => Number(p.price) <= Number(filters.priceMax));
@@ -198,7 +199,7 @@ const Catalog = () => {
   }, [filters]);
 
   // Sorting
-  const sortedProducts = useMemo(() => {
+  const sortedProducts = React.useMemo(() => {
     let arr = [...filteredProducts];
     switch (sort) {
       case 'newest':
@@ -216,50 +217,40 @@ const Catalog = () => {
 
   // Pagination
   const total = sortedProducts.length;
-  const paginatedProducts = useMemo(() => {
+  const paginatedProducts = React.useMemo(() => {
     const start = (page - 1) * perPage;
     return sortedProducts.slice(start, start + perPage);
   }, [sortedProducts, page, perPage]);
 
   // Reset filters
   const handleResetFilters = () => setFilters(initialFilters);
-  useEffect(() => { setPage(1); }, [filters, sort, perPage]);
+  React.useEffect(() => { setPage(1); }, [filters, sort, perPage]);
 
   return (
     <div className="catalog-page container-fluid py-4">
       <div className="row gx-4">
-        {/* Sidebar */}
-        <div className="col-lg-3 col-md-4 mb-4 mb-md-0">
+        <div className="col-12 col-md-4 col-lg-3 mb-4 mb-md-0" style={{minWidth:240, maxWidth:320}}>
           <CatalogSidebar
             filters={filters}
             setFilters={setFilters}
             categories={categoryTree}
-            sizes={SIZE_OPTIONS}
-            colors={COLOR_OPTIONS}
+            sizes={sizes}
+            colors={colors}
             brands={BRAND_OPTIONS}
             onReset={handleResetFilters}
           />
         </div>
-        {/* Main content */}
-        <div className="col-lg-9 col-md-8">
+
+        <div className="col-12 col-md-8 col-lg-9">
           <Breadcrumbs items={breadcrumbs} />
           <h1 className="h4 fw-bold mb-3">Каталог</h1>
-          <CatalogControls
-            sort={sort}
-            setSort={setSort}
-            view={view}
-            setView={setView}
-            perPage={perPage}
-            setPerPage={setPerPage}
-            total={total}
-            page={page}
-            setPage={setPage}
-            sortOptions={SORT_OPTIONS}
-          />
-          {/* Grid/List view */}
+
+
           <div className={view === 'grid' ? 'row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3' : 'd-flex flex-column gap-3'}>
             {paginatedProducts.length === 0 ? (
-              <div className="text-muted text-center py-5">Немає товарів за вибраними фільтрами</div>
+              <div style={{minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%'}}>
+                <span className="text-muted text-center" style={{fontSize: '1.24rem'}}>Немає товарів за вибраними фільтрами</span>
+              </div>
             ) : (
               paginatedProducts.map(product => (
                 <div key={product.id} className={view === 'grid' ? 'col' : ''}>
@@ -269,7 +260,6 @@ const Catalog = () => {
             )}
           </div>
 
-          {/* Pagination */}
           {total > perPage && (
             <nav className="d-flex justify-content-center mt-4" aria-label="Пагінація каталогу">
               <ul className="pagination">
