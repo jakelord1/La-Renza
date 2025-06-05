@@ -47,7 +47,7 @@ const FooterEmailSubscribe = () => {
                   style={{minWidth:180}}
                 />
               </div>
-              <button type="submit" className="btn btn-purple px-4 fw-semibold" style={{height:40}}>Підписатися</button>
+              <button type="submit" className="btn-purple d-flex justify-content-center align-items-center fw-semibold" style={{height:40, paddingLeft: '16px', paddingRight: '16px'}}>Підписатися</button>
             </form>
             <div className="d-flex align-items-center justify-content-center gap-2 mt-2 mb-0">
               <input type="checkbox" id="footer-privacy" checked={checked} onChange={e => setChecked(e.target.checked)} style={{accentColor: checked ? 'var(--purple)' : '#fff', width:18, height:18, border:'2px solid #ccc', background:'#fff'}} />
@@ -56,7 +56,20 @@ const FooterEmailSubscribe = () => {
               </label>
             </div>
             {error && <div className="text-danger text-center small mt-1">{error}</div>}
-            {submitted && <div className="text-success text-center small mt-1">Дякуємо! Ви підписані.</div>}
+            {submitted && (
+              <div className="modal fade show" tabIndex="-1" style={{display:'block', background:'rgba(0,0,0,0.2)'}}>
+                <div className="modal-dialog modal-dialog-centered">
+                  <div className="modal-content" style={{borderRadius: '16px'}}>
+                    <div className="modal-body text-center py-4">
+                      <div className="fw-bold mb-2" style={{fontSize:'1.2rem', color:'#6f42c1'}}>Дякуємо! Ви підписані.</div>
+                      <div className="d-flex justify-content-center">
+                        <button type="button" className="btn-purple d-flex justify-content-center align-items-center fw-semibold mt-2 px-4" style={{height:40, paddingLeft: '16px', paddingRight: '16px'}} onClick={() => setSubmitted(false)}>OK</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
