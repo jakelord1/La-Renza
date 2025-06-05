@@ -10,7 +10,6 @@ const Home = () => {
 
   return (
     <div className="larenza-font">
-      {/* Navbar буде під PromoBanner, якщо Navbar додається на рівні App або Layout */}
       <CategoryList />
       <MainBanner />
       <CategoryTabs active={activeTab} setActive={setActiveTab} />

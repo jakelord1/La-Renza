@@ -10,6 +10,8 @@ const Models = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingModel, setEditingModel] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewModel, setViewModel] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -352,25 +354,33 @@ const Models = () => {
                         ) : '-'}
                       </td>
                       <td>
-                        <div className="d-flex gap-2">
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleEditModel(model)}
-                            title="Редагувати"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </Button>
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDeleteModel(model.id)}
-                            title="Видалити"
-                          >
-                            <i className="bi bi-trash"></i>
-                          </Button>
-                        </div>
-                      </td>
+  <div className="d-flex gap-2">
+    <Button
+      variant="outline-info"
+      size="sm"
+      onClick={() => { setViewModel(model); setShowViewModal(true); }}
+      title="Детальніше"
+    >
+      <i className="bi bi-eye"></i>
+    </Button>
+    <Button
+      variant="outline-primary"
+      size="sm"
+      onClick={() => handleEditModel(model)}
+      title="Редагувати"
+    >
+      <i className="bi bi-pencil"></i>
+    </Button>
+    <Button
+      variant="outline-danger"
+      size="sm"
+      onClick={() => handleDeleteModel(model.id)}
+      title="Видалити"
+    >
+      <i className="bi bi-trash"></i>
+    </Button>
+  </div>
+</td>
                     </tr>
                   ))}
                 </tbody>
@@ -383,6 +393,58 @@ const Models = () => {
       
       {renderModal()}
       {renderModal(true)}
+      {/* Модальне вікно перегляду повної інформації */}
+      <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Детальна інформація про модель</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {viewModel ? (
+            <div>
+              <div><strong>ID:</strong> {viewModel.id}</div>
+              <div><strong>Назва:</strong> {viewModel.name}</div>
+              <div><strong>Опис:</strong> {viewModel.description}</div>
+              <div><strong>Матеріали:</strong> {viewModel.materialInfo}</div>
+              <div><strong>Дата початку:</strong> {viewModel.startDate ? new Date(viewModel.startDate).toLocaleString() : '-'}</div>
+              <div><strong>Ціна:</strong> {viewModel.price} грн</div>
+              <div><strong>Рейтинг:</strong> {viewModel.rate}</div>
+              <div><strong>Бейдж:</strong> {viewModel.bage}</div>
+              <div><strong>Категорія ID:</strong> {viewModel.categoryId}</div>
+              <div><strong>Фото:</strong>
+                <ul>
+                  {(viewModel.photos && viewModel.photos.length > 0) ? viewModel.photos.map(photo => (
+                    <li key={photo.id}>{photo.path}</li>
+                  )) : <li>-</li>}
+                </ul>
+              </div>
+              <div><strong>Кольори:</strong>
+                <ul>
+                  {(viewModel.colors && viewModel.colors.length > 0) ? viewModel.colors.map(color => (
+                    <li key={color.id}>
+                      <div><strong>ID:</strong> {color.id}</div>
+                      <div><strong>Назва:</strong> {color.name}</div>
+                      <div><strong>Зображення:</strong> {color.image ? color.image.path : '-'}</div>
+                      <div><strong>Фото кольору:</strong>
+                        <ul>
+                          {(color.photos && color.photos.length > 0) ? color.photos.map(ph => (
+                            <li key={ph.id}>{ph.path}</li>
+                          )) : <li>-</li>}
+                        </ul>
+                      </div>
+                      <div><strong>modelId:</strong> {color.modelId}</div>
+                    </li>
+                  )) : <li>-</li>}
+                </ul>
+              </div>
+            </div>
+          ) : <div>Немає даних</div>}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Закрити
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
