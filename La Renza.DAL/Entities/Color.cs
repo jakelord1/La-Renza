@@ -12,7 +12,7 @@ namespace La_Renza.DAL.Entities
         public string Name { get; set; }
         public int ModelId { get; set; }
         public int ImageId { get; set; }
-        public ICollection<Image> Photos { get; set; }
+        public Image Image { get; set; }
 
         public Model Model { get; set; }
 

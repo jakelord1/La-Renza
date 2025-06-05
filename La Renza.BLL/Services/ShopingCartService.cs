@@ -10,10 +10,12 @@ namespace La_Renza.BLL.Services
     public class ShopingCartService : IShopingCartService
     {
         IUnitOfWork Database { get; set; }
+        private readonly IMapper _mapper;
 
-        public ShopingCartService(IUnitOfWork uow)
+        public ShopingCartService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
 
         public async Task CreateShopingCart(ShopingCartDTO shopingCartDto)
@@ -60,19 +62,14 @@ namespace La_Renza.BLL.Services
                 Id = shopingCart.Id,
                 UserId = shopingCart.UserId,
                 ProductId = shopingCart.ProductId,
-                Quantity = shopingCart.Quantity,
-                User = shopingCart.User.Email,
+                Quantity = shopingCart.Quantity
             };
         }
 
    
         public async Task<IEnumerable<ShopingCartDTO>> GetShopingCarts()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<ShoppingCart, ShopingCartDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email))
-            .ForMember("Product", opt => opt.MapFrom(c => c.Product.Id)));
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(await Database.ShopingCarts.GetAll());
+            return _mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(await Database.ShopingCarts.GetAll());
         }
 
         public async Task<bool> ExistsShopingCart(int id)

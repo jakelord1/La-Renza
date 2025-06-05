@@ -29,7 +29,7 @@ namespace La_Renza.BLL.Services
                 Name = categoryDto.Name,
                 CategoryId = categoryDto.ParentCategoryId,
                 IsGlobal = categoryDto.IsGlobal,
-                ImageId = categoryDto.ImageId,
+                CategoryImage = _mapper.Map<Image>(categoryDto.Image),
                 IsActive = true
             };
             await _db.Categories.Create(category);
@@ -43,7 +43,7 @@ namespace La_Renza.BLL.Services
                 Name = categoryDto.Name,
                 CategoryId = categoryDto.ParentCategoryId,
                 IsGlobal = categoryDto.IsGlobal,
-                ImageId = categoryDto.ImageId,
+                CategoryImage = _mapper.Map<Image>(categoryDto.Image),
                 IsActive = true
             };
 

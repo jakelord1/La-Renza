@@ -1,16 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const PURPLE = '#7c3aed';
 
 const AuthenticatedPopover = ({ onClose }) => {
   const navigate = useNavigate();
+  const [userInfo, setUserInfo] = useState({ userName: '', email: '' });
+  const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
+
+ useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const res = await fetch('https://localhost:7071/api/Users/accountProfile', {
+          method: 'GET',
+          credentials: 'include', 
+        });
+        if (!res.ok) {
+          throw new Error('Не удалось получить инфк о пользователе');
+        }
+        const data = await res.json();
+        setUserInfo({
+          userName: data.fullName,
+          email: data.email,
+        });
+      } catch (error) {
+        console.error(error);
+          setUserInfo({
+          userName: "Ім'я користувача",
+          email: "user@example.com",
+     });
+       setIsGuest(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+     fetchUserInfo();
+  }, []);
 
   const handleNavigation = (path) => {
     onClose();
     navigate(path);
   };
+  const handleLogout = async (e) => {
+    e.preventDefault();
+      console.log('handleLogout вызван');
+      try {
+          const res = await fetch('https://localhost:7071/api/Users/logout', {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+          });
+          if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(errorData.message || 'Не удалось выйти');
+          }
+            onClose();
+            navigate('/login'); 
+      }
+      catch (error) {
+      console.error(error);
+}
 
+
+
+  };
   return (
     <div style={{
       minWidth: 260,
@@ -45,9 +99,13 @@ const AuthenticatedPopover = ({ onClose }) => {
           <i className="bi bi-person-fill" style={{ color: PURPLE, fontSize: '1.2rem' }}></i>
         </div>
         <div>
-          <div style={{ fontWeight: 600, fontSize: '1rem', color: '#000' }}>Ім'я користувача</div>
-          <div style={{ fontSize: '0.9rem', color: '#666' }}>user@example.com</div>
-        </div>
+         <div style={{ fontWeight: 600, fontSize: '1rem', color: '#000' }}>
+            {loading ? 'Завантаження...' : userInfo.userName}
+          </div>
+          <div style={{ fontSize: '0.9rem', color: '#666' }}>
+            {loading ? '' : userInfo.email}
+          </div>
+         </div>
       </div>
 
       <div
@@ -121,9 +179,9 @@ const AuthenticatedPopover = ({ onClose }) => {
         <i className="bi bi-gear me-2" style={{ color: PURPLE }}></i>
         Налаштування
       </div>
-
-      <button
-        style={{
+  {isGuest ? (
+  <button
+    style={{
           width: '100%',
           background: '#fff',
           color: PURPLE,
@@ -136,13 +194,42 @@ const AuthenticatedPopover = ({ onClose }) => {
           letterSpacing: 0.2,
           transition: 'background 0.15s, color 0.15s',
         }}
-        onClick={() => {
-          onClose();
-          console.log('Logout clicked');
+        // onClick={() => {
+        //   onClose();
+        //   console.log('Logout clicked');
+        // }}
+    onClick={() => {
+      onClose();
+      navigate('/login');
+    }}
+  >
+    УВІЙТИ
+  </button>
+) : (
+  <button
+    style={{
+          width: '100%',
+          background: '#fff',
+          color: PURPLE,
+          fontWeight: 600,
+          fontSize: '0.95rem',
+          border: `2px solid ${PURPLE}`,
+          borderRadius: 4,
+          padding: '10px 0',
+          cursor: 'pointer',
+          letterSpacing: 0.2,
+          transition: 'background 0.15s, color 0.15s',
         }}
-      >
-        ВИЙТИ
-      </button>
+        // onClick={() => {
+        //   onClose();
+        //   console.log('Logout clicked');
+        // }}
+    onClick={handleLogout}
+  >
+    ВИЙТИ
+  </button>
+)}
+
     </div>
   );
 };

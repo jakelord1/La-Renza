@@ -28,7 +28,7 @@ namespace La_Renza.BLL.Services
                 Text = commentDto.Text,
                 ProductId = commentDto.ProductId,
                 UserId = commentDto.UserId,
-                ImageId = commentDto.ImageId,
+                Image = _mapper.Map<Image>(commentDto.Image),
                 Rating = commentDto.Rating,
                 Date = commentDto.Date,
                 LikesAmount = commentDto.LikesAmount
@@ -44,7 +44,7 @@ namespace La_Renza.BLL.Services
                 Text = commentDto.Text,
                 ProductId = commentDto.ProductId,
                 UserId = commentDto.UserId,
-                ImageId = commentDto.ImageId,
+                Image = _mapper.Map<Image>(commentDto.Image),
                 Rating = commentDto.Rating,
                 Date = commentDto.Date,
                 LikesAmount = commentDto.LikesAmount

@@ -11,6 +11,7 @@ namespace La_Renza.BLL.DTO
         public int Id { get; set; }
         public string Name { get; set; }
         public int ImageId { get; set; }
+        public ImageDTO Image { get; set; }
         public ICollection<ImageDTO> Photos { get; set; }
         public int ModelId { get; set; }
     }

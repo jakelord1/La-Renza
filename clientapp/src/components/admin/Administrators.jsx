@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Spinner, Alert, Table, Pagination } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/Admins';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Admins`;
 
 const Administrators = () => {
   const [administrators, setAdministrators] = useState([]);

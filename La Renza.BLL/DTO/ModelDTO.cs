@@ -17,5 +17,9 @@ namespace La_Renza.BLL.DTO
         public decimal Price { get; set; }
         public decimal? Rate { get; set; }
         public string? Bage { get; set; }
+
+        public ICollection<ColorDTO> Colors { get; set; }
+        public ICollection<ImageDTO> Photos { get; set; }
+        public int CategoryId { get; set; }
     }
 }

@@ -20,6 +20,7 @@ namespace La_Renza.DAL.Repositories
                 .Include(o => o.User)
                 .Include(o => o.Delivery)
                 .Include(o => o.Cupons)
+                .Include(o => o.OrderItems)
                 .ToListAsync();
         }
 
@@ -29,6 +30,7 @@ namespace La_Renza.DAL.Repositories
                 .Include(o => o.User)
                 .Include(o => o.Delivery)
                 .Include(o => o.Cupons)
+                .Include(o => o.OrderItems)
                 .Where(a => a.Id == id)
                 .ToListAsync();
             Order? order = orders?.FirstOrDefault();
@@ -41,6 +43,7 @@ namespace La_Renza.DAL.Repositories
                 .Include(o => o.User)
                 .Include(o => o.Delivery)
                 .Include(o => o.Cupons)
+                .Include(o => o.OrderItems)
                 .Where(a => a.OrderName == orderName)
                 .ToListAsync();
             Order? order = orders?.FirstOrDefault();

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Spinner, Alert, Table, Modal, Pagination } from 'react-bootstrap';
-import commentsData from '../../data/comments.json';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Comments`;
 
 function StarRating({ value, onChange, disabled }) {
   return (
@@ -76,6 +76,13 @@ styleSheet.textContent = Object.entries(paginationStyles)
 document.head.appendChild(styleSheet);
 
 const Comments = () => {
+  const [userNames, setUserNames] = useState({}); // { userId: fullName }
+  const [modelNames, setModelNames] = useState({}); // { modelId: name }
+  const [colorNames, setColorNames] = useState({}); // { colorId: name }
+  const [colorIdToModelId, setColorIdToModelId] = useState({}); // { colorId: modelId }
+  const [sizeNames, setSizeNames] = useState({}); // { sizeId: name }
+  const [imagePaths, setImagePaths] = useState({}); // { imageId: path }
+  const [productMap, setProductMap] = useState({}); // { productId: { colorId, sizeId } }
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');
@@ -100,46 +107,68 @@ const Comments = () => {
 
   useEffect(() => {
     setLoading(true);
-    setTimeout(() => {
-      const mockProducts = [
-        {
-          id: 1,
-          name: 'Плед "Soft Home"',
-          sku: 'TS-001',
-          sizes: ['S', 'M', 'L'],
-          colors: ['Сірий'],
-          images: [
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80'
-          ]
-        },
-        {
-          id: 2,
-          name: 'Набір рушників',
-          sku: 'JN-002',
-          sizes: ['M', 'L'],
-          colors: ['Білий'],
-          images: [
-            'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80'
-          ]
-        },
-        {
-          id: 3,
-          name: 'Декоративна подушка',
-          sku: 'HD-003',
-          sizes: ['S', 'M'],
-          colors: ['Бежевий'],
-          images: [
-            'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80'
-          ]
-        }
-      ];
-      
-      setProducts(mockProducts);
-      setAllComments(commentsData.comments);
-      setLoading(false);
-    }, 1000);
+    fetch('/api/Products')
+  .then(res => {
+    if (!res.ok) throw new Error('Помилка завантаження товарів');
+    return res.json();
+  })
+  .then(data => setProducts(data))
+  .catch(() => setProducts([]));
+    fetch(API_URL)
+      .then(res => {
+        if (!res.ok) throw new Error('Помилка завантаження коментарів');
+        return res.json();
+      })
+      .then(async (data) => {
+        setAllComments(data);
+        const userIds = Array.from(new Set(data.map(c => c.userId).filter(Boolean)));
+        const productIds = Array.from(new Set(data.map(c => c.productId).filter(Boolean)));
+        const imageIds = Array.from(new Set(data.map(c => c.imageId).filter(Boolean)));
+        const userReqs = userIds.map(id => fetch(`/api/Users/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
+        const userResults = await Promise.all(userReqs);
+        const userMap = {};
+        userResults.forEach((u, i) => { if (u && u.fullName) userMap[userIds[i]] = u.fullName; });
+        setUserNames(userMap);
+        const prodReqs = productIds.map(id => fetch(`/api/Products/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
+        const prodResults = await Promise.all(prodReqs);
+        const prodMap = {};
+        const colorIds = new Set();
+        const sizeIds = new Set();
+        prodResults.forEach((p, i) => {
+          if (p) {
+            prodMap[productIds[i]] = p;
+            if (p.colorId) colorIds.add(p.colorId);
+            if (p.sizeId) sizeIds.add(p.sizeId);
+          }
+        });
+        setProductMap(prodMap);
+        const colorIdArr = Array.from(colorIds);
+        const colorReqs = colorIdArr.map(id => fetch(`/api/Colors/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
+        const colorResults = await Promise.all(colorReqs);
+        const colorMap = {};
+        const modelIds = new Set();
+        colorResults.forEach((c, i) => {
+          if (c) {
+            colorMap[colorIdArr[i]] = c;
+            if (c.modelId) modelIds.add(c.modelId);
+          }
+        });
+        setColorNames(Object.fromEntries(colorIdArr.map((id, i) => [id, colorResults[i]?.name || '-'])));
+        setColorIdToModelId(Object.fromEntries(colorIdArr.map((id, i) => [id, colorResults[i]?.modelId || null])));
+        const sizeIdArr = Array.from(sizeIds);
+        const sizeReqs = sizeIdArr.map(id => fetch(`/api/Sizes/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
+        const sizeResults = await Promise.all(sizeReqs);
+        setSizeNames(Object.fromEntries(sizeIdArr.map((id, i) => [id, sizeResults[i]?.name || '-'])));
+        const modelIdArr = Array.from(modelIds);
+        const modelReqs = modelIdArr.map(id => fetch(`/api/Models/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
+        const modelResults = await Promise.all(modelReqs);
+        setModelNames(Object.fromEntries(modelIdArr.map((id, i) => [id, modelResults[i]?.name || '-'])));
+        const imageReqs = imageIds.map(id => fetch(`/api/Images/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
+        const imageResults = await Promise.all(imageReqs);
+        setImagePaths(Object.fromEntries(imageIds.map((id, i) => [id, imageResults[i]?.path || imageResults[i]?.url || ''])));
+      })
+      .catch(e => setAlert({ show: true, type: 'danger', message: e.message }))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleProductChange = (e) => {
@@ -150,60 +179,33 @@ const Comments = () => {
     setSelectedColor('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!selectedProduct) {
-      setAlert({
-        show: true, 
-        type: 'danger',
-        message: 'Будь ласка, оберіть товар'
-      });
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть товар' });
       return;
     }
-    
     if (!selectedSize) {
-      setAlert({
-        show: true, 
-        type: 'danger',
-        message: 'Будь ласка, оберіть розмір'
-      });
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть розмір' });
       return;
     }
-    
     if (!selectedColor) {
-      setAlert({
-        show: true, 
-        type: 'danger',
-        message: 'Будь ласка, оберіть колір'
-      });
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть колір' });
       return;
     }
-    
     if (!text.trim()) {
-      setAlert({
-        show: true, 
-        type: 'danger',
-        message: 'Будь ласка, додайте текст коментаря'
-      });
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, додайте текст коментаря' });
       return;
     }
-    
     if (!author.trim()) {
-      setAlert({
-        show: true, 
-        type: 'danger',
-        message: 'Будь ласка, введіть автора'
-      });
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, введіть автора' });
       return;
     }
-    
 
     setLoading(true);
-    
-    setTimeout(() => {
+    try {
       const newComment = {
-        id: allComments.length + 1,
         productId: selectedProduct.id,
         text,
         author,
@@ -215,25 +217,27 @@ const Comments = () => {
         likes: 0,
         fit: 'Ідеальна'
       };
-      
-      setAllComments([...allComments, newComment]);
-      
-
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newComment)
+      });
+      if (!res.ok) throw new Error('Не вдалося додати коментар');
+      setAlert({ show: true, type: 'success', message: 'Коментар успішно додано!' });
+      setShowAddModal(false);
       setText('');
       setAuthor('');
       setRating(5);
       setImage(null);
       setImagePreview(null);
-      
-      setAlert({
-        show: true,
-        type: 'success',
-        message: 'Коментар успішно додано!'
-      });
-      
+      const commentsRes = await fetch(API_URL);
+      const updatedComments = await commentsRes.json();
+      setAllComments(updatedComments);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
       setLoading(false);
-      setShowAddModal(false);
-    }, 1000);
+    }
   };
 
   const handleShowComment = (comment) => {
@@ -242,14 +246,21 @@ const Comments = () => {
   };
 
 
-  const handleDeleteComment = (id) => {
-    if (window.confirm('Ви впевнені, що хочете видалити цей коментар?')) {
-      setAllComments(allComments.filter(comment => comment.id !== id));
-      setAlert({
-        show: true,
-        type: 'success',
-        message: 'Коментар видалено!'
-      });
+  const handleDeleteComment = async (id) => {
+    if (window.confirm('Ви впевнені, що бажаєте видалити цей коментар?')) {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Не вдалося видалити коментар');
+        setAlert({ show: true, type: 'success', message: 'Коментар видалено!' });
+        const commentsRes = await fetch(API_URL);
+        const updatedComments = await commentsRes.json();
+        setAllComments(updatedComments);
+      } catch (e) {
+        setAlert({ show: true, type: 'danger', message: e.message });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -265,21 +276,30 @@ const Comments = () => {
     setShowEditModal(true);
   };
 
-  const handleUpdateComment = (e) => {
+  const handleUpdateComment = async (e) => {
     e.preventDefault();
-    
-    if (!selectedProduct || !selectedSize || !selectedColor || !text.trim() || !author.trim()) {
-      setAlert({
-        show: true,
-        type: 'danger',
-        message: 'Будь ласка, заповніть всі обов\'язкові поля'
-      });
+    if (!selectedProduct) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть товар' });
       return;
     }
-
+    if (!selectedSize) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть розмір' });
+      return;
+    }
+    if (!selectedColor) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть колір' });
+      return;
+    }
+    if (!text.trim()) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, додайте текст коментаря' });
+      return;
+    }
+    if (!author.trim()) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, введіть автора' });
+      return;
+    }
     setLoading(true);
-    
-    setTimeout(() => {
+    try {
       const updatedComment = {
         ...editingComment,
         productId: selectedProduct.id,
@@ -290,30 +310,23 @@ const Comments = () => {
         color: selectedColor,
         image: (imagePreview && typeof imagePreview === 'string' && imagePreview.match(/^https?:\/\//)) ? imagePreview : null,
       };
-      
-      setAllComments(allComments.map(comment => 
-        comment.id === editingComment.id ? updatedComment : comment
-      ));
-
-      setText('');
-      setAuthor('');
-      setRating(5);
-      setImage(null);
-      setImagePreview(null);
-      setSelectedProduct(null);
-      setSelectedSize('');
-      setSelectedColor('');
-      
-      setAlert({
-        show: true,
-        type: 'success',
-        message: 'Коментар успішно оновлено!'
+      const res = await fetch(`${API_URL}/${editingComment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedComment)
       });
-      
-      setLoading(false);
+      if (!res.ok) throw new Error('Не вдалося оновити коментар');
+      setAlert({ show: true, type: 'success', message: 'Коментар оновлено!' });
       setShowEditModal(false);
       setEditingComment(null);
-    }, 1000);
+      const commentsRes = await fetch(API_URL);
+      const updatedComments = await commentsRes.json();
+      setAllComments(updatedComments);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -425,189 +438,228 @@ const Comments = () => {
               ) : (
                 <div className="d-flex flex-column gap-3">
                   {currentItems.map(comment => (
-                    <div key={comment.id} className="d-flex align-items-start gap-3 p-3 rounded-4 shadow-sm bg-light position-relative" style={{minHeight: 90}}>
-                      <div style={{width:48, height:48, borderRadius:12, background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px #0001', flexShrink:0}}>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Question_Mark.svg" alt="?" style={{width: 32, height: 32, objectFit: 'contain'}} />
-                      </div>
-                      <div className="flex-grow-1">
-                        <div className="d-flex align-items-center gap-2 mb-1">
-                          <span className="fw-bold">{comment.author}</span>
-                          <span className="text-warning">{'★'.repeat(comment.rating)}</span>
-                          <span className="text-muted small ms-2">{comment.date}</span>
-                        </div>
-                        <div className="mb-1">{comment.text}</div>
-                        <div className="small text-secondary">{products.find(p => p.id === comment.productId)?.name || '-'} • {comment.size} • {comment.color}</div>
-                      </div>
-                      <div className="d-flex align-items-center gap-3 ms-2">
-                        <Button variant="link" size="sm" onClick={() => handleShowComment(comment)} title="Деталі" className="p-0"><i className="bi bi-eye"></i></Button>
-                        <Button variant="link" size="sm" onClick={() => handleEditComment(comment)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
-                        <Button variant="link" size="sm" onClick={() => handleDeleteComment(comment.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            {allComments.length > itemsPerPage && (
-              <div className="d-flex justify-content-center mt-4">
-                <Pagination className="mb-0">
-                  {renderPagination()}
-                </Pagination>
+  <div key={comment.id} className="d-flex align-items-start gap-3 p-3 rounded-4 shadow-sm bg-light position-relative" style={{minHeight: 90}}>
+      <div style={{width:48, height:48, borderRadius:12, background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px #0001', flexShrink:0}}>
+        {comment.imageId && imagePaths[comment.imageId] ? (
+          <img src={"/api/Images/" + comment.imageId + (imagePaths[comment.imageId].startsWith('/') ? imagePaths[comment.imageId] : '')} alt="фото відгуку" style={{width: 32, height: 32, objectFit: 'cover', borderRadius: 8}} />
+        ) : (
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Question_Mark.svg" alt="?" style={{width: 32, height: 32, objectFit: 'contain'}} />
+        )}
+      </div>
+    <div className="flex-grow-1">
+      <div className="d-flex align-items-center gap-2 mb-1">
+        <span className="fw-bold">{userNames[comment.userId] || comment.author}</span>
+        <span className="text-warning">{'★'.repeat(comment.rating)}</span>
+        <span className="text-muted small ms-2">{comment.date}</span>
+      </div>
+      <div className="mb-1">{comment.text}</div>
+      <div className="small text-secondary">{
+        (() => {
+          const prod = productMap[comment.productId];
+          if (!prod) return '-';
+          const colorName = prod.colorId && colorNames[prod.colorId] ? colorNames[prod.colorId] : '-';
+          const sizeName = prod.sizeId && sizeNames[prod.sizeId] ? sizeNames[prod.sizeId] : '-';
+          const modelId = prod.colorId && colorIdToModelId[prod.colorId] ? colorIdToModelId[prod.colorId] : null;
+          const modelName = modelId && modelNames[modelId] ? modelNames[modelId] : '-';
+          return `${modelName} • ${sizeName} • ${colorName}`;
+        })()
+      }</div>
+    </div>
+    <div className="d-flex align-items-center gap-3 ms-2">
+      <Button variant="link" size="sm" onClick={() => handleShowComment(comment)} title="Деталі" className="p-0"><i className="bi bi-eye"></i></Button>
+      <Button variant="link" size="sm" onClick={() => handleEditComment(comment)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
+      <Button variant="link" size="sm" onClick={() => handleDeleteComment(comment.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
+    </div>
+  </div>
+))}
               </div>
             )}
-          </>
-        )}
-      </Card>
-
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered size="md" dialogClassName="modal-narrow">
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title className="fw-bold">Додати новий коментар</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleSubmit} className="row g-3">
-            <div className="col-12">
-              <label htmlFor="product" className="form-label text-secondary small mb-1">Товар</label>
-              <Form.Select id="product" className="form-select-lg custom-select" onChange={handleProductChange} disabled={loading} value={selectedProduct?.id || ''}>
-                <option value="">Оберіть товар</option>
-                {products.map(product => (
-                  <option key={product.id} value={product.id}>{product.name}</option>
-                ))}
-              </Form.Select>
-            </div>
-            {selectedProduct && (
-              <>
-                <div className="col-6">
-                  <label htmlFor="size" className="form-label text-secondary small mb-1">Розмір</label>
-                  <Form.Select id="size" value={selectedSize} onChange={e => setSelectedSize(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                    <option value="">Розмір</option>
-                    {selectedProduct.sizes.map(size => (<option key={size} value={size}>{size}</option>))}
-                  </Form.Select>
-                </div>
-                <div className="col-6">
-                  <label htmlFor="color" className="form-label text-secondary small mb-1">Колір</label>
-                  <Form.Select id="color" value={selectedColor} onChange={e => setSelectedColor(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                    <option value="">Колір</option>
-                    {selectedProduct.colors.map(color => (<option key={color} value={color}>{color}</option>))}
-                  </Form.Select>
-                </div>
-              </>
-            )}
-            {selectedSize && selectedColor && (
-              <>
-                <div className="col-12">
-                  <label htmlFor="author" className="form-label text-secondary small mb-1">Автор</label>
-                  <Form.Control type="text" id="author" value={author} onChange={e => setAuthor(e.target.value)} placeholder="Автор" disabled={loading} className="rounded-3" />
-                </div>
-                <div className="col-12">
-                  <label htmlFor="comment" className="form-label text-secondary small mb-1">Текст коментаря</label>
-                  <Form.Control as="textarea" id="comment" value={text} onChange={e => setText(e.target.value)} placeholder="Текст коментаря" style={{ minHeight: 80 }} disabled={loading} className="rounded-3" />
-                </div>
-                <div className="col-12 mb-2">
-                  <label className="form-label text-secondary small mb-1">Оцінка</label>
-                  <StarRating value={rating} onChange={setRating} disabled={loading} />
-                </div>
-                <div className="col-12 mt-2">
-                  <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
-                    {loading ? <Spinner size="sm" /> : <><i className="bi bi-send me-2"></i>Додати</>}
-                  </Button>
-                </div>
-              </>
-            )}
-          </Form>
-        </Modal.Body>
-      </Modal>
-
-      <Modal show={showCommentModal} onHide={() => setShowCommentModal(false)} centered>
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title>Деталі коментаря</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {currentComment && (
-            <div>
-              <p><strong>Автор:</strong> {currentComment.author}</p>
-              <p><strong>Рейтинг:</strong> {'★'.repeat(currentComment.rating)}</p>
-              <p><strong>Дата:</strong> {currentComment.date}</p>
-              <p><strong>Розмір:</strong> {currentComment.size}</p>
-              <p><strong>Колір:</strong> {currentComment.color}</p>
-              <p><strong>Текст:</strong> {currentComment.text}</p>
-              {currentComment.image && typeof currentComment.image === 'string' && currentComment.image.match(/^https?:\/\//) ? (
-                <div className="mt-3">
-                  <p><strong>Зображення:</strong></p>
-                  <img 
-                    src={currentComment.image} 
-                    alt="Фото відгуку" 
-                    className="img-fluid rounded-3 shadow" 
-                  />
-                </div>
-              ) : (
-                <div className="text-center text-secondary">Зображення відсутнє</div>
-              )}
+          </div>
+          {allComments.length > itemsPerPage && (
+            <div className="d-flex justify-content-center mt-4">
+              <Pagination className="mb-0">
+                {renderPagination()}
+              </Pagination>
             </div>
           )}
-        </Modal.Body>
-        <Modal.Footer className="border-0">
-          <Button variant="secondary" onClick={() => setShowCommentModal(false)}>Закрити</Button>
-        </Modal.Footer>
-      </Modal>
+        </>
+      )}
+    </Card>
 
-      <Modal show={showEditModal} onHide={() => {
-        setShowEditModal(false);
-        setEditingComment(null);
-      }} centered size="md" dialogClassName="modal-narrow">
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title className="fw-bold">Редагувати коментар</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleUpdateComment} className="row g-3">
-            <div className="col-12">
-              <label htmlFor="edit-product" className="form-label text-secondary small mb-1">Товар</label>
-              <Form.Select id="edit-product" className="form-select-lg custom-select" onChange={handleProductChange} disabled={loading} value={selectedProduct?.id || ''}>
-                <option value="">Оберіть товар</option>
-                {products.map(product => (
-                  <option key={product.id} value={product.id}>{product.name}</option>
-                ))}
-              </Form.Select>
-            </div>
-            {selectedProduct && (
-              <>
-                <div className="col-6">
-                  <label htmlFor="edit-size" className="form-label text-secondary small mb-1">Розмір</label>
-                  <Form.Select id="edit-size" value={selectedSize} onChange={e => setSelectedSize(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                    <option value="">Розмір</option>
-                    {selectedProduct.sizes.map(size => (<option key={size} value={size}>{size}</option>))}
-                  </Form.Select>
-                </div>
-                <div className="col-6">
-                  <label htmlFor="edit-color" className="form-label text-secondary small mb-1">Колір</label>
-                  <Form.Select id="edit-color" value={selectedColor} onChange={e => setSelectedColor(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                    <option value="">Колір</option>
-                    {selectedProduct.colors.map(color => (<option key={color} value={color}>{color}</option>))}
-                  </Form.Select>
-                </div>
-              </>
+    <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered size="md" dialogClassName="modal-narrow">
+      <Modal.Header closeButton className="border-0">
+        <Modal.Title className="fw-bold">Додати новий коментар</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSubmit} className="row g-3">
+          <div className="col-12">
+            <label htmlFor="product" className="form-label text-secondary small mb-1">Товар</label>
+            <Form.Select id="product" className="form-select-lg custom-select" onChange={handleProductChange} disabled={loading} value={selectedProduct?.id || ''}>
+              <option value="">Оберіть товар</option>
+              {products.map(product => (
+                <option key={product.id} value={product.id}>{product.name}</option>
+              ))}
+            </Form.Select>
+          </div>
+          {selectedProduct && (
+            <>
+              <div className="col-6">
+                <label htmlFor="size" className="form-label text-secondary small mb-1">Розмір</label>
+                <Form.Select id="size" value={selectedSize} onChange={e => setSelectedSize(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
+                  <option value="">Розмір</option>
+                  {selectedProduct.sizes.map(size => (<option key={size} value={size}>{size}</option>))}
+                </Form.Select>
+              </div>
+              <div className="col-6">
+                <label htmlFor="color" className="form-label text-secondary small mb-1">Колір</label>
+                <Form.Select id="color" value={selectedColor} onChange={e => setSelectedColor(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
+                  <option value="">Колір</option>
+                  {selectedProduct.colors.map(color => (<option key={color} value={color}>{color}</option>))}
+                </Form.Select>
+              </div>
+            </>
+          )}
+          {selectedSize && selectedColor && (
+            <>
+              <div className="col-12">
+                <label htmlFor="author" className="form-label text-secondary small mb-1">Автор</label>
+                <Form.Control type="text" id="author" value={author} onChange={e => setAuthor(e.target.value)} placeholder="Автор" disabled={loading} className="rounded-3" />
+              </div>
+              <div className="col-12">
+                <label htmlFor="comment" className="form-label text-secondary small mb-1">Текст коментаря</label>
+                <Form.Control as="textarea" id="comment" value={text} onChange={e => setText(e.target.value)} placeholder="Текст коментаря" style={{ minHeight: 80 }} disabled={loading} className="rounded-3" />
+              </div>
+              <div className="col-12 mb-2">
+                <label className="form-label text-secondary small mb-1">Оцінка</label>
+                <StarRating value={rating} onChange={setRating} disabled={loading} />
+              </div>
+              <div className="col-12 mt-2">
+                <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
+                  {loading ? <Spinner size="sm" /> : <><i className="bi bi-send me-2"></i>Додати</>}
+                </Button>
+              </div>
+            </>
+          )}
+        </Form>
+      </Modal.Body>
+    </Modal>
+
+    <Modal show={showCommentModal} onHide={() => setShowCommentModal(false)} centered>
+      <Modal.Header closeButton className="border-0">
+        <Modal.Title>Деталі коментаря</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {currentComment && (
+          <div>
+            <p><strong>ID коментаря:</strong> {currentComment.id}</p>
+            <p><strong>Автор:</strong> {userNames[currentComment.userId] || currentComment.author}</p>
+            <p><strong>Товар:</strong> {
+              (() => {
+                const prod = productMap[currentComment.productId];
+                if (!prod) return '-';
+                const modelId = prod.colorId && colorIdToModelId[prod.colorId] ? colorIdToModelId[prod.colorId] : null;
+                const modelName = modelId && modelNames[modelId] ? modelNames[modelId] : '-';
+                return modelName;
+              })()
+            }</p>
+            <p><strong>Розмір:</strong> {
+              (() => {
+                const prod = productMap[currentComment.productId];
+                if (!prod) return '-';
+                return prod.sizeId && sizeNames[prod.sizeId] ? sizeNames[prod.sizeId] : '-';
+              })()
+            }</p>
+            <p><strong>Колір:</strong> {
+              (() => {
+                const prod = productMap[currentComment.productId];
+                if (!prod) return '-';
+                return prod.colorId && colorNames[prod.colorId] ? colorNames[prod.colorId] : '-';
+              })()
+            }</p>
+            <p><strong>Рейтинг:</strong> {'★'.repeat(currentComment.rating)}</p>
+            <p><strong>Дата:</strong> {currentComment.date}</p>
+            <p><strong>Текст:</strong> {currentComment.text}</p>
+            {currentComment.imageId && imagePaths[currentComment.imageId] ? (
+              <div className="mt-3">
+                <p><strong>Зображення:</strong></p>
+                <img 
+                  src={imagePaths[currentComment.imageId]} 
+                  alt="Фото відгуку" 
+                  className="img-fluid rounded-3 shadow" 
+                />
+              </div>
+            ) : (
+              <div className="text-center text-secondary">Зображення відсутнє</div>
             )}
-            <div className="col-12">
-              <label htmlFor="edit-author" className="form-label text-secondary small mb-1">Автор</label>
-              <Form.Control type="text" id="edit-author" value={author} onChange={e => setAuthor(e.target.value)} placeholder="Автор" disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-12">
-              <label htmlFor="edit-comment" className="form-label text-secondary small mb-1">Текст коментаря</label>
-              <Form.Control as="textarea" id="edit-comment" value={text} onChange={e => setText(e.target.value)} placeholder="Текст коментаря" style={{ minHeight: 80 }} disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-12 mb-2">
-              <label className="form-label text-secondary small mb-1">Оцінка</label>
-              <StarRating value={rating} onChange={setRating} disabled={loading} />
-            </div>
-            <div className="col-12 mt-2">
-              <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
-                {loading ? <Spinner size="sm" /> : <><i className="bi bi-save me-2"></i>Зберегти зміни</>}
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal>
-    </div>
+          </div>
+        )}
+      </Modal.Body>
+      <Modal.Footer className="border-0">
+        <Button variant="secondary" onClick={() => setShowCommentModal(false)}>Закрити</Button>
+      </Modal.Footer>
+    </Modal>
+
+    <Modal show={showEditModal} onHide={() => {
+      setShowEditModal(false);
+      setEditingComment(null);
+    }} centered size="md" dialogClassName="modal-narrow">
+      <Modal.Header closeButton className="border-0">
+        <Modal.Title className="fw-bold">Редагувати коментар</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleUpdateComment} className="row g-3">
+          <div className="col-12">
+            <label htmlFor="edit-product" className="form-label text-secondary small mb-1">Товар</label>
+            <Form.Select id="edit-product" className="form-select-lg custom-select" onChange={handleProductChange} disabled={loading} value={selectedProduct?.id || ''}>
+  <option value="">Оберіть товар</option>
+  {products.map(product => (
+    <option key={product.id} value={product.id}>{product.name}</option>
+  ))}
+</Form.Select>
+          </div>
+          {selectedProduct && (
+            <>
+              <div className="col-6">
+                <label htmlFor="edit-size" className="form-label text-secondary small mb-1">Розмір</label>
+                <Form.Select id="edit-size" value={selectedSize} onChange={e => setSelectedSize(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
+                  <option value="">Розмір</option>
+                  {selectedProduct.sizes.map(size => (<option key={size} value={size}>{size}</option>))}
+                </Form.Select>
+              </div>
+              <div className="col-6">
+                <label htmlFor="edit-color" className="form-label text-secondary small mb-1">Колір</label>
+                <Form.Select id="edit-color" value={selectedColor} onChange={e => setSelectedColor(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
+                  <option value="">Колір</option>
+                  {selectedProduct.colors.map(color => (<option key={color} value={color}>{color}</option>))}
+                </Form.Select>
+              </div>
+            </>
+          )}
+          <div className="col-12">
+            <label htmlFor="edit-author" className="form-label text-secondary small mb-1">Автор</label>
+            <Form.Control type="text" id="edit-author" value={author} onChange={e => setAuthor(e.target.value)} placeholder="Автор" disabled={loading} className="rounded-3" />
+          </div>
+          <div className="col-12">
+            <label htmlFor="edit-comment" className="form-label text-secondary small mb-1">Текст коментаря</label>
+            <Form.Control as="textarea" id="edit-comment" value={text} onChange={e => setText(e.target.value)} placeholder="Текст коментаря" style={{ minHeight: 80 }} disabled={loading} className="rounded-3" />
+          </div>
+          <div className="col-12 mb-2">
+            <label className="form-label text-secondary small mb-1">Оцінка</label>
+            <StarRating value={rating} onChange={setRating} disabled={loading} />
+          </div>
+          <div className="col-12 mt-2">
+            <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
+              {loading ? <Spinner size="sm" /> : <><i className="bi bi-save me-2"></i>Зберегти зміни</>}
+            </Button>
+          </div>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer className="border-0">
+        <Button variant="secondary" onClick={() => setShowEditModal(false)}>Закрити</Button>
+      </Modal.Footer>
+    </Modal>
+  </div>
   );
 };
 
-export default Comments; 
+export default Comments;

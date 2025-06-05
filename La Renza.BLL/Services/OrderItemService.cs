@@ -11,10 +11,12 @@ namespace La_Renza.BLL.Services
     public class OrderItemService : IOrderItemService
     {
         IUnitOfWork Database { get; set; }
+        private readonly IMapper _mapper;
 
-        public OrderItemService(IUnitOfWork uow)
+        public OrderItemService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
 
         public async Task CreateOrderItem(OrderItemDTO orderItemDto)
@@ -64,8 +66,7 @@ namespace La_Renza.BLL.Services
                 OrderId = orderItem.OrderId,
                 ProductId = orderItem.ProductId,
                 Quantity = orderItem.Quantity,
-                Price = orderItem.Price,
-                Order = orderItem.Order?.OrderName
+                Price = orderItem.Price
             };
         }
 
@@ -73,7 +74,6 @@ namespace La_Renza.BLL.Services
         public async Task<IEnumerable<OrderItemDTO>> GetOrderItems()
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<OrderItem, OrderItemDTO>()
-            .ForMember("Order", opt => opt.MapFrom(c => c.Order.OrderName))
             .ForMember("Product", opt => opt.MapFrom(c => c.Product.Id)));
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<OrderItem>, IEnumerable<OrderItemDTO>>(await Database.OrderItems.GetAll());

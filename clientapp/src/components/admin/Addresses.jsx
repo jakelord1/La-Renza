@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Spinner, Alert, Table, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/Adresses';
-const USERS_API_URL = 'https://localhost:7071/api/Users';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Adresses`;
+const USERS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
 
 const Addresses = () => {
   const [addresses, setAddresses] = useState([]);
@@ -13,7 +13,6 @@ const Addresses = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
 
-  // Form states
   const [userId, setUserId] = useState('');
   const [secondName, setSecondName] = useState('');
   const [fullName, setFullName] = useState('');
@@ -142,7 +141,7 @@ const Addresses = () => {
         phoneNumber
       };
       
-      const res = await fetch(`${API_URL}/${editingAddress.id}`, {
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)

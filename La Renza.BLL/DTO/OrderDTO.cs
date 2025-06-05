@@ -14,8 +14,10 @@ namespace La_Renza.BLL.DTO
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public int PaymentMethod { get; set; }
-        public int DeliveryMethodId { get; set; }
+        public int? DeliveryMethodId { get; set; }
         public string Phonenumber { get; set; }
+
+        public List<OrderItemDTO> orderItems { get; set; }
     }
  
 }

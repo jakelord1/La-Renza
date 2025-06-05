@@ -20,7 +20,6 @@ namespace La_Renza.BLL.Services
         {
             var adress = new Address
             {
-
                 Id = adressDto.Id,
                 UserId = adressDto.UserId,
                 SecondName = adressDto.SecondName,
@@ -32,27 +31,44 @@ namespace La_Renza.BLL.Services
                 AdditionalInfo = adressDto.AdditionalInfo,
                 PhoneNumber = adressDto.PhoneNumber
             };
+
             await Database.Addresses.Create(adress);
             await Database.Save();
         }
 
         public async Task UpdateAddress(AddressDTO adressDto)
         {
-            var adress = new Address
-            {
+            var adress = await Database.Addresses.Get(adressDto.Id);
+            if (adress == null)
+                throw new Exception("Adress not found");
+            adress.Id = adressDto.Id;
+            adress.UserId = adressDto.UserId;
+            adress.SecondName = adressDto.SecondName;
+            adress.FullName = adressDto.FullName;
+            adress.Street = adressDto.Street;
+            adress.City = adressDto.City;
+            adress.HouseNum = adressDto.HouseNum;
+            adress.PostIndex = adressDto.PostIndex;
+            adress.AdditionalInfo = adressDto.AdditionalInfo;
+            adress.PhoneNumber = adressDto.PhoneNumber;
 
-                Id = adressDto.Id,
-                UserId = adressDto.UserId,
-                SecondName = adressDto.SecondName,
-                FullName = adressDto.FullName,
-                Street = adressDto.Street,
-                City = adressDto.City,
-                HouseNum = adressDto.HouseNum,
-                PostIndex = adressDto.PostIndex,
-                AdditionalInfo = adressDto.AdditionalInfo,
-                PhoneNumber = adressDto.PhoneNumber
-            };
-            Database.Addresses.Update(adress);
+
+
+
+            //var adress = new Address
+            //{
+            //    Id = adressDto.Id,
+            //    UserId = adressDto.UserId,
+            //    SecondName = adressDto.SecondName,
+            //    FullName = adressDto.FullName,
+            //    Street = adressDto.Street,
+            //    City = adressDto.City,
+            //    HouseNum = adressDto.HouseNum,
+            //    PostIndex = adressDto.PostIndex,
+            //    AdditionalInfo = adressDto.AdditionalInfo,
+            //    PhoneNumber = adressDto.PhoneNumber
+            //};
+            //Database.Addresses.Update(adress);
             await Database.Save();
         }
 
@@ -78,16 +94,25 @@ namespace La_Renza.BLL.Services
                 HouseNum = address.HouseNum,
                 PostIndex = address.PostIndex,
                 AdditionalInfo = address.AdditionalInfo,
-                PhoneNumber = address.PhoneNumber,
-                User = address.User?.Email
+                PhoneNumber = address.PhoneNumber
             };
         }
+        public async Task<IEnumerable<AddressDTO>> GetAddressesByUserId(int userId)
+        {
+            var addresses = await Database.Addresses.GetAll();
+            var userAddresses = addresses.Where(a => a.UserId == userId);
+
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>());
+            var mapper = new Mapper(config);
+
+            return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(userAddresses);
+        }
+
 
 
         public async Task<IEnumerable<AddressDTO>> GetAddresses()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>());
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(await Database.Addresses.GetAll());
         }

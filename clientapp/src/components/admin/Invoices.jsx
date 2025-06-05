@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Spinner, Alert, Table, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const API_URL = 'https://localhost:7071/api/InvoiceInfos';
-const USERS_API_URL = 'https://localhost:7071/api/Users';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/InvoiceInfos`;
+const USERS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -131,7 +131,7 @@ const Invoices = () => {
         houseNumber,
         isDigital: Boolean(isDigital)
       };
-      const res = await fetch(`${API_URL}/${editingInvoice.id}`, {
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -164,10 +164,10 @@ const Invoices = () => {
     }
   };
 
-  const getUserName = (userId) => {
-    const user = users.find(u => u.id === userId);
-    return user ? `${user.firstName} ${user.lastName}` : 'Невідомий користувач';
-  };
+  // const getUserName = (userId) => {
+  //   const user = users.find(u => u.id === userId);
+  //   return user ? `${user.firstName} ${user.lastName}` : 'Невідомий користувач';
+  // };
 
   return (
     <div>
