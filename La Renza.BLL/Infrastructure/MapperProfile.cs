@@ -35,7 +35,7 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Image, ImageDTO>()
                 .ReverseMap();
             CreateMap<Model, ModelDTO>()
-                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Photos))
+                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Image))
                 .ForMember(dest => dest.Colors, opt => opt.MapFrom(src => src.Colors))
                 .ReverseMap();
             CreateMap<ShoppingCart, ShopingCartDTO>()

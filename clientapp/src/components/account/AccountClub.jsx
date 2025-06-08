@@ -174,7 +174,7 @@ const AccountClub = () => {
   useEffect(() => {
   const fetchPoints = async () => {
     try {
-      const response = await fetch('https://localhost:7071/api/Users/accountProfile', {
+      const response = await fetch('https://localhost:7071/api/Account/accountProfile', {
         method: 'GET',
         credentials: 'include'
       });

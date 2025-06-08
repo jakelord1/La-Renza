@@ -16,7 +16,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<Model>> GetAll()
         {
-            return await db.Model.Include(c => c.Photos).Include(m => m.Colors).ToListAsync();
+            return await db.Model.Include(c => c.Image).Include(m => m.Colors).ToListAsync();
         }
 
         public async Task<Model> Get(int id)
@@ -27,7 +27,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Model> Get(string name)
         {
-            var models = await db.Model.Include(m => m.Colors).Include(c => c.Photos).Where(m => m.Name == name).ToListAsync();
+            var models = await db.Model.Include(m => m.Colors).Include(c => c.Image).Where(m => m.Name == name).ToListAsync();
             Model? model = models?.FirstOrDefault();
             return model!;
         }

@@ -15,7 +15,7 @@ namespace La_Renza.DAL.Entities
         public string Description { get; set; }
         public int Price { get; set; }
 
-        public ICollection<User> Users { get; set; }
+        public ICollection<User> User { get; set; }
         public ICollection<Order> Orders { get; set; }
 
     }

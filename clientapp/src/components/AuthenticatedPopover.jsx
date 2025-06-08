@@ -12,7 +12,7 @@ const AuthenticatedPopover = ({ onClose }) => {
  useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const res = await fetch('https://localhost:7071/api/Users/accountProfile', {
+        const res = await fetch('https://localhost:7071/api/Account/accountProfile', {
           method: 'GET',
           credentials: 'include', 
         });
@@ -46,7 +46,7 @@ const AuthenticatedPopover = ({ onClose }) => {
     e.preventDefault();
       console.log('handleLogout вызван');
       try {
-          const res = await fetch('https://localhost:7071/api/Users/logout', {
+          const res = await fetch('https://localhost:7071/api/Account/logout', {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',

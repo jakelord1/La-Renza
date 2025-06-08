@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
 
 
-const API_URL = 'https://localhost:7071/api/Users';
+const API_URL = 'https://localhost:7071/api/Account';
 
 const AccountProfile = () => {
    const [formData, setFormData] = useState({
