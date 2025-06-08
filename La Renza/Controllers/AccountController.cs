@@ -15,10 +15,12 @@ namespace La_Renza.Controllers
     {
         private readonly IUserService _userService;
         private readonly IAddressService _addressService;
-        public AccountController(IUserService userService, IAddressService addressService)
+        private readonly ICouponService _couponService;
+        public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService)
         {
             _userService = userService;
             _addressService = addressService;
+            _couponService = couponService;
         }
         private string GetCurrentUserEmail()
         {
@@ -154,7 +156,7 @@ namespace La_Renza.Controllers
         }
 
         [HttpGet("accountAddresses")]
-        public async Task<ActionResult> GetUserAddresses([FromServices] IAddressService addressService)
+        public async Task<ActionResult> GetUserAddresses()
         {
             //string email = HttpContext.Session.GetString("Login");
             string? email = GetCurrentUserEmail();
@@ -166,7 +168,7 @@ namespace La_Renza.Controllers
             {
                 return NotFound();
             }
-            var addresses = await addressService.GetAddressesByUserId(user.Id);
+            var addresses = await _addressService.GetAddressesByUserId(user.Id);
             return Ok(addresses);
         }
         [HttpPost("accountAddresses")]
@@ -226,7 +228,22 @@ namespace La_Renza.Controllers
 
             return Ok(new { message = "Address updated successfully." });
         }
+        [HttpGet("accountCoupons")]
+        public async Task<ActionResult> GetUserCoupons()
+        {
+            //string email = HttpContext.Session.GetString("Login");
+            string? email = GetCurrentUserEmail();
+            if (email == null)
+                return Unauthorized(new { message = "User not logged in." });
 
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var coupons = await _couponService.GetCouponsByUserId(user.Id);
+            return Ok(coupons);
+        }
 
         [HttpGet("accountOrders")]
         public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
+const API_URL = 'https://localhost:7071/api/Account';
 
 const mockOrders = [
   {

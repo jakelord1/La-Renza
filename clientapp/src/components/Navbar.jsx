@@ -6,6 +6,11 @@ import CartCount from './CartCount';
 import NavbarDropdownSection from './NavbarDropdownSection';
 import data from '../data/dropdownSectionsData.json';
 
+
+
+
+const API_URL = 'https://localhost:7071/api/Account';
+
 const popularTags = [
   'сумка', 'джинси жіночі', 'піжама', 'футболка',
   'лонгслів', 'футболка жіноча', 'боді', 'шорти'
@@ -125,7 +130,7 @@ const Navbar = () => {
 
 
  useEffect(() => {
-    fetch('https://localhost:7071/api/Account/accountProfile', { credentials: 'include' })
+    fetch(`${API_URL}/accountProfile`, { credentials: 'include' })
       .then(res => {
         if (res.ok) {
           return res.json();

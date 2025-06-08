@@ -4,6 +4,7 @@ using La_Renza.DAL.Interfaces;
 using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
+using System.Runtime.InteropServices;
 
 namespace La_Renza.BLL.Services
 {
@@ -31,8 +32,8 @@ namespace La_Renza.BLL.Services
                 Password = userDto.Password,
                 NewsOn = userDto.NewsOn,
                 Addresses = new List<Address>(),
-                Invoices = new List<InvoiceInfo>()
-                
+                Invoices = new List<InvoiceInfo>(),
+                Cupon = new List<Coupon>()
             };
             await Database.Users.Create(user);
             await Database.Save();
@@ -55,7 +56,7 @@ namespace La_Renza.BLL.Services
 
             user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);
             user.Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices);
-
+            user.Cupon = _mapper.Map<ICollection<Coupon>>(userDto.Cupons);
             //var user = new User
             //{
             //    Id = userDto.Id,
@@ -99,7 +100,8 @@ namespace La_Renza.BLL.Services
                 NewsOn = user.NewsOn,
                 LaRenzaPoints = user.LaRenzaPoints,
                 Addresses = _mapper.Map<List<AddressDTO>>(user.Addresses),
-                Invoices = _mapper.Map<List<InvoiceInfoDTO>>(user.Invoices)
+                Invoices = _mapper.Map<List<InvoiceInfoDTO>>(user.Invoices),
+                Cupons = _mapper.Map<List<CouponDTO>>(user.Cupon)
             };
         }
 

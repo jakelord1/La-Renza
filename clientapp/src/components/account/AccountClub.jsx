@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+const API_URL = 'https://localhost:7071/api/Account';
 
 const coupons = [
   {
@@ -174,7 +175,7 @@ const AccountClub = () => {
   useEffect(() => {
   const fetchPoints = async () => {
     try {
-      const response = await fetch('https://localhost:7071/api/Account/accountProfile', {
+      const response = await fetch(`${API_URL}/accountProfile`, {
         method: 'GET',
         credentials: 'include'
       });
