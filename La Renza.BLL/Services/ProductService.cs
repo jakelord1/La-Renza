@@ -26,7 +26,8 @@ namespace La_Renza.BLL.Services
             {
                 ColorId = productDto.ColorId,
                 SizeId = productDto.SizeId,
-                Quantity = productDto.Quantity
+                Quantity = productDto.Quantity,
+                User = new List<User>()
             };
             await _db.Products.Create(product);
             await _db.Save();
@@ -39,7 +40,8 @@ namespace La_Renza.BLL.Services
                 Id = productDto.Id,
                 ColorId = productDto.ColorId,
                 SizeId = productDto.SizeId,
-                Quantity = productDto.Quantity
+                Quantity = productDto.Quantity,
+                User = _mapper.Map<ICollection<User>>(productDto.UsersWhoFavorited)
             };
             _db.Products.Update(product);
             await _db.Save();

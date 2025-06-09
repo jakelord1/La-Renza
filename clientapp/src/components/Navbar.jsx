@@ -1,10 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import AccountPopover from './AccountPopover';
 import AuthenticatedPopover from './AuthenticatedPopover';
 import CartCount from './CartCount';
 import NavbarDropdownSection from './NavbarDropdownSection';
 import data from '../data/dropdownSectionsData.json';
+
+
+
+
+const API_URL = 'https://localhost:7071/api/Account';
 
 const popularTags = [
   'сумка', 'джинси жіночі', 'піжама', 'футболка',
@@ -113,10 +118,10 @@ const NavbarDropdown = ({ section, onMouseLeave }) => {
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
- const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const searchRef = useRef(null);
   const popoverTimeout = useRef();
+  const location = useLocation();
 
   const handleToggleSearch = e => {
     e.preventDefault();
@@ -125,7 +130,7 @@ const Navbar = () => {
 
 
  useEffect(() => {
-    fetch('https://localhost:7071/api/Users/accountProfile', { credentials: 'include' })
+    fetch(`${API_URL}/accountProfile`, { credentials: 'include' })
       .then(res => {
         if (res.ok) {
           return res.json();
@@ -140,7 +145,7 @@ const Navbar = () => {
         }
       })
       .catch(() => setIsAuthenticated(false));
-  }, []);
+ }, [location]);
 
 
   useEffect(() => {

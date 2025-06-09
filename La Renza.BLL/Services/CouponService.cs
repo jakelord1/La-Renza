@@ -10,20 +10,33 @@ namespace La_Renza.BLL.Services
     public class CouponService : ICouponService
     {
         IUnitOfWork Database { get; set; }
-
-        public CouponService(IUnitOfWork uow)
+        private readonly IMapper _mapper;
+        public CouponService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
 
         public async Task CreateCoupon(CouponDTO couponDto)
         {
+            var users = new List<User>();
+            
+            foreach (var userId in couponDto.Users)
+            {
+                var user = await Database.Users.Get(userId);
+                if (user != null)
+                {
+                    users.Add(user);
+                }
+            }
+
             var coupon = new Coupon
             {
                 Id = couponDto.Id,
                 Name = couponDto.Name,
                 Description = couponDto.Description,
-                Price = couponDto.Price
+                Price = couponDto.Price,
+                User = users
 
             };
             await Database.Coupons.Create(coupon);
@@ -62,11 +75,22 @@ namespace La_Renza.BLL.Services
                 Price = coupon.Price
             };
         }
+        
+        public async Task<IEnumerable<CouponDTO>> GetCouponsByUserId(int userId)
+        {
+            var user = await Database.Users.Get(userId);
+
+            var coupons = user?.Cupon;
+
+         
+            return _mapper.Map<IEnumerable<CouponDTO>>(coupons);
+        }
 
         public async Task<IEnumerable<CouponDTO>> GetCoupons()
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<Coupon, CouponDTO>()).CreateMapper();
-            return mapper.Map<IEnumerable<Coupon>, IEnumerable<CouponDTO>>(await Database.Coupons.GetAll());
+            var coupons = await Database.Coupons.GetAll();
+            return _mapper.Map<IEnumerable<Coupon>, IEnumerable<CouponDTO>>(coupons);
+
         }
 
         public async Task<bool> ExistsCoupon(int id)

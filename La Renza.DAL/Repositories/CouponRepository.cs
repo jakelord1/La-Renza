@@ -18,7 +18,7 @@ namespace La_Renza.DAL.Repositories
         public async Task<IEnumerable<Coupon>> GetAll()
         {
             return await db.Coupon
-                .Include(c => c.Users)
+                .Include(c => c.User)
                 .Include(c => c.Orders)
                 .ToListAsync();
         }
@@ -32,7 +32,7 @@ namespace La_Renza.DAL.Repositories
         public async Task<Coupon> Get(string name)
         {
             var coupons = await db.Coupon
-                .Include(c => c.Users)
+                .Include(c => c.User)
                 .Include(c => c.Orders).Where(a => a.Name == name).ToListAsync();
             Coupon? coupon = coupons?.FirstOrDefault();
             return coupon!;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Alert from 'react-bootstrap/Alert';
 
-const API_URL = 'https://localhost:7071/api/Users';
+const API_URL = 'https://localhost:7071/api/Account';
 
 const AccountAddresses = () => {
  const [addresses, setAddresses] = useState([]);

@@ -8,6 +8,7 @@ namespace La_Renza.BLL.Interfaces
         Task UpdateCoupon(CouponDTO couponDto);
         Task DeleteCoupon(int id);
         Task<CouponDTO> GetCoupon(int id);
+        Task<IEnumerable<CouponDTO>> GetCouponsByUserId(int userId);
         Task<IEnumerable<CouponDTO>> GetCoupons();
         Task<bool> ExistsCoupon(int id);
     }

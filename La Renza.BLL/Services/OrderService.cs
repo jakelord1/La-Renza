@@ -101,7 +101,10 @@ namespace La_Renza.BLL.Services
         public async Task<IEnumerable<OrderDTO>> GetOrders()
         {
             var config = new MapperConfiguration(cfg => cfg.CreateMap<DAL.Entities.Order, OrderDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))  
+            .ForMember(dest => dest.Delivery, opt => opt.MapFrom(src => src.Delivery))  
+            .ForMember(dest => dest.Cupons, opt => opt.MapFrom(src => src.Cupons))  
+            ); 
             var mapper = new Mapper(config);
             return mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
 
