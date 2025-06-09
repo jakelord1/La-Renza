@@ -31,5 +31,6 @@ namespace La_Renza.DAL.Entities
         public ICollection<Order>? Orders { get; set; }
 
         public ICollection<Comment>? Comments { get; set; }
+        public ICollection<Product>? Product { get; set; }
     }
 }

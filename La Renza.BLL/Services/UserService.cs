@@ -35,8 +35,9 @@ namespace La_Renza.BLL.Services
                 LaRenzaPoints = userDto.LaRenzaPoints,
                 Addresses = new List<Address>(),
                 Invoices = new List<InvoiceInfo>(),
-                Cupon = new List<Coupon>()
-            };
+                Cupon = new List<Coupon>(),
+                Product = new List<Product>()
+    };
             await Database.Users.Create(user);
             await Database.Save();
         }
@@ -59,6 +60,7 @@ namespace La_Renza.BLL.Services
             user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);
             user.Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices);
             user.Cupon = _mapper.Map<ICollection<Coupon>>(userDto.Cupons);
+            user.Product = _mapper.Map<ICollection<Product>>(userDto.FavoriteProducts);
 
             //var user = new User
             //{
@@ -104,7 +106,8 @@ namespace La_Renza.BLL.Services
                 LaRenzaPoints = user.LaRenzaPoints,
                 Addresses = _mapper.Map<List<AddressDTO>>(user.Addresses),
                 Invoices = _mapper.Map<List<InvoiceInfoDTO>>(user.Invoices),
-                Cupons = _mapper.Map<List<CouponDTO>>(user.Cupon)
+                Cupons = _mapper.Map<List<CouponDTO>>(user.Cupon),
+                FavoriteProducts = _mapper.Map<List<ProductDTO>>(user.Product)
             };
         }
 
@@ -138,7 +141,8 @@ namespace La_Renza.BLL.Services
                 LaRenzaPoints = user.LaRenzaPoints,
                 Addresses = _mapper.Map<List<AddressDTO>>(user.Addresses),
                 Invoices = _mapper.Map<List<InvoiceInfoDTO>>(user.Invoices),
-                Cupons = _mapper.Map<List<CouponDTO>>(user.Cupon)
+                Cupons = _mapper.Map<List<CouponDTO>>(user.Cupon),
+                FavoriteProducts = _mapper.Map<List<ProductDTO>>(user.Product)
             };
         }
 

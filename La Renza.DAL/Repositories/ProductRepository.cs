@@ -22,6 +22,7 @@ namespace La_Renza.DAL.Repositories
                 .Include(p => p.Color)
                 .Include(p => p.Size)
                 .Include(p => p.Comments)
+                .Include(p=>p.User)
                 .ToListAsync();
         }
 
@@ -38,6 +39,7 @@ namespace La_Renza.DAL.Repositories
                                    .Include(p => p.Color)
                 .Include(p => p.Size)
                 .Include(p => p.Comments)
+                 .Include(p => p.User)
                                    .ToListAsync();
             Product? product = products?.FirstOrDefault();
             return product!;
@@ -46,6 +48,7 @@ namespace La_Renza.DAL.Repositories
         {
             var products = await db.Product
                 .Include(p => p.Color)
+                 .Include(p => p.User)
                 .Include(p => p.Size)
                 .Include(p => p.Comments)
                                    .Where(p => p.Size.Name == size)

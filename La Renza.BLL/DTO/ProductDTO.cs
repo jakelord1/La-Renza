@@ -16,6 +16,6 @@ namespace La_Renza.BLL.DTO
 
         public SizeDTO Size { get; set; }
         public Color Color { get; set; }
-
+        public List<UserDTO>? UsersWhoFavorited { get; set; }
     }
 }
