@@ -1,31 +1,9 @@
 import React, { useEffect, useState } from 'react';
 const API_URL = 'https://localhost:7071/api/Account';
+const API_URL2 = 'https://localhost:7071/api/Coupons';
 
-const coupons = [
-  {
-    title: 'Знижка 100 UAH',
-    desc: 'Після активації купон діє необмежений строк. Мінімальна сума покупки становить 300 UAH',
-    points: 200,
-    minSum: 300,
-    disabled: true
-  },
-  {
-    title: 'Знижка 200 UAH',
-    desc: 'Після активації купон діє необмежений строк. Мінімальна сума покупки становить 500 UAH',
-    points: 400,
-    minSum: 500,
-    disabled: true
-  },
-  {
-    title: 'Знижка 500 UAH',
-    desc: 'Після активації купон діє необмежений строк. Мінімальна сума покупки становить 1100 UAH',
-    points: 1000,
-    minSum: 1100,
-    disabled: true
-  }
-];
 
-function CouponCarousel({ coupons }) {
+function CouponCarousel({ userCoupons, allCoupons, points ,onActivateCoupon }) {
   const [hovered, setHovered] = useState(false);
   const scrollRef = React.useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -46,6 +24,11 @@ function CouponCarousel({ coupons }) {
   const scrollBy = (offset) => {
     scrollRef.current && scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
   };
+
+
+
+  const userCouponIds = new Set(userCoupons.map(c => c.id));
+
 
   return (
     <div
@@ -85,32 +68,71 @@ function CouponCarousel({ coupons }) {
         style={{display:'flex',overflowX:'auto',scrollSnapType:'x mandatory',gap:24,paddingBottom:8,scrollbarWidth:'none',msOverflowStyle:'none'}}
         className="coupon-carousel-scroll"
       >
-        {coupons.map((coupon, idx) => (
-          <div
-            key={idx}
-            style={{
-              minWidth:280,
-              maxWidth:320,
-              background:'#f3eafe',
-              borderRadius:12,
-              padding:24,
-              scrollSnapAlign:'start',
-              flex:'0 0 320px',
-              marginBottom:0,
-              display:'flex',
-              flexDirection:'column',
-              alignItems:'stretch',
-              justifyContent:'space-between',
-              boxShadow:'0 2px 8px rgba(124,58,237,0.07)'
-            }}
-          >
-            <div style={{fontWeight:700,fontSize:18,marginBottom:8}}>{coupon.title}</div>
-            <div style={{fontSize:15,color:'#444',marginBottom:16}}>{coupon.desc}</div>
-            <button disabled={coupon.disabled} style={{width:'100%',background:'#d6dbe4',color:'#888',fontWeight:600,fontSize:16,border:'none',borderRadius:6,padding:'12px 0',cursor:'not-allowed'}}>
-              Активуй за {coupon.points} балів
-            </button>
-          </div>
-        ))}
+{allCoupons.map(coupon => {
+   const isActivated = userCouponIds.has(coupon.id);
+   return (
+            <div key={coupon.id}
+              style={{
+                minWidth:280,
+                maxWidth:320,
+                background:'#f3eafe',
+                borderRadius:12,
+                padding:24,
+                scrollSnapAlign:'start',
+                flex:'0 0 320px',
+                marginBottom:0,
+                display:'flex',
+                flexDirection:'column',
+                alignItems:'stretch',
+                justifyContent:'space-between',
+                boxShadow:'0 2px 8px rgba(124,58,237,0.07)'
+              }}
+            >
+              <div style={{fontWeight:700, fontSize:18, marginBottom:8}}>{coupon.name}</div>
+              <div style={{fontSize:15, color:'#444', marginBottom:16}}>{coupon.description}</div>
+
+              {isActivated ? (
+                <button
+                  disabled
+                  style={{
+                    width: '100%',
+                    background: '#28a745',
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: 16,
+                    border: 'none',
+                    borderRadius: 6,
+                    padding: '12px 0',
+                    cursor: 'default',
+                  }}
+                >
+                  Активовано
+                </button>
+              ) : (
+             <button
+  onClick={() => onActivateCoupon(coupon.id)}
+  disabled={coupon.disabled || points < coupon.price}
+  title={points < coupon.price ? 'Недостатньо балів' : ''}
+  style={{
+    width: '100%',
+    background: points >= coupon.price ? 'var(--purple, #7c3aed)' : '#d6dbe4',
+    color: points >= coupon.price ? '#fff' : '#888',
+    fontWeight: 600,
+    fontSize: 16,
+    border: 'none',
+    borderRadius: 6,
+    padding: '12px 0',
+    cursor: points >= coupon.price ? 'pointer' : 'not-allowed',
+  }}
+>
+  Активуй за {coupon.price} балів
+</button>
+
+
+              )}
+            </div>
+          );
+        })}
         <div
           style={{
             minWidth:280,
@@ -171,8 +193,28 @@ function CouponCarousel({ coupons }) {
 const AccountClub = () => {
   const [showClubModal, setShowClubModal] = useState(false);
  const [points, setPoints] = useState(null);
+  
 
-  useEffect(() => {
+const [allCoupons, setAllCoupons] = useState([]);
+const [userCoupons, setUserCoupons] = useState([]);
+const [loadingCoupons, setLoadingCoupons] = useState(false);
+
+
+  const fetchUserCoupons = async () => {
+        setLoadingCoupons(true);
+    try {
+      const response = await fetch(`${API_URL}/accountCoupons`, { credentials: 'include' });
+      if (!response.ok) throw new Error('Помилка при отриманні купонів');
+      const data = await response.json();
+       console.log('User coupons:', data);
+      setUserCoupons(data);
+    } catch (err) {
+      console.error(err);
+      setUserCoupons([]); 
+    } finally {
+      setLoadingCoupons(false);
+    }
+  };
   const fetchPoints = async () => {
     try {
       const response = await fetch(`${API_URL}/accountProfile`, {
@@ -190,9 +232,54 @@ const AccountClub = () => {
     }
   };
 
-  fetchPoints();
-}, []);
+  const fetchAllCoupons = async () => {
+    try {
+      const response = await fetch(`${API_URL2}`, { credentials: 'include' });
+      if (!response.ok) throw new Error('Ошибка при загрузке всех купонов');
+      const data = await response.json();
+       console.log('All coupons:', data); 
+      setAllCoupons(data);
+    } catch (error) {
+      console.error(error);
+      setAllCoupons([]);
+    }
+  };
+  useEffect(() => {
+  
 
+  fetchAllCoupons();
+  fetchUserCoupons();
+   fetchPoints();
+}, []);
+  
+
+
+
+  const handleActivateCoupon = async (couponId) => {
+    try {
+      const response = await fetch(`${API_URL}/accountCoupons`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(couponId),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        alert(`Помилка: ${errData.message || 'Невідома помилка'}`);
+        return;
+      }
+
+      alert('Купон успішно активований!');
+        await fetchUserCoupons();
+       await  fetchAllCoupons();
+        await fetchPoints();
+
+   
+    } catch (error) {
+      alert('Помилка мережі: ' + error.message);
+    }
+  };
   return (
     <div className="account-content">
       <h2 className="mb-4">Акаунт учасника клубу</h2>
@@ -225,7 +312,13 @@ const AccountClub = () => {
           БІЛЬШЕ <span style={{fontSize:18,marginLeft:2}}>&#8250;</span>
         </a>
       </div>
-      <CouponCarousel coupons={coupons} />
+   {loadingCoupons ? (
+        <div>Загрузка купонов...</div>
+      ) : (
+    <CouponCarousel allCoupons={allCoupons} userCoupons={userCoupons} points={points}   onActivateCoupon={handleActivateCoupon} />
+
+      )}
+
       <div className="d-flex justify-content-end mt-4" style={{gap:32}}>
         {/* <a href="#" style={{color:'var(--purple, #7c3aed)',fontWeight:600,textDecoration:'none'}}>ІСТОРІЯ БАЛІВ</a> */}
         <a href="#" onClick={e => {e.preventDefault(); setShowClubModal(true);}} style={{color:'var(--purple, #7c3aed)',fontWeight:600,textDecoration:'none'}}>ПРО La'Renza CLUB</a>

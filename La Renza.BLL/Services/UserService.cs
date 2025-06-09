@@ -5,6 +5,7 @@ using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
 using System.Runtime.InteropServices;
+using La_Renza.DAL.Repositories;
 
 namespace La_Renza.BLL.Services
 {
@@ -31,6 +32,7 @@ namespace La_Renza.BLL.Services
                 Gender = userDto.Gender,
                 Password = userDto.Password,
                 NewsOn = userDto.NewsOn,
+                LaRenzaPoints = userDto.LaRenzaPoints,
                 Addresses = new List<Address>(),
                 Invoices = new List<InvoiceInfo>(),
                 Cupon = new List<Coupon>()
@@ -53,10 +55,11 @@ namespace La_Renza.BLL.Services
             user.Gender = userDto.Gender;
             user.Password = userDto.Password;
             user.NewsOn = userDto.NewsOn;
-
+            user.LaRenzaPoints = userDto.LaRenzaPoints;
             user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);
             user.Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices);
             user.Cupon = _mapper.Map<ICollection<Coupon>>(userDto.Cupons);
+
             //var user = new User
             //{
             //    Id = userDto.Id,
@@ -132,7 +135,10 @@ namespace La_Renza.BLL.Services
                 Gender = user.Gender,
                 Password = user.Password,
                 NewsOn = user.NewsOn,
-                LaRenzaPoints = user.LaRenzaPoints
+                LaRenzaPoints = user.LaRenzaPoints,
+                Addresses = _mapper.Map<List<AddressDTO>>(user.Addresses),
+                Invoices = _mapper.Map<List<InvoiceInfoDTO>>(user.Invoices),
+                Cupons = _mapper.Map<List<CouponDTO>>(user.Cupon)
             };
         }
 
@@ -140,5 +146,35 @@ namespace La_Renza.BLL.Services
         {
             return await Database.Users.Any();
         }
+
+
+        public async Task<(bool Success, string? ErrorMessage)> AddCouponToUser(string userEmail, int couponId)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
+
+            var coupon = await Database.Coupons.Get(couponId);
+            if (coupon == null)
+                return (false, "Coupon not found.");
+
+            if (user.LaRenzaPoints < coupon.Price)
+                return (false, "Недостаточно баллов.");
+
+
+            if (!user.Cupon.Any(c => c.Id == couponId))
+            {
+                user.Cupon.Add(coupon);
+                user.LaRenzaPoints -= coupon.Price;
+
+                Database.Users.Update(user);
+                await Database.Save();
+            }
+
+            return (true, null);
+        }
+
+
+
     }
 }

@@ -244,6 +244,18 @@ namespace La_Renza.Controllers
             var coupons = await _couponService.GetCouponsByUserId(user.Id);
             return Ok(coupons);
         }
+        [HttpPost("accountCoupons")]
+        public async Task<IActionResult> AddUserCoupons([FromBody] int couponId)
+        {
+            string email = GetCurrentUserEmail();
+            if (string.IsNullOrEmpty(email)) return Unauthorized();
+
+            var result = await _userService.AddCouponToUser(email, couponId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Купон добавлен и баллы списаны." });
+        }
 
         [HttpGet("accountOrders")]
         public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)
