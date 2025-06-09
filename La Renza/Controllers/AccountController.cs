@@ -244,6 +244,24 @@ namespace La_Renza.Controllers
             var coupons = await _couponService.GetCouponsByUserId(user.Id);
             return Ok(coupons);
         }
+
+        [HttpGet("accountFavoriteProducts")]
+        public async Task<ActionResult> GetUserFavoriteProducts()
+        {
+            //string email = HttpContext.Session.GetString("Login");
+            string? email = GetCurrentUserEmail();
+            if (email == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            UserDTO user = await _userService.GetUserByLogin(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var favoriteProducts = user.FavoriteProducts;
+            return Ok(favoriteProducts);
+        }
+
         [HttpPost("accountCoupons")]
         public async Task<IActionResult> AddUserCoupons([FromBody] int couponId)
         {
