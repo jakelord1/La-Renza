@@ -348,7 +348,22 @@ namespace La_Renza.Controllers
             var orders = await orderService.GetOrdersByUserId(user.Id);
             return Ok(orders);
         }
-       
-    
+        // POST: api/Account/addOrder
+        [HttpPost("addOrder")]
+        public async Task<IActionResult> AddUserOrder([FromBody] OrderDTO orderDto)
+        {
+            var user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not authenticated." });
+
+            var result = await _userService.AddOrderToUser(user.Email, orderDto);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Order successfully added." });
+        }
+
+
     }
 }

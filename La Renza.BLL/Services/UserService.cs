@@ -203,6 +203,22 @@ namespace La_Renza.BLL.Services
 
             return (true, null);
         }
+        public async Task<(bool Success, string? ErrorMessage)> AddOrderToUser(string userEmail, OrderDTO orderDto)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
+
+            var order = _mapper.Map<Order>(orderDto);
+            order.UserId = user.Id;
+            order.User = user;
+
+            await Database.Orders.Create(order);
+            await Database.Save();
+
+            return (true, null);
+        }
+
 
         public async Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductFromUser(string userEmail, int productId)
         {
