@@ -76,13 +76,13 @@ styleSheet.textContent = Object.entries(paginationStyles)
 document.head.appendChild(styleSheet);
 
 const Comments = () => {
-  const [userNames, setUserNames] = useState({}); // { userId: fullName }
-  const [modelNames, setModelNames] = useState({}); // { modelId: name }
-  const [colorNames, setColorNames] = useState({}); // { colorId: name }
-  const [colorIdToModelId, setColorIdToModelId] = useState({}); // { colorId: modelId }
-  const [sizeNames, setSizeNames] = useState({}); // { sizeId: name }
-  const [imagePaths, setImagePaths] = useState({}); // { imageId: path }
-  const [productMap, setProductMap] = useState({}); // { productId: { colorId, sizeId } }
+  const [userNames, setUserNames] = useState({});
+  const [modelNames, setModelNames] = useState({});
+  const [colorNames, setColorNames] = useState({});
+  const [colorIdToModelId, setColorIdToModelId] = useState({});
+  const [sizeNames, setSizeNames] = useState({});
+  const [imagePaths, setImagePaths] = useState({});
+  const [productMap, setProductMap] = useState({});
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState('');

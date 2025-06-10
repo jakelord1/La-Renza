@@ -28,7 +28,8 @@ builder.Services.AddSession(options =>
 }); 
 
 builder.Services.AddLaRenzaDAL(builder.Configuration.GetConnectionString("DefaultConnection")!);
-//BLLServiceCollectionExtensions.AddLaRenzaBLL(builder.Services);
+DependencyInjection.AddLaRenzaBLL(builder.Services);
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

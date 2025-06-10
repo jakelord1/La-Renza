@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 
-// categories: массив объектов с полями id, name, children
-// selected: массив выбранных id (ожидаем один элемент)
-// onSelect: функция выбора категории
 const CategoryTree = ({ categories, selected, onSelect }) => {
   return (
     <ul className="list-unstyled mb-0 ps-1">

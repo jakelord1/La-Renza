@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 
-// Створення дерева категорій з flat-списку
 function buildCategoryTree(list) {
   const map = {};
   const roots = [];
@@ -175,30 +174,22 @@ const Catalog = () => {
       .catch(() => setCategoryTree([]));
   }, []);
 
-  // Breadcrumbs example
   const breadcrumbs = [
     { label: 'Головна', href: '/' },
     { label: 'Каталог', href: '/catalog' },
   ];
 
-  // Filtering
   const filteredProducts = React.useMemo(() => {
     let arr = catalogProducts;
-    // Category filter
     if (filters.categories.length) arr = arr.filter(p => filters.categories.includes(p.category));
-    // Price filter
     if (filters.priceMin) arr = arr.filter(p => Number(p.price) >= Number(filters.priceMin));
     if (filters.priceMax) arr = arr.filter(p => Number(p.price) <= Number(filters.priceMax));
-    // Color filter
     if (filters.colors.length) arr = arr.filter(p => p.colors && p.colors.some(c => filters.colors.includes(c)));
-    // Size filter
     if (filters.sizes.length) arr = arr.filter(p => p.sizes && p.sizes.some(s => filters.sizes.includes(s)));
-    // Brand filter
     if (filters.brands.length) arr = arr.filter(p => p.brand && filters.brands.includes(p.brand));
     return arr;
   }, [filters]);
 
-  // Sorting
   const sortedProducts = React.useMemo(() => {
     let arr = [...filteredProducts];
     switch (sort) {
@@ -215,14 +206,12 @@ const Catalog = () => {
     }
   }, [filteredProducts, sort]);
 
-  // Pagination
   const total = sortedProducts.length;
   const paginatedProducts = React.useMemo(() => {
     const start = (page - 1) * perPage;
     return sortedProducts.slice(start, start + perPage);
   }, [sortedProducts, page, perPage]);
 
-  // Reset filters
   const handleResetFilters = () => setFilters(initialFilters);
   React.useEffect(() => { setPage(1); }, [filters, sort, perPage]);
 
@@ -244,7 +233,6 @@ const Catalog = () => {
         <div className="col-12 col-md-8 col-lg-9">
           <Breadcrumbs items={breadcrumbs} />
           <h1 className="h4 fw-bold mb-3">Каталог</h1>
-
 
           <div className={view === 'grid' ? 'row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3' : 'd-flex flex-column gap-3'}>
             {paginatedProducts.length === 0 ? (

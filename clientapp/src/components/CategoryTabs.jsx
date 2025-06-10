@@ -14,7 +14,6 @@ const CategoryTabs = ({ active, setActive }) => {
   const handleClick = (tab, e) => {
     e.preventDefault();
     setActive(tab);
-    // Force a reflow to ensure the active class is applied immediately
     const button = e.currentTarget;
     button.blur();
     button.focus();
@@ -28,7 +27,7 @@ const CategoryTabs = ({ active, setActive }) => {
             <button
               className={`nav-link category-tab-btn${active === tab ? ' active' : ''}`}
               onClick={(e) => handleClick(tab, e)}
-              onMouseDown={(e) => e.preventDefault()} // Prevent focus loss on mousedown
+              onMouseDown={(e) => e.preventDefault()}
             >
               {tab}
             </button>

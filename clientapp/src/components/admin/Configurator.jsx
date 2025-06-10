@@ -9,11 +9,16 @@ const getConfigItem = async (name) => {
 };
 
 const saveConfigItem = async (item) => {
-    const method = item.id ? 'PUT' : 'POST';
+  const method = item.id ? 'PUT' : 'POST';
+  let payload = item;
+  if (method === 'POST') {
+    const { _id, ...rest } = item;
+    payload = rest;
+  }
   const res = await fetch('/api/Configurator', {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(item)
+    body: JSON.stringify(payload)
   });
   return res.ok;
 };
@@ -53,7 +58,7 @@ const Configurator = () => {
       }
       setLoading(false);
     }).catch(e => {
-      setError('Помилка завантаження');
+      setError('Помилка завантаження: ' + e);
       setLoading(false);
     });
   }, []);
