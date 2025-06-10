@@ -8,6 +8,7 @@ const BADGE_COLORS = {
   'ЦІНИ ВАУ!': 'bg-pink text-white',
   'ХІТ ПРОДАЖУ': 'bg-warning text-dark',
 };
+const API_URL = 'https://localhost:7071/api/Users/Model';
 
 const isFavorite = (product) => {
   try {

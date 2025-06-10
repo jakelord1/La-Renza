@@ -17,17 +17,32 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<IEnumerable<User>> GetAll()
         {
-            return await db.User.Include(u => u.Addresses).Include(u => u.Invoices).ToListAsync();
+            return await db.User
+                .Include(u => u.Addresses)
+                .Include(u => u.Invoices)
+                .Include(u => u.Cupon)
+                .Include(u=> u.Product)
+                .ToListAsync();
         }
 
         public async Task<User> Get(int id)
         {
-            return await db.User.Include(u => u.Addresses).Include(u => u.Invoices).FirstOrDefaultAsync(u => u.Id == id);
+            return await db.User
+                .Include(u => u.Addresses)
+                .Include(u => u.Invoices)
+                .Include(u => u.Cupon)
+                .Include(u => u.Product)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<User> Get(string email)
         {
-            var users = await db.User.Include(u => u.Addresses).Include(u => u.Invoices).Where(u => u.Email == email).ToListAsync(); 
+            var users = await db.User
+                .Include(u => u.Addresses)
+                .Include(u => u.Invoices)
+                .Include(u => u.Cupon)
+                .Include(u => u.Product)
+                .Where(u => u.Email == email).ToListAsync(); 
             User? user = users?.FirstOrDefault();
             return user!;
         }

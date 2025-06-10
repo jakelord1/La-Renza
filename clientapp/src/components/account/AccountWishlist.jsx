@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = 'https://localhost:7071/api/Account';
+
+
 const mockWishlist = [
   {
     id: 1,

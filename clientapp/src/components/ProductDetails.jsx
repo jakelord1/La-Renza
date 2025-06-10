@@ -26,6 +26,26 @@ const ProductDetails = ({ product }) => {
       });
   }, [product.id]);
 
+    const API_URL = 'https://localhost:7071/api/Adresses';
+
+    const fetchModels = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(API_URL);
+            if (!res.ok) throw new Error('Помилка завантаження моделей');
+            const mockProducts = await res.json();
+        } catch (e) {
+            setAlert({ show: true, type: 'danger', message: e.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchModels();
+    }, []);
+
+
   useEffect(() => {
     if (!showModal) return;
     const handleKey = (e) => { if (e.key === 'Escape') setShowModal(false); };

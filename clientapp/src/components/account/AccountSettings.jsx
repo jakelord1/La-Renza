@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import Alert from 'react-bootstrap/Alert';
 
-const API_URL = 'https://localhost:7071/api/Users';
+const API_URL = 'https://localhost:7071/api/Account';
 
 const AccountSettings = () => {
   const [currentPassword, setCurrentPassword] = useState('');

@@ -25,11 +25,12 @@ namespace La_Renza.DAL.Entities
         public int LaRenzaPoints { get; set; }
 
         public ICollection<InvoiceInfo> Invoices { get; set; }
-        public ICollection<Coupon>? Coupons { get; set; }
+        public ICollection<Coupon>? Cupon { get; set; }
 
         public ICollection<Address> Addresses { get; set; }
         public ICollection<Order>? Orders { get; set; }
 
         public ICollection<Comment>? Comments { get; set; }
+        public ICollection<Product>? Product { get; set; }
     }
 }

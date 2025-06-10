@@ -18,6 +18,8 @@ namespace La_Renza.BLL.DTO
 
         public List<AddressDTO>? Addresses { get; set; }
         public List<InvoiceInfoDTO>? Invoices { get; set; }
+        public List<CouponDTO>? Cupons { get; set; }
+        public List<ProductDTO>? FavoriteProducts { get; set; }
     }
 
 }
