@@ -4,9 +4,6 @@ using La_Renza.DAL.Repositories;
 
 namespace La_Renza.BLL.Services
 {
-    /// <summary>
-    /// Реалізація сервісу для роботи з конфігурацією (CRUD, универсальные структуры через JsonElement)
-    /// </summary>
     public class ConfiguratorService : IConfiguratorService
     {
         private readonly ConfiguratorRepository _repo;

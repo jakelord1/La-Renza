@@ -11,7 +11,7 @@ namespace La_Renza.DAL.Entities
         [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
         [JsonPropertyName("type")]
-        public string Type { get; set; } = "string"; // string, categoryIds, bannerArray, promoArray и т.д.
+        public string Type { get; set; } = "string";
         [JsonPropertyName("value")]
         public JsonElement? Value { get; set; }
     }
