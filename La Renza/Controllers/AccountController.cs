@@ -22,25 +22,48 @@ namespace La_Renza.Controllers
             _addressService = addressService;
             _couponService = couponService;
         }
-        private string GetCurrentUserEmail()
-        {
-            string? email = HttpContext.Session.GetString("Login");
 
+        private async Task<UserDTO?> GetCurrentUser()
+        {
+            string? userIdStr = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userIdStr) && Request.Cookies.ContainsKey("UserId"))
+            {
+                userIdStr = Request.Cookies["UserId"];
+            }
+
+            UserDTO? user = null;
+
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+            {
+                user = await _userService.GetUser(userId); 
+                if (user != null) return user;
+            }
+
+            string? email = HttpContext.Session.GetString("Login");
             if (string.IsNullOrEmpty(email) && Request.Cookies.ContainsKey("login"))
             {
                 email = Request.Cookies["login"];
             }
 
-            return email;
+            if (!string.IsNullOrEmpty(email))
+            {
+                user = await _userService.GetUserByLogin(email);
+            }
+
+            return user;
         }
+
+       
+
+        // GET: api/Account/isAuthenticated
         [HttpGet("isAuthenticated")]
         public async Task<ActionResult> IsAuthenticated()
         {
-            string email = GetCurrentUserEmail();
-            if (string.IsNullOrEmpty(email))
+            var user = await GetCurrentUser();
+            if (user == null)
                 return Unauthorized(new { isAuthenticated = false });
 
-            return Ok(new { isAuthenticated = true, email });
+            return Ok(new { isAuthenticated = true, email = user.Email });
         }
 
 
@@ -57,6 +80,7 @@ namespace La_Renza.Controllers
             {
                 return NotFound();
             }
+        
             if (!passwordService.VerifyPassword(logon.Password, user.Password))
             {
                 return Unauthorized(new { message = "Invalid login or password" });
@@ -66,13 +90,15 @@ namespace La_Renza.Controllers
                 CookieOptions option = new CookieOptions();
                 option.Expires = DateTime.Now.AddDays(10);
                 Response.Cookies.Append("login", logon.Email, option);
+                Response.Cookies.Append("UserId", user.Id.ToString(), option);
 
             }
             HttpContext.Session.SetString("Login", user.Email);
             HttpContext.Session.SetString("UserName", user.FullName);
+            HttpContext.Session.SetString("UserId", user.Id.ToString());
             return Ok(new { message = "Login successful" });
         }
-
+        // GET: api/Account/logout
         [HttpGet("logout")]
         public async Task<ActionResult> Logout()
         {
@@ -81,7 +107,7 @@ namespace La_Renza.Controllers
             return Ok(new { message = "Logout successful" });
 
         }
-
+        // POST: api/Account/changeUserPassword
         [HttpPost("changeUserPassword")]
         public async Task<IActionResult> ChangeUserPassword([FromBody] ChangePasswordModel model, [FromServices] PasswordHasher hasher)
         {
@@ -89,15 +115,10 @@ namespace La_Renza.Controllers
                 return BadRequest(ModelState);
 
             //string? email = HttpContext.Session.GetString("Login");
-            string email = GetCurrentUserEmail();
-            if (email == null)
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
             if (!hasher.VerifyPassword(model.CurrentPassword, user.Password))
             {
                 return BadRequest(new { message = "Current password is incorrect." });
@@ -108,23 +129,44 @@ namespace La_Renza.Controllers
 
             return Ok(new { message = "Profile updated successfully." });
         }
+        // DELETE: api/Users/deleteAccount
+        [HttpDelete("deleteAccount")]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
 
+
+            await _userService.DeleteUser(user.Id);
+
+            HttpContext.Session.Clear();
+            Response.Cookies.Delete("login");
+
+            return Ok(new { message = "Account deleted successfully." });
+        }
+        // GET: api/Account/accountProfile
+        [HttpGet("accountProfile")]
+        public async Task<ActionResult> GetUserInfo()
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+
+            return Ok(user);
+        }
+        // POST: api/Account/changeAccountProfile
         [HttpPost("changeAccountProfile")]
         public async Task<IActionResult> ChangeSomeUser([FromBody] ChangeAccountProfilveModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            //string? email = HttpContext.Session.GetString("Login");
-            string email = GetCurrentUserEmail();
-            if (email == null)
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
 
             user.Email = model.Email;
             user.PhoneNumber = model.PhoneNumber;
@@ -132,53 +174,33 @@ namespace La_Renza.Controllers
             user.SurName = model.SurName;
             user.BirthDate = model.BirthDate;
             user.Gender = model.Gender;
+            user.Cupons = null;
+          
 
             await _userService.UpdateUser(user);
 
             return Ok(new { message = "Profile updated successfully." });
         }
-
-        [HttpGet("accountProfile")]
-        public async Task<ActionResult> GetUserInfo()
-        {
-            //string email = HttpContext.Session.GetString("Login");
-            string email = GetCurrentUserEmail();
-            if (email == null)
-                return Unauthorized(new { message = "User not logged in." });
-
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(user);
-        }
-
+       
+        // GET: api/Account/accountAddresses
         [HttpGet("accountAddresses")]
         public async Task<ActionResult> GetUserAddresses()
         {
-            //string email = HttpContext.Session.GetString("Login");
-            string? email = GetCurrentUserEmail();
-            if (email == null)
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
+
             var addresses = await _addressService.GetAddressesByUserId(user.Id);
             return Ok(addresses);
         }
+        // POST: api/Account/accountAddresses
         [HttpPost("accountAddresses")]
         public async Task<IActionResult> AddUserAddress([FromBody] AccountAddressModel model)
         {
-            string email = GetCurrentUserEmail();
-            if (string.IsNullOrEmpty(email)) return Unauthorized();
-            UserDTO user = await _userService.GetUserByLogin(email);
+            UserDTO? user = await GetCurrentUser();
             if (user == null)
-                return NotFound(new { message = "User not found." });
+                return Unauthorized(new { message = "User not logged in." });
 
             var addressDto = new AddressDTO
             {
@@ -195,19 +217,17 @@ namespace La_Renza.Controllers
             await _addressService.CreateAddress(addressDto);
             return Ok();
         }
+        // PUT: api/Account/accountAddresses
         [HttpPut("accountAddresses/{id}")]
         public async Task<IActionResult> UpdateUserAddress(int id, [FromBody] AccountAddressModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string email = GetCurrentUserEmail();
-            if (string.IsNullOrEmpty(email))
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-                return NotFound(new { message = "User not found." });
 
             var addresses = await _addressService.GetAddressesByUserId(user.Id);
             var newAddress = addresses.FirstOrDefault(a => a.Id == id);
@@ -228,100 +248,14 @@ namespace La_Renza.Controllers
 
             return Ok(new { message = "Address updated successfully." });
         }
-        [HttpGet("accountCoupons")]
-        public async Task<ActionResult> GetUserCoupons()
-        {
-            //string email = HttpContext.Session.GetString("Login");
-            string? email = GetCurrentUserEmail();
-            if (email == null)
-                return Unauthorized(new { message = "User not logged in." });
-
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            var coupons = await _couponService.GetCouponsByUserId(user.Id);
-            return Ok(coupons);
-        }
-
-        [HttpGet("accountFavoriteProducts")]
-        public async Task<ActionResult> GetUserFavoriteProducts()
-        {
-            //string email = HttpContext.Session.GetString("Login");
-            string? email = GetCurrentUserEmail();
-            if (email == null)
-                return Unauthorized(new { message = "User not logged in." });
-
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            var favoriteProducts = user.FavoriteProducts;
-            return Ok(favoriteProducts);
-        }
-
-        [HttpPost("accountCoupons")]
-        public async Task<IActionResult> AddUserCoupons([FromBody] int couponId)
-        {
-            string email = GetCurrentUserEmail();
-            if (string.IsNullOrEmpty(email)) return Unauthorized();
-
-            var result = await _userService.AddCouponToUser(email, couponId);
-            if (!result.Success)
-                return BadRequest(new { message = result.ErrorMessage });
-
-            return Ok(new { message = "Купон добавлен и баллы списаны." });
-        }
-
-        [HttpGet("accountOrders")]
-        public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)
-        {
-            //string email = HttpContext.Session.GetString("Login");
-            string? email = GetCurrentUserEmail();
-            if (email == null)
-                return Unauthorized(new { message = "User not logged in." });
-
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var orders = await orderService.GetOrdersByUserId(user.Id);
-            return Ok(orders);
-        }
-        // DELETE: api/Users/deleteAccount
-        [HttpDelete("deleteAccount")]
-        public async Task<IActionResult> DeleteAccount()
-        {
-            string email = GetCurrentUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return Unauthorized(new { message = "User not logged in." });
-
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-                return NotFound(new { message = "User not found." });
-
-            await _userService.DeleteUser(user.Id);
-
-            HttpContext.Session.Clear();
-            Response.Cookies.Delete("login");
-
-            return Ok(new { message = "Account deleted successfully." });
-        }
         // DELETE: api/Users/accountAddresses/5
         [HttpDelete("accountAddresses/{id}")]
         public async Task<IActionResult> DeleteUserAddress(int id)
         {
-            string email = GetCurrentUserEmail();
-            if (string.IsNullOrEmpty(email))
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            UserDTO user = await _userService.GetUserByLogin(email);
-            if (user == null)
-                return NotFound(new { message = "User not found." });
 
             var address = await _addressService.GetAddress(id);
             if (address == null || address.UserId != user.Id)
@@ -331,5 +265,89 @@ namespace La_Renza.Controllers
 
             return Ok(new { message = "Address deleted successfully." });
         }
+
+        // GET: api/Account/accountCoupons
+        [HttpGet("accountCoupons")]
+        public async Task<ActionResult> GetUserCoupons()
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+
+            var coupons = await _couponService.GetCouponsByUserId(user.Id);
+            return Ok(coupons);
+        }
+
+        // POST: api/Account/accountCoupons
+        [HttpPost("accountCoupons")]
+        public async Task<IActionResult> AddUserCoupons([FromBody] int couponId)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            var result = await _userService.AddCouponToUser(user.Email, couponId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Купон добавлен и баллы списаны." });
+        }
+        // GET: api/Account/accountFavoriteProducts
+        [HttpGet("accountFavoriteProducts")]
+        public async Task<ActionResult> GetUserFavoriteProducts()
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+
+            var favoriteProducts = user.FavoriteProducts;
+            return Ok(favoriteProducts);
+        }
+        // POST: api/Account/accountFavoriteProducts
+        [HttpPost("accountFavoriteProducts")]
+        public async Task<IActionResult> AddFavoriteProduct([FromBody] int productId)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+
+            var result = await _userService.AddFavoriteProductToUser(user.Email, productId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Product added to favorites successfully." });
+        }
+        // DELETE: api/Account/accountFavoriteProducts/5
+        [HttpDelete("accountFavoriteProducts/{productId}")]
+        public async Task<IActionResult> RemoveFavoriteProduct(int productId)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+
+            var result = await _userService.RemoveFavoriteProductFromUser(user.Email, productId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Product removed from favorites successfully." });
+        }
+
+        // GET: api/Account/accountOrders
+        [HttpGet("accountOrders")]
+        public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            var orders = await orderService.GetOrdersByUserId(user.Id);
+            return Ok(orders);
+        }
+       
+    
     }
 }

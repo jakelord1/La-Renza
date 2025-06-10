@@ -51,11 +51,19 @@ namespace La_Renza.Controllers
             {
                 return BadRequest(ModelState);
             }
-            if (!await _userService.ExistsUser(user.Id))
+            var existUser = await _userService.GetUser(user.Id);
+            if (existUser == null)
             {
                 return NotFound();
             }
-            user.Password = hasher.HashPassword(user.Password);
+            if (!hasher.VerifyPassword(user.Password, existUser.Password))
+            {
+                user.Password = hasher.HashPassword(user.Password);
+            }
+            else
+            {
+                user.Password = existUser.Password;
+            }
             await _userService.UpdateUser(user);
             return Ok(user);
         }
