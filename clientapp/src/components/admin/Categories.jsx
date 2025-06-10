@@ -4,17 +4,23 @@ import { Card, Form, Button, Spinner, Alert, Table, Modal, Accordion } from 'rea
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories`;
 
 const Categories = () => {
+  const [previewImagePath, setPreviewImagePath] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [showSizesModal, setShowSizesModal] = useState(false);
+  const [showModelsModal, setShowModelsModal] = useState(false);
+  const [modalList, setModalList] = useState([]);
+  const [modalTitle, setModalTitle] = useState('');
 
   const [name, setName] = useState('');
   const [parentCategoryId, setParentCategoryId] = useState('');
   const [isGlobal, setIsGlobal] = useState(false);
-  const [imageId, setImageId] = useState('');
+  const [image, setImage] = useState({ path: '' });
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -38,7 +44,7 @@ const Categories = () => {
     setName('');
     setParentCategoryId('');
     setIsGlobal(false);
-    setImageId('');
+    setImage({ path: '' });
   };
 
   const handleAddCategory = async (e) => {
@@ -53,7 +59,9 @@ const Categories = () => {
         name,
         parentCategoryId: isGlobal || !parentCategoryId ? null : Number(parentCategoryId),
         isGlobal,
-        imageId: imageId ? Number(imageId) : null
+        image: { path: image.path || '' },
+        sizes: [],
+        models: []
       };
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -77,7 +85,9 @@ const Categories = () => {
     setName(cat.name);
     setParentCategoryId(cat.parentCategoryId ? String(cat.parentCategoryId) : '');
     setIsGlobal(cat.isGlobal);
-    setImageId(cat.imageId ? String(cat.imageId) : '');
+    setImage({
+      path: cat.image?.path || ''
+    });
     setShowEditModal(true);
   };
 
@@ -94,7 +104,9 @@ const Categories = () => {
         name,
         parentCategoryId: isGlobal || !parentCategoryId ? null : Number(parentCategoryId),
         isGlobal,
-        imageId: imageId ? Number(imageId) : null
+        image: { path: image.path || '' },
+        sizes: [],
+        models: []
       };
       const res = await fetch(API_URL, {
         method: 'PUT',
@@ -176,7 +188,7 @@ const Categories = () => {
                           <th>ID</th>
                           <th>Назва</th>
                           <th>Глобальна</th>
-                          <th>ImageId</th>
+                          <th>Зображення</th>
                           <th>Дії</th>
                         </tr>
                       </thead>
@@ -186,11 +198,20 @@ const Categories = () => {
                           <td>{group.id}</td>
                           <td>{group.name}</td>
                           <td>Так</td>
-                          <td>{group.imageId ?? '-'}</td>
+                          <td>{group.image?.path ? (
+  <img
+    src={group.image.path}
+    alt="img"
+    style={{ maxHeight: 40, borderRadius: 5, cursor: 'pointer' }}
+    onClick={() => { setPreviewImagePath(group.image.path); setShowPreview(true); }}
+  />
+) : '—'}</td>
                           <td>
                             <div className="d-flex gap-2">
                               <Button variant="link" size="sm" onClick={() => handleEditCategory(group)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
                               <Button variant="link" size="sm" onClick={() => handleDeleteCategory(group.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
+                              <Button variant="link" size="sm" onClick={() => { setModalTitle('Розміри'); setModalList(group.sizes); setShowSizesModal(true); }} title="Розміри" className="p-0"><i className="bi bi-rulers"></i></Button>
+                              <Button variant="link" size="sm" onClick={() => { setModalTitle('Моделі'); setModalList(group.models); setShowModelsModal(true); }} title="Моделі" className="p-0"><i className="bi bi-person"></i></Button>
                             </div>
                           </td>
                         </tr>
@@ -200,11 +221,20 @@ const Categories = () => {
                             <td>{child.id}</td>
                             <td>{child.name}</td>
                             <td>Ні</td>
-                            <td>{child.imageId ?? '-'}</td>
+                            <td>{child.image?.path ? (
+  <img
+    src={child.image.path}
+    alt="img"
+    style={{ maxHeight: 40, borderRadius: 5, cursor: 'pointer' }}
+    onClick={() => { setPreviewImagePath(child.image.path); setShowPreview(true); }}
+  />
+) : '—'}</td>
                             <td>
                               <div className="d-flex gap-2">
                                 <Button variant="link" size="sm" onClick={() => handleEditCategory(child)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
                                 <Button variant="link" size="sm" onClick={() => handleDeleteCategory(child.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
+                                <Button variant="link" size="sm" onClick={() => { setModalTitle('Розміри'); setModalList(child.sizes); setShowSizesModal(true); }} title="Розміри" className="p-0"><i className="bi bi-rulers"></i></Button>
+                                <Button variant="link" size="sm" onClick={() => { setModalTitle('Моделі'); setModalList(child.models); setShowModelsModal(true); }} title="Моделі" className="p-0"><i className="bi bi-person"></i></Button>
                               </div>
                             </td>
                           </tr>
@@ -242,8 +272,11 @@ const Categories = () => {
               </Form.Select>
             </div>
             <div className="col-12">
-              <label htmlFor="imageId" className="form-label text-secondary small mb-1">ImageId</label>
-              <Form.Control type="number" id="imageId" value={imageId} onChange={e => setImageId(e.target.value)} placeholder="ID зображення" disabled={loading} className="rounded-3" />
+              <label htmlFor="imagePath" className="form-label text-secondary small mb-1">Шлях до зображення</label>
+              <Form.Control type="text" id="imagePath" value={image.path} onChange={e => setImage({ path: e.target.value })} placeholder="/uploads/img.jpg" disabled={loading} className="rounded-3 mb-1" />
+              {image.path && (
+                <div className="mb-2"><img src={image.path} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc' }} /></div>
+              )}
             </div>
             <div className="col-12 mt-2">
               <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
@@ -277,8 +310,11 @@ const Categories = () => {
               </Form.Select>
             </div>
             <div className="col-12">
-              <label htmlFor="edit-imageId" className="form-label text-secondary small mb-1">ImageId</label>
-              <Form.Control type="number" id="edit-imageId" value={imageId} onChange={e => setImageId(e.target.value)} placeholder="ID зображення" disabled={loading} className="rounded-3" />
+              <label htmlFor="edit-imagePath" className="form-label text-secondary small mb-1">Шлях до зображення</label>
+              <Form.Control type="text" id="edit-imagePath" value={image.path} onChange={e => setImage({ path: e.target.value })} placeholder="/uploads/img.jpg" disabled={loading} className="rounded-3 mb-1" />
+              {image.path && (
+                <div className="mb-2"><img src={image.path} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc' }} /></div>
+              )}
             </div>
             <div className="col-12 mt-2">
               <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
@@ -286,6 +322,35 @@ const Categories = () => {
               </Button>
             </div>
           </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Модалка для перегляду розмірів/моделей */}
+      <Modal show={showSizesModal || showModelsModal} onHide={() => { setShowSizesModal(false); setShowModelsModal(false); }} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{modalTitle}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {modalList.length === 0 ? (
+            <div className="text-secondary">Немає даних</div>
+          ) : (
+            <ul>
+              {modalList.map((item, idx) => (
+                <li key={item.id || idx}>
+                  {showSizesModal ? item.name : `${item.name} — ${item.description || ''}`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Modal.Body>
+      </Modal>
+
+      {/* Модалка предпросмотру зображення */}
+      <Modal show={showPreview} onHide={() => setShowPreview(false)} centered size="lg">
+        <Modal.Body className="d-flex flex-column align-items-center justify-content-center">
+          {previewImagePath && (
+            <img src={previewImagePath} alt="preview" style={{ maxWidth: '100%', maxHeight: '70vh', borderRadius: 10 }} />
+          )}
         </Modal.Body>
       </Modal>
     </div>

@@ -24,23 +24,31 @@ const saveConfigItem = async (item) => {
 };
 
 const Configurator = () => {
-    const [carousel, setCarousel] = useState([{ path: '', link: '' }]);
+  const [carousel, setCarousel] = useState([{ path: '', link: '' }]);
   const [carouselId, setCarouselId] = useState(null);
   const [promoArray, setPromoArray] = useState([{ title: '', link: '', active: false }]);
   const [promoId, setPromoId] = useState(null);
   const [categoryIds, setCategoryIds] = useState([]);
   const [categoryIdsId, setCategoryIdsId] = useState(null);
+  const [categoryTabsIds, setCategoryTabsIds] = useState([]);
+  const [categoryTabsIdsId, setCategoryTabsIdsId] = useState(null);
+  const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
     setLoading(true);
+    fetch('/api/Categories')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setAllCategories(Array.isArray(data) ? data : []));
+
     Promise.all([
       getConfigItem('Банери'),
       getConfigItem('PromoBanner'),
-      getConfigItem('Категорії')
-    ]).then(([banners, promoItem, cats]) => {
+      getConfigItem('Категорії'),
+      getConfigItem('Категорії для табів')
+    ]).then(([banners, promoItem, cats, tabsCats]) => {
       if (banners) {
         setCarousel(Array.isArray(banners.value) ? banners.value.map(x => ({ path: x.path || '', link: x.link || '' })) : [{ path: '', link: '' }]);
         setCarouselId(banners.id);
@@ -56,6 +64,10 @@ const Configurator = () => {
         setCategoryIds(Array.isArray(cats.value) ? cats.value : []);
         setCategoryIdsId(cats.id);
       }
+      if (tabsCats) {
+        setCategoryTabsIds(Array.isArray(tabsCats.value) ? tabsCats.value : []);
+        setCategoryTabsIdsId(tabsCats.id);
+      }
       setLoading(false);
     }).catch(e => {
       setError('Помилка завантаження: ' + e);
@@ -63,27 +75,28 @@ const Configurator = () => {
     });
   }, []);
 
-    const handleCarouselChange = (idx, field, value) => {
+  const handleCarouselChange = (idx, field, value) => {
     setCarousel(carousel.map((item, i) => i === idx ? { ...item, [field]: value } : item));
   };
   const addCarouselItem = () => setCarousel([...carousel, { path: '', link: '' }]);
   const removeCarouselItem = (idx) => setCarousel(carousel.filter((_, i) => i !== idx));
   const saveCarousel = async () => {
     setSuccess(null); setError(null);
-    const ok = await saveConfigItem({
-      id: carouselId,
+    const bannerPayload = {
       name: 'Банери',
       type: 'bannerArray',
       value: carousel
-    });
+    };
+    if (carouselId) bannerPayload.id = carouselId;
+    const ok = await saveConfigItem(bannerPayload);
     setSuccess(ok ? 'Банери збережено' : null);
     setError(ok ? null : 'Помилка збереження');
   };
 
-    const handlePromoChange = (idx, field, value) => {
+  const handlePromoChange = (idx, field, value) => {
     setPromoArray(promoArray.map((item, i) => i === idx ? { ...item, [field]: value } : item));
   };
-    const setActivePromo = (idx) => {
+  const setActivePromo = (idx) => {
     setPromoArray(promoArray.map((item, i) => ({ ...item, active: i === idx })));
   };
 
@@ -91,29 +104,40 @@ const Configurator = () => {
   const removePromoItem = (idx) => setPromoArray(promoArray.filter((_, i) => i !== idx));
   const savePromo = async () => {
     setSuccess(null); setError(null);
-    const ok = await saveConfigItem({
-      id: promoId,
+    const promoPayload = {
       name: 'PromoBanner',
       type: 'array',
       value: promoArray
-    });
+    };
+    if (promoId) promoPayload.id = promoId;
+    const ok = await saveConfigItem(promoPayload);
     setSuccess(ok ? 'Промо-банери збережено' : null);
     setError(ok ? null : 'Помилка збереження');
   };
 
-    const handleCategoryIdsChange = (str) => {
-    // Ожидается строка вида "1,2,3"
-    setCategoryIds(str.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n)));
-  };
   const saveCategoryIds = async () => {
     setSuccess(null); setError(null);
-    const ok = await saveConfigItem({
-      id: categoryIdsId,
+    const payload = {
       name: 'Категорії',
       type: 'categoryIds',
       value: categoryIds
-    });
+    };
+    if (categoryIdsId) payload.id = categoryIdsId;
+    const ok = await saveConfigItem(payload);
     setSuccess(ok ? 'Категорії збережено' : null);
+    setError(ok ? null : 'Помилка збереження');
+  };
+
+  const saveCategoryTabsIds = async () => {
+    setSuccess(null); setError(null);
+    const payload = {
+      name: 'Категорії для табів',
+      type: 'categoryTabsIds',
+      value: categoryTabsIds
+    };
+    if (categoryTabsIdsId) payload.id = categoryTabsIdsId;
+    const ok = await saveConfigItem(payload);
+    setSuccess(ok ? 'Категорії для табів збережено' : null);
     setError(ok ? null : 'Помилка збереження');
   };
 
@@ -124,21 +148,140 @@ const Configurator = () => {
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
 
-      {/* Категории */}
       <Card className="mb-4">
         <Card.Header>Категорії на головній</Card.Header>
         <Card.Body>
-          <Form.Group className="mb-3">
-            <Form.Label>Список id категорій (через кому)</Form.Label>
-            <Form.Control
-              type="text"
-              value={categoryIds.join(',')}
-              onChange={e => handleCategoryIdsChange(e.target.value)}
-              placeholder="1,2,3"
-            />
+          <Form.Group controlId="mainCategories">
+            <Form.Label>Виберіть категорії для головної</Form.Label>
+            <div className="mb-3">
+              {allCategories.map(cat => (
+                <Form.Check
+                  key={cat.id}
+                  type="checkbox"
+                  id={`cat-${cat.id}`}
+                  label={cat.name}
+                  checked={categoryIds.includes(cat.id)}
+                  onChange={e => {
+                    if (e.target.checked) {
+                      setCategoryIds([...categoryIds, cat.id]);
+                    } else {
+                      setCategoryIds(categoryIds.filter(id => id !== cat.id));
+                    }
+                  }}
+                  className="mb-1"
+                />
+              ))}
+            </div>
           </Form.Group>
+
+          {categoryIds.length > 0 && (
+            <div className="mb-3">
+              <Form.Label>Порядок категорій на головній</Form.Label>
+              {categoryIds.map((id, idx) => {
+                const cat = allCategories.find(c => c.id === id);
+                if (!cat) return null;
+                return (
+                  <div key={id} className="d-flex align-items-center mb-1 gap-2">
+                    <span style={{ minWidth: 130 }}>{cat.name}</span>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      disabled={idx === 0}
+                      onClick={() => {
+                        if (idx === 0) return;
+                        const newOrder = [...categoryIds];
+                        [newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
+                        setCategoryIds(newOrder);
+                      }}
+                    >↑</Button>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      disabled={idx === categoryIds.length - 1}
+                      onClick={() => {
+                        if (idx === categoryIds.length - 1) return;
+                        const newOrder = [...categoryIds];
+                        [newOrder[idx + 1], newOrder[idx]] = [newOrder[idx], newOrder[idx + 1]];
+                        setCategoryIds(newOrder);
+                      }}
+                    >↓</Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <Button variant="primary" onClick={saveCategoryIds}>
             Зберегти категорії
+          </Button>
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4">
+        <Card.Header>Категорії для табів</Card.Header>
+        <Card.Body>
+          <Form.Group controlId="tabsCategories">
+            <Form.Label>Виберіть категорії для вкладок</Form.Label>
+            <div className="mb-3">
+              {allCategories.map(cat => (
+                <Form.Check
+                  key={cat.id}
+                  type="checkbox"
+                  id={`tabcat-${cat.id}`}
+                  label={cat.name}
+                  checked={categoryTabsIds.includes(cat.id)}
+                  onChange={e => {
+                    if (e.target.checked) {
+                      setCategoryTabsIds([...categoryTabsIds, cat.id]);
+                    } else {
+                      setCategoryTabsIds(categoryTabsIds.filter(id => id !== cat.id));
+                    }
+                  }}
+                  className="mb-1"
+                />
+              ))}
+            </div>
+          </Form.Group>
+
+          {categoryTabsIds.length > 0 && (
+            <div className="mb-3">
+              <Form.Label>Порядок категорій у вкладках</Form.Label>
+              {categoryTabsIds.map((id, idx) => {
+                const cat = allCategories.find(c => c.id === id);
+                if (!cat) return null;
+                return (
+                  <div key={id} className="d-flex align-items-center mb-1 gap-2">
+                    <span style={{ minWidth: 130 }}>{cat.name}</span>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      disabled={idx === 0}
+                      onClick={() => {
+                        if (idx === 0) return;
+                        const newOrder = [...categoryTabsIds];
+                        [newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
+                        setCategoryTabsIds(newOrder);
+                      }}
+                    >↑</Button>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      disabled={idx === categoryTabsIds.length - 1}
+                      onClick={() => {
+                        if (idx === categoryTabsIds.length - 1) return;
+                        const newOrder = [...categoryTabsIds];
+                        [newOrder[idx + 1], newOrder[idx]] = [newOrder[idx], newOrder[idx + 1]];
+                        setCategoryTabsIds(newOrder);
+                      }}
+                    >↓</Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <Button variant="primary" onClick={saveCategoryTabsIds}>
+            Зберегти категорії для табів
           </Button>
         </Card.Body>
       </Card>
