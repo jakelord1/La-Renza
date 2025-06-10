@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Spinner, Alert, Table, Modal, Pagination } from 'react-bootstrap';
-import couponsData from '../../data/coupons.json';
+
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Coupons`;
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);
@@ -10,132 +11,122 @@ const Coupons = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
 
-  const [code, setCode] = useState('');
-  const [discount, setDiscount] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
-  useEffect(() => {
+  const fetchCoupons = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setCoupons(couponsData.coupons);
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('Помилка завантаження купонів');
+      const data = await res.json();
+      setCoupons(data);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoupons();
   }, []);
 
-  const handleSubmit = (e) => {
+  const resetForm = () => {
+    setName('');
+    setPrice('');
+    setDescription('');
+  };
+
+  const handleAddCoupon = async (e) => {
     e.preventDefault();
-    
-    if (!code || !discount || !startDate || !endDate) {
-      setAlert({
-        show: true,
-        type: 'danger',
-        message: 'Будь ласка, заповніть всі обов\'язкові поля'
-      });
+    if (!name || !price || !description) {
+      setAlert({ show: true, type: 'danger', message: "Будь ласка, заповніть всі обов'язкові поля" });
       return;
     }
-
     setLoading(true);
-    
-    setTimeout(() => {
-      const newCoupon = {
-        id: coupons.length + 1,
-        code,
-        discount: parseFloat(discount),
-        startDate,
-        endDate,
-        description
+    try {
+      const body = {
+        name,
+        price: parseFloat(price),
+        description,
+        users: []
       };
-      
-      setCoupons([...coupons, newCoupon]);
-      
-      resetForm();
-      
-      setAlert({
-        show: true,
-        type: 'success',
-        message: 'Купон успішно додано!'
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       });
-      
-      setLoading(false);
+      if (!res.ok) throw new Error('Не вдалося додати купон');
+      setAlert({ show: true, type: 'success', message: 'Купон успішно додано!' });
       setShowAddModal(false);
-    }, 1000);
-  };
-
-  const handleUpdateCoupon = (e) => {
-    e.preventDefault();
-    
-    if (!code || !discount || !startDate || !endDate) {
-      setAlert({
-        show: true,
-        type: 'danger',
-        message: 'Будь ласка, заповніть всі обов\'язкові поля'
-      });
-      return;
-    }
-
-    setLoading(true);
-    
-    setTimeout(() => {
-      const updatedCoupon = {
-        ...editingCoupon,
-        code,
-        discount: parseFloat(discount),
-        startDate,
-        endDate,
-        description
-      };
-      
-      setCoupons(coupons.map(coupon => 
-        coupon.id === editingCoupon.id ? updatedCoupon : coupon
-      ));
-      
-      
       resetForm();
-      
-      setAlert({
-        show: true,
-        type: 'success',
-        message: 'Купон успішно оновлено!'
-      });
-      
+      fetchCoupons();
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
       setLoading(false);
-      setShowEditModal(false);
-      setEditingCoupon(null);
-    }, 1000);
-  };
-
-  const handleDeleteCoupon = (id) => {
-    if (window.confirm('Ви впевнені, що хочете видалити цей купон?')) {
-      setCoupons(coupons.filter(coupon => coupon.id !== id));
-      setAlert({
-        show: true,
-        type: 'success',
-        message: 'Купон видалено!'
-      });
     }
   };
 
   const handleEditCoupon = (coupon) => {
     setEditingCoupon(coupon);
-    setCode(coupon.code);
-    setDiscount(coupon.discount.toString());
-    setStartDate(coupon.startDate);
-    setEndDate(coupon.endDate);
+    setName(coupon.name);
+    setPrice(coupon.price.toString());
     setDescription(coupon.description);
     setShowEditModal(true);
   };
 
-  const resetForm = () => {
-    setCode('');
-    setDiscount('');
-    setStartDate('');
-    setEndDate('');
-    setDescription('');
+  const handleUpdateCoupon = async (e) => {
+    e.preventDefault();
+    if (!name || !price || !description) {
+      setAlert({ show: true, type: 'danger', message: "Будь ласка, заповніть всі обов'язкові поля" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const body = {
+        id: editingCoupon.id,
+        name,
+        price: parseFloat(price),
+        description,
+        users: editingCoupon.users || []
+      };
+      const res = await fetch(API_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error('Не вдалося оновити купон');
+      setAlert({ show: true, type: 'success', message: 'Купон успішно оновлено!' });
+      setShowEditModal(false);
+      setEditingCoupon(null);
+      resetForm();
+      fetchCoupons();
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    if (!window.confirm('Ви впевнені, що хочете видалити цей купон?')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Не вдалося видалити купон');
+      setAlert({ show: true, type: 'success', message: 'Купон видалено!' });
+      fetchCoupons();
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -157,7 +148,6 @@ const Coupons = () => {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-
     pages.push(
       <Pagination.Prev 
         key="prev" 
@@ -165,7 +155,6 @@ const Coupons = () => {
         disabled={currentPage === 1}
       />
     );
-
 
     if (startPage > 1) {
       pages.push(
@@ -177,7 +166,6 @@ const Coupons = () => {
         pages.push(<Pagination.Ellipsis key="ellipsis1" disabled />);
       }
     }
-
 
     for (let number = startPage; number <= endPage; number++) {
       pages.push(
@@ -191,7 +179,6 @@ const Coupons = () => {
       );
     }
 
-
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.push(<Pagination.Ellipsis key="ellipsis2" disabled />);
@@ -202,7 +189,6 @@ const Coupons = () => {
         </Pagination.Item>
       );
     }
-
 
     pages.push(
       <Pagination.Next 
@@ -253,9 +239,9 @@ const Coupons = () => {
                 <Table hover className="align-middle">
                   <thead>
                     <tr>
-                      <th>Код</th>
+                      <th>Назва</th>
                       <th>Опис</th>
-                      <th>Знижка</th>
+                      <th>Ціна</th>
                       <th>Дії</th>
                     </tr>
                   </thead>
@@ -263,11 +249,11 @@ const Coupons = () => {
                     {currentItems.map(coupon => (
                       <tr key={coupon.id}>
                         <td>
-                          <div className="fw-bold">{coupon.code}</div>
+                          <div className="fw-bold">{coupon.name}</div>
                         </td>
                         <td>{coupon.description}</td>
                         <td>
-                          <span className="text-success">{coupon.discount} ₴</span>
+                          <span className="text-success">{coupon.price} ₴</span>
                         </td>
                         <td>
                           <div className="d-flex gap-2">
@@ -297,14 +283,14 @@ const Coupons = () => {
           <Modal.Title className="fw-bold">Додати новий купон</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleSubmit} className="row g-3">
+          <Form onSubmit={handleAddCoupon} className="row g-3">
             <div className="col-12">
-              <label htmlFor="code" className="form-label text-secondary small mb-1">Код купона</label>
-              <Form.Control type="text" id="code" value={code} onChange={e => setCode(e.target.value)} placeholder="Наприклад: WELCOME10" disabled={loading} className="rounded-3" />
+              <label htmlFor="name" className="form-label text-secondary small mb-1">Назва купона</label>
+              <Form.Control type="text" id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Назва купона" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
-              <label htmlFor="discount" className="form-label text-secondary small mb-1">Розмір знижки</label>
-              <Form.Control type="number" id="discount" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="Наприклад: 100" disabled={loading} className="rounded-3" />
+              <label htmlFor="price" className="form-label text-secondary small mb-1">Ціна</label>
+              <Form.Control type="number" id="price" value={price} onChange={e => setPrice(e.target.value)} placeholder="Ціна" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
               <label htmlFor="description" className="form-label text-secondary small mb-1">Опис</label>
@@ -329,20 +315,12 @@ const Coupons = () => {
         <Modal.Body>
           <Form onSubmit={handleUpdateCoupon} className="row g-3">
             <div className="col-12">
-              <label htmlFor="edit-code" className="form-label text-secondary small mb-1">Код купона</label>
-              <Form.Control type="text" id="edit-code" value={code} onChange={e => setCode(e.target.value)} placeholder="Наприклад: WELCOME10" disabled={loading} className="rounded-3" />
+              <label htmlFor="edit-name" className="form-label text-secondary small mb-1">Назва купона</label>
+              <Form.Control type="text" id="edit-name" value={name} onChange={e => setName(e.target.value)} placeholder="Назва купона" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
-              <label htmlFor="edit-discount" className="form-label text-secondary small mb-1">Розмір знижки</label>
-              <Form.Control type="number" id="edit-discount" value={discount} onChange={e => setDiscount(e.target.value)} placeholder="Наприклад: 100" disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="edit-startDate" className="form-label text-secondary small mb-1">Дата початку</label>
-              <Form.Control type="date" id="edit-startDate" value={startDate} onChange={e => setStartDate(e.target.value)} disabled={loading} className="rounded-3" />
-            </div>
-            <div className="col-6">
-              <label htmlFor="edit-endDate" className="form-label text-secondary small mb-1">Дата закінчення</label>
-              <Form.Control type="date" id="edit-endDate" value={endDate} onChange={e => setEndDate(e.target.value)} disabled={loading} className="rounded-3" />
+              <label htmlFor="edit-price" className="form-label text-secondary small mb-1">Ціна</label>
+              <Form.Control type="number" id="edit-price" value={price} onChange={e => setPrice(e.target.value)} placeholder="Ціна" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12">
               <label htmlFor="edit-description" className="form-label text-secondary small mb-1">Опис</label>

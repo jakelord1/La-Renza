@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import AccountPopover from './AccountPopover';
 import AuthenticatedPopover from './AuthenticatedPopover';
 import CartCount from './CartCount';
+import FavoritesCount from './FavoritesCount';
 import NavbarDropdownSection from './NavbarDropdownSection';
 import data from '../data/dropdownSectionsData.json';
 
@@ -218,6 +219,7 @@ const Navbar = () => {
               </div>
               <Link to="/favorites" className="nav-link px-2 text-warning position-relative">
                 <i className="bi bi-heart fs-5" style={{color:'#000'}}></i>
+                <FavoritesCount />
               </Link>
               <div
                 className="position-relative"
