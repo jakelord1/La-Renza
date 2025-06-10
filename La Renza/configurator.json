@@ -10,5 +10,52 @@
         "active": true
       }
     ]
+  },
+  {
+    "id": 2,
+    "name": "\u0411\u0430\u043D\u0435\u0440\u0438",
+    "type": "bannerArray",
+    "value": [
+      {
+        "path": "../src/assets/images/banner/car-banner.png",
+        "link": "/catalog"
+      },
+      {
+        "path": "../src/assets/images/banner/delivery-banner.png",
+        "link": "/favorites"
+      },
+      {
+        "path": "../src/assets/images/banner/plants-banner.png",
+        "link": "/sale"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0456\u0457",
+    "type": "categoryIds",
+    "value": [
+      12,
+      14,
+      13
+    ]
+  },
+  {
+    "id": 4,
+    "name": "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0456\u0457",
+    "type": "categoryIds",
+    "value": [
+      13,
+      12
+    ]
+  },
+  {
+    "id": 5,
+    "name": "\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0456\u0457 \u0434\u043B\u044F \u0442\u0430\u0431\u0456\u0432",
+    "type": "categoryTabsIds",
+    "value": [
+      12,
+      13
+    ]
   }
 ]
