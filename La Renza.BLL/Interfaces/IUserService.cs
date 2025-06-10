@@ -13,6 +13,8 @@ namespace La_Renza.BLL.Interfaces
         Task<UserDTO> GetUserByLogin(string login);
         Task<bool> AnyUsers();
         Task<(bool Success, string? ErrorMessage)> AddCouponToUser(string userEmail, int couponId);
+        Task<(bool Success, string? ErrorMessage)> AddFavoriteProductToUser(string email, int productId);
+        Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductFromUser(string email, int productId);
 
 
     }

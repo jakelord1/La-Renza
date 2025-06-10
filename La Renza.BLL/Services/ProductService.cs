@@ -41,7 +41,7 @@ namespace La_Renza.BLL.Services
                 ColorId = productDto.ColorId,
                 SizeId = productDto.SizeId,
                 Quantity = productDto.Quantity,
-                User = _mapper.Map<ICollection<User>>(productDto.UsersWhoFavorited)
+                User = _mapper.Map<ICollection<User>>(productDto.UsersLikesId)
             };
             _db.Products.Update(product);
             await _db.Save();
