@@ -47,7 +47,7 @@ function App() {
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/*" element={<AdminLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="configurator" element={<Конфігуратор />} />
+            <Route path="configurator" element={<Configurator />} />
             <Route path="orders" element={<Orders />} />
             <Route path="invoices" element={<Invoices />} />
             <Route path="comments" element={<Comments />} />

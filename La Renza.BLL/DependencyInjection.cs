@@ -34,6 +34,8 @@ namespace La_Renza.BLL
             services.AddScoped<IShopingCartService, ShopingCartService>();
             services.AddScoped<ISizeService, SizeService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IConfiguratorService>(provider =>
+                new ConfiguratorService("configurator.json"));
             services.AddScoped<PasswordHasher>();
             services.AddScoped<IDbInitService, DbInitService>();
             services.AddScoped<IUnitOfWork, EFUnitOfWork>();
