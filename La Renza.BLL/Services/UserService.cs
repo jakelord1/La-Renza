@@ -57,11 +57,17 @@ namespace La_Renza.BLL.Services
             user.Password = userDto.Password;
             user.NewsOn = userDto.NewsOn;
             user.LaRenzaPoints = userDto.LaRenzaPoints;
-            user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);
-            user.Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices);
-            user.Cupon = _mapper.Map<ICollection<Coupon>>(userDto.Cupons);
-            user.Product = _mapper.Map<ICollection<Product>>(userDto.FavoriteProducts);
+            if (userDto.Addresses != null)
+                user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);
 
+            if (userDto.Invoices != null)
+                user.Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices);
+
+            if (userDto.Cupons != null)
+                user.Cupon = _mapper.Map<ICollection<Coupon>>(userDto.Cupons);
+
+            if (userDto.FavoriteProducts != null)
+                user.Product = _mapper.Map<ICollection<Product>>(userDto.FavoriteProducts);
             //var user = new User
             //{
             //    Id = userDto.Id,
@@ -177,7 +183,43 @@ namespace La_Renza.BLL.Services
 
             return (true, null);
         }
+        public async Task<(bool Success, string? ErrorMessage)> AddFavoriteProductToUser(string userEmail, int productId)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
 
+            if (user.Product.Any(p => p.Id == productId))
+                return (false, "Product already in favorites.");
+
+            var product = await Database.Products.Get(productId);
+            if (product == null)
+                return (false, "Product  not found.");
+
+            user.Product.Add(product);
+            Database.Users.Update(user);
+            await Database.Save();
+           
+
+            return (true, null);
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductFromUser(string userEmail, int productId)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
+
+            var product = user.Product.FirstOrDefault(p => p.Id == productId);
+            if (product == null)
+                return (false, "Product not found in user's favorites.");
+
+            user.Product.Remove(product);
+            Database.Users.Update(user);
+            await Database.Save();
+
+            return (true, null);
+        }
 
 
     }

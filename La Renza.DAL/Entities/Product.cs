@@ -18,6 +18,5 @@ namespace La_Renza.DAL.Entities
         public ICollection<User>? User { get; set; }
         public Color? Color { get; set; }
         public Size? Size { get; set; }
-
     }
 }

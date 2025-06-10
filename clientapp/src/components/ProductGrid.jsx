@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import ProductCard from './ProductCard';
 
 const API_URL = 'https://localhost:7071/api/Products';
@@ -51,6 +52,7 @@ const ProductGrid = () => {
       )}
     </div>
   );
+
 };
 
 export default ProductGrid;
