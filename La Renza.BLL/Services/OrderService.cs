@@ -12,10 +12,12 @@ namespace La_Renza.BLL.Services
     public class OrderService : IOrderService
     {
         IUnitOfWork Database { get; set; }
+        private readonly IMapper _mapper;
 
-        public OrderService(IUnitOfWork uow)
+        public OrderService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
 
         public async Task CreateOrder(OrderDTO orderDto)
@@ -91,22 +93,13 @@ namespace La_Renza.BLL.Services
             var orders = await Database.Orders.GetAll();
             var userOrders = orders.Where(o => o.UserId == userId);
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DAL.Entities.Order, OrderDTO>()
-                .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
-            var mapper = new Mapper(config);
 
-            return mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(userOrders);
+            return _mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(userOrders);
         }
 
         public async Task<IEnumerable<OrderDTO>> GetOrders()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DAL.Entities.Order, OrderDTO>()
-            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))  
-            .ForMember(dest => dest.Delivery, opt => opt.MapFrom(src => src.Delivery))  
-            .ForMember(dest => dest.Cupons, opt => opt.MapFrom(src => src.Cupons))  
-            ); 
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
+            return _mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
 
         }
 
