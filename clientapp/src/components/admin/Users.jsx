@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Pagination, Badge } from 'react-bootstrap';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
+const API_COUPONS_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Coupons`;
 
 const genderOptions = [
   { value: 0, label: 'Жіночий' },
@@ -77,6 +78,7 @@ const Users = () => {
   const [gender, setGender] = useState(0);
   const [newsOn, setNewsOn] = useState(false);
   const [laRenzaPoints, setLaRenzaPoints] = useState('');
+  const [favoriteProducts, setFavoriteProducts] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
@@ -117,7 +119,8 @@ const Users = () => {
         gender: parseInt(gender),
         newsOn: newsOn ? 1 : 0,
         laRenzaPoints: parseInt(laRenzaPoints) || 0,
-        coupons: []
+        cupons: [],
+        favoriteProducts: favoriteProducts
       };
       setUsers([...users, newUser]);
       resetForm();
@@ -144,7 +147,8 @@ const Users = () => {
         birthDate,
         gender: parseInt(gender),
         newsOn: newsOn ? 1 : 0,
-        laRenzaPoints: parseInt(laRenzaPoints) || 0
+        laRenzaPoints: parseInt(laRenzaPoints) || 0,
+        favoriteProducts: favoriteProducts
       };
       setUsers(users.map(u => u.id === editingUser.id ? updatedUser : u));
       resetForm();
@@ -172,23 +176,53 @@ const Users = () => {
     setGender(user.gender);
     setNewsOn(!!user.newsOn);
     setLaRenzaPoints(user.laRenzaPoints.toString());
+    setFavoriteProducts(user.favoriteProducts || []);
     setShowEditModal(true);
   };
 
-  const handleManageCoupons = (user) => {
+  const handleManageCoupons = async (user) => {
     setSelectedUser(user);
-    setSelectedCoupons(user.coupons || []);
+    setSelectedCoupons(user.cupons || []);
     setShowCouponsModal(true);
+    // Получаем все купоны с бэка
+    setLoading(true);
+    try {
+      const res = await fetch(API_COUPONS_URL);
+      if (!res.ok) throw new Error('Помилка завантаження купонів');
+      const data = await res.json();
+      setAvailableCoupons(data);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSaveCoupons = () => {
-    setUsers(users.map(user => 
-      user.id === selectedUser.id 
-        ? { ...user, coupons: selectedCoupons }
-        : user
-    ));
-    setAlert({ show: true, type: 'success', message: 'Купони користувача оновлено!' });
-    setShowCouponsModal(false);
+  const handleSaveCoupons = async () => {
+    setLoading(true);
+    try {
+      const updatedUser = { ...selectedUser, cupons: selectedCoupons };
+      const res = await fetch(API_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUser)
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Не вдалося оновити купони користувача');
+      }
+      setUsers(users.map(user =>
+        user.id === selectedUser.id
+          ? updatedUser
+          : user
+      ));
+      setAlert({ show: true, type: 'success', message: 'Купони користувача оновлено!' });
+      setShowCouponsModal(false);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddCoupon = (coupon) => {
@@ -210,6 +244,7 @@ const Users = () => {
     setGender(0);
     setNewsOn(false);
     setLaRenzaPoints('');
+    setFavoriteProducts([]);
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -292,6 +327,7 @@ const Users = () => {
                       <th>Дата народження</th>
                       <th>Гендер</th>
                       <th>Купони</th>
+                      <th>Улюблені товари</th>
                       <th>Розсилка</th>
                       <th>Поінти</th>
                       <th>Дії</th>
@@ -308,12 +344,12 @@ const Users = () => {
                         <td>{user.gender === true ? 'Чоловічий' : user.gender === false ? 'Жіночий' : 'Інше'}</td>
                         <td>
                           <div className="d-flex flex-wrap gap-1">
-                            {(user.coupons || []).map(coupon => (
+                            {(user.cupons || []).map(coupon => (
                               <span
                                 key={coupon.id}
                                 className="badge rounded-pill bg-primary"
                               >
-                                {coupon.code}
+                                {coupon.name}
                               </span>
                             ))}
                             <Button 
@@ -325,6 +361,11 @@ const Users = () => {
                               <i className="bi bi-plus-circle"></i>
                             </Button>
                           </div>
+                        </td>
+                        <td>
+                          {(user.favoriteProducts && user.favoriteProducts.length > 0)
+                            ? user.favoriteProducts.join(', ')
+                            : <span className="text-muted">—</span>}
                         </td>
                         <td>{user.newsOn ? 'Так' : 'Ні'}</td>
                         <td>{user.laRenzaPoints}</td>
@@ -392,6 +433,16 @@ const Users = () => {
               <Form.Control type="text" id="laRenzaPoints" value={laRenzaPoints} onChange={e => setLaRenzaPoints(e.target.value)} placeholder="Поінти" />
             </div>
             <div className="col-12">
+              <label htmlFor="favoriteProducts" className="form-label text-secondary small mb-1">Улюблені товари (ID через кому)</label>
+              <Form.Control
+                type="text"
+                id="favoriteProducts"
+                value={favoriteProducts.join(',')}
+                onChange={e => setFavoriteProducts(e.target.value.split(',').map(id => id.trim()).filter(Boolean))}
+                placeholder="Напр. 1,2,3"
+              />
+            </div>
+            <div className="col-12">
               <Button type="submit" variant="primary" disabled={loading} className="rounded-3">
                 {loading ? <Spinner animation="border" size="sm" /> : 'Додати'}
               </Button>
@@ -444,6 +495,16 @@ const Users = () => {
               <Form.Control type="text" id="laRenzaPoints" value={laRenzaPoints} onChange={e => setLaRenzaPoints(e.target.value)} placeholder="Поінти" />
             </div>
             <div className="col-12">
+              <label htmlFor="favoriteProductsEdit" className="form-label text-secondary small mb-1">Улюблені товари (ID через кому)</label>
+              <Form.Control
+                type="text"
+                id="favoriteProductsEdit"
+                value={favoriteProducts.join(',')}
+                onChange={e => setFavoriteProducts(e.target.value.split(',').map(id => id.trim()).filter(Boolean))}
+                placeholder="Напр. 1,2,3"
+              />
+            </div>
+            <div className="col-12">
               <Button type="submit" style={{ background: '#6f42c1', border: 'none', fontWeight: 600, fontSize: '1.1rem', padding: '12px 0' }} className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2">
                 {loading ? <Spinner animation="border" size="sm" /> : 'Оновити'}
               </Button>
@@ -468,7 +529,7 @@ const Users = () => {
                   .map(coupon => (
                     <div key={coupon.id} className="list-group-item d-flex justify-content-between align-items-center">
                       <div>
-                        <strong>{coupon.code}</strong>
+                        <strong>{coupon.name}</strong>
                         <div className="text-muted small">{coupon.description}</div>
                       </div>
                       <Button
@@ -489,7 +550,7 @@ const Users = () => {
                 {selectedCoupons.map(coupon => (
                   <div key={coupon.id} className="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                      <strong>{coupon.code}</strong>
+                      <strong>{coupon.name}</strong>
                       <div className="text-muted small">{coupon.description}</div>
                     </div>
                     <Button
