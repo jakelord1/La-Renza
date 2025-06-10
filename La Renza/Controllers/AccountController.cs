@@ -104,6 +104,7 @@ namespace La_Renza.Controllers
         {
             HttpContext.Session.Clear();
             Response.Cookies.Delete("login");
+            Response.Cookies.Delete("UserId");
             return Ok(new { message = "Logout successful" });
 
         }
