@@ -28,7 +28,7 @@ builder.Services.AddSession(options =>
 }); 
 
 builder.Services.AddLaRenzaDAL(builder.Configuration.GetConnectionString("DefaultConnection")!);
-builder.Services.AddLaRenzaBLL();
+//BLLServiceCollectionExtensions.AddLaRenzaBLL(builder.Services);
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -48,3 +48,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

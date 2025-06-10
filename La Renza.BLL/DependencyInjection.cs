@@ -1,4 +1,4 @@
-﻿using La_Renza.BLL.Infrastructure;
+using La_Renza.BLL.Infrastructure;
 using La_Renza.DAL.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
