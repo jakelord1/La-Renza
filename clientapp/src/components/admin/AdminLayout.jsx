@@ -9,6 +9,11 @@ const navLinks = [
     label: 'Дашборд',
   },
   {
+    to: '/admin/configurator',
+    icon: 'bi-tools',
+    label: 'Конфігуратор',
+  },
+  {
     to: '/admin/orders',
     icon: 'bi-cart-check',
     label: 'Замовлення',

@@ -1,21 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { BannerContext } from './BannerContext';
 
-const carouselItems = [
-  {
-    image: '../src/assets/images/banner/car-banner.png',
-    link: '/catalog',
-  },
-  {
-    image: '../src/assets/images/banner/delivery-banner.png',
-    link: '/favorites',
-  },
-  {
-    image: '../src/assets/images/banner/plants-banner.png',
-    link: '/sale',
-  },
-];
+
 
 const MainBanner = () => {
+  const { carouselItems } = useContext(BannerContext);
   const [activeIndex, setActiveIndex] = useState(0);
   const intervalRef = useRef();
 

@@ -31,19 +31,23 @@ import {
   Products,
   Models
 } from './components/admin';
+import Configurator from './components/admin/Configurator';
 import Administrators from './components/admin/Administrators';
 import Invoices from './components/admin/Invoices';
 import './App.css';
+import { BannerProvider } from './components/BannerContext';
 
 function App() {
   return (
-    <Router>
-      <div className="d-flex flex-column min-vh-100">
+    <BannerProvider>
+      <Router>
+        <div className="d-flex flex-column min-vh-100">
         <Routes>
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/*" element={<AdminLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="configurator" element={<Конфігуратор />} />
             <Route path="orders" element={<Orders />} />
             <Route path="invoices" element={<Invoices />} />
             <Route path="comments" element={<Comments />} />
@@ -86,6 +90,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </BannerProvider>
   );
 }
 
