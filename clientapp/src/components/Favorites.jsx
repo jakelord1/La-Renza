@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
+import FavoritesCount from './FavoritesCount';
 
 const getFavorites = () => {
   try {
@@ -35,6 +36,7 @@ const Favorites = () => {
       <div className="container">
         <div className="d-flex align-items-center mb-2" style={{marginTop: '10px'}}>
           <h2 className="fw-bold mb-0" style={{color: '#222', fontSize: '2.2rem', letterSpacing: '-1px'}}>Вибране</h2>
+          <FavoritesCount />
           <span className="badge rounded-pill ms-3" style={{background: '#1976f7', color: '#fff', fontWeight: 500, fontSize: '1rem', padding: '8px 18px'}}>НОВИНКИ</span>
         </div>
         <hr style={{marginTop: 0, marginBottom: '40px', borderColor: '#eee'}} />
