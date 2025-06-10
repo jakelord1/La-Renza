@@ -4,7 +4,6 @@ const Footer = () => {
   return (
     <footer className="footer-larenza bg-white pt-4 pb-2">
       <div className="container">
-        {/* FooterEmailSubscribe теперь только на главной странице! */}
         <div className="row mt-4 gy-4" style={{borderTop: '1px solid #eee'}}>
           <div className="col-12 col-md-3" >
             <div className="fw-bold mb-2 small text-uppercase text-purple">La'renza</div>

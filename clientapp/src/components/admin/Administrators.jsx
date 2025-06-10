@@ -28,7 +28,6 @@ const Administrators = () => {
     fetchAdmins();
   }, []);
 
-  // Pagination calculations
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = administrators.slice(indexOfFirstItem, indexOfLastItem);
