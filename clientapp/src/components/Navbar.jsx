@@ -113,7 +113,8 @@ const NavbarDropdown = ({ section, onMouseLeave }) => {
 const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+ const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const searchRef = useRef(null);
   const popoverTimeout = useRef();
 
@@ -121,6 +122,26 @@ const Navbar = () => {
     e.preventDefault();
     setShowSearch(prev => !prev);
   };
+
+
+ useEffect(() => {
+    fetch('https://localhost:7071/api/Users/accountProfile', { credentials: 'include' })
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Unauthorized');
+      })
+      .then(data => {
+        if (data && data.email) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      })
+      .catch(() => setIsAuthenticated(false));
+  }, []);
+
 
   useEffect(() => {
     const handleClickOutside = e => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Pagination, Badge } from 'react-bootstrap';
-import usersData from '../../data/users.json';
-import couponsData from '../../data/coupons.json';
+
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
 
 const genderOptions = [
   { value: 0, label: 'Жіночий' },
@@ -72,7 +72,7 @@ const Users = () => {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fullName, setFullName] = useState('');
-  const [surname, setSurname] = useState('');
+  const [surName, setSurName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState(0);
   const [newsOn, setNewsOn] = useState(false);
@@ -81,22 +81,27 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
-  useEffect(() => {
+  const fetchUsers = async () => {
     setLoading(true);
-    setTimeout(() => {
-      const usersWithCoupons = usersData.users.map(user => ({
-        ...user,
-        coupons: user.coupons || []
-      }));
-      setUsers(usersWithCoupons);
-      setAvailableCoupons(couponsData.coupons);
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('Помилка завантаження користувачів');
+      const data = await res.json();
+      setUsers(data);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !phoneNumber || !fullName || !surname || !birthDate) {
+    if (!email || !phoneNumber || !fullName || !surName || !birthDate) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
       return;
     }
@@ -107,7 +112,7 @@ const Users = () => {
         email,
         phoneNumber,
         fullName,
-        surname,
+        surName,
         birthDate,
         gender: parseInt(gender),
         newsOn: newsOn ? 1 : 0,
@@ -124,7 +129,7 @@ const Users = () => {
 
   const handleUpdateUser = (e) => {
     e.preventDefault();
-    if (!email || !phoneNumber || !fullName || !surname || !birthDate) {
+    if (!email || !phoneNumber || !fullName || !surName || !birthDate) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
       return;
     }
@@ -135,7 +140,7 @@ const Users = () => {
         email,
         phoneNumber,
         fullName,
-        surname,
+        surName,
         birthDate,
         gender: parseInt(gender),
         newsOn: newsOn ? 1 : 0,
@@ -162,7 +167,7 @@ const Users = () => {
     setEmail(user.email);
     setPhoneNumber(user.phoneNumber);
     setFullName(user.fullName);
-    setSurname(user.surname);
+    setSurName(user.surName);
     setBirthDate(user.birthDate);
     setGender(user.gender);
     setNewsOn(!!user.newsOn);
@@ -200,7 +205,7 @@ const Users = () => {
     setEmail('');
     setPhoneNumber('');
     setFullName('');
-    setSurname('');
+    setSurName('');
     setBirthDate('');
     setGender(0);
     setNewsOn(false);
@@ -257,6 +262,13 @@ const Users = () => {
       <Card className="shadow rounded-4 border-0 bg-white bg-opacity-100 p-4 mb-4" style={{maxWidth: 1400, margin: '0 auto'}}>
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
           <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі користувачі</h4>
+          <Button
+            variant="primary"
+            style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
+            onClick={() => { resetForm(); setShowAddModal(true); }}
+          >
+            <i className="bi bi-plus-lg" style={{fontSize:18}}></i> Додати
+          </Button>
         </div>
         {loading ? (
           <div className="text-center py-4">
@@ -291,9 +303,9 @@ const Users = () => {
                         <td>{user.email}</td>
                         <td>{user.phoneNumber}</td>
                         <td>{user.fullName}</td>
-                        <td>{user.surname}</td>
-                        <td>{user.birthDate}</td>
-                        <td>{genderOptions.find(g => g.value === user.gender)?.label || '-'}</td>
+                        <td>{user.surName}</td>
+                        <td>{user.birthDate ? user.birthDate.slice(0, 10) : ''}</td>
+                        <td>{user.gender === true ? 'Чоловічий' : user.gender === false ? 'Жіночий' : 'Інше'}</td>
                         <td>
                           <div className="d-flex flex-wrap gap-1">
                             {(user.coupons || []).map(coupon => (
@@ -356,8 +368,8 @@ const Users = () => {
               <Form.Control type="text" id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Ім'я" />
             </div>
             <div className="col-12">
-              <label htmlFor="surname" className="form-label text-secondary small mb-1">Прізвище</label>
-              <Form.Control type="text" id="surname" value={surname} onChange={e => setSurname(e.target.value)} placeholder="Прізвище" />
+              <label htmlFor="surName" className="form-label text-secondary small mb-1">Прізвище</label>
+              <Form.Control type="text" id="surName" value={surName} onChange={e => setSurName(e.target.value)} placeholder="Прізвище" required />
             </div>
             <div className="col-12">
               <label htmlFor="birthDate" className="form-label text-secondary small mb-1">Дата народження</label>
@@ -408,8 +420,8 @@ const Users = () => {
               <Form.Control type="text" id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Ім'я" />
             </div>
             <div className="col-12">
-              <label htmlFor="surname" className="form-label text-secondary small mb-1">Прізвище</label>
-              <Form.Control type="text" id="surname" value={surname} onChange={e => setSurname(e.target.value)} placeholder="Прізвище" />
+              <label htmlFor="surName" className="form-label text-secondary small mb-1">Прізвище</label>
+              <Form.Control type="text" id="surName" value={surName} onChange={e => setSurName(e.target.value)} placeholder="Прізвище" required />
             </div>
             <div className="col-12">
               <label htmlFor="birthDate" className="form-label text-secondary small mb-1">Дата народження</label>

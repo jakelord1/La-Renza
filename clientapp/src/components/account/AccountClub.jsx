@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const coupons = [
   {
@@ -169,12 +169,37 @@ function CouponCarousel({ coupons }) {
 
 const AccountClub = () => {
   const [showClubModal, setShowClubModal] = useState(false);
+ const [points, setPoints] = useState(null);
+
+  useEffect(() => {
+  const fetchPoints = async () => {
+    try {
+      const response = await fetch('https://localhost:7071/api/Users/accountProfile', {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Помилка запиту');
+
+      const data = await response.json();
+      setPoints(data.laRenzaPoints ?? 0);
+    } catch (error) {
+      console.error('Помилка при отриманні балів:', error);
+      setPoints(0); 
+    }
+  };
+
+  fetchPoints();
+}, []);
+
   return (
     <div className="account-content">
       <h2 className="mb-4">Акаунт учасника клубу</h2>
       <div className="d-flex align-items-center mb-3" style={{justifyContent:'space-between'}}>
         <div style={{background:'var(--purple, #7c3aed)',color:'#fff',borderRadius: 24,padding:'8px 32px',fontWeight:700,fontSize:18}}>
-          150 балів
+        <div>
+        {points !== null ? `${points} балів` : 'Завантаження...'}
+        </div>
         </div>
         <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',minWidth:340,gap:10}}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%'}}>

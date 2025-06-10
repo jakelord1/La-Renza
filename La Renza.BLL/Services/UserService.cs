@@ -10,12 +10,10 @@ namespace La_Renza.BLL.Services
     public class UserService: IUserService
     {
         IUnitOfWork Database { get; set; }
-        PasswordHasher Hasher { get; set; }
         private readonly IMapper _mapper;
         public UserService(IUnitOfWork uow, PasswordHasher hash, IMapper mapper)
         {
             Database = uow;
-            Hasher = hash;
             _mapper = mapper;
         }
 
@@ -30,7 +28,7 @@ namespace La_Renza.BLL.Services
                 SurName = userDto.SurName,
                 BirthDate = userDto.BirthDate,
                 Gender = userDto.Gender,
-                Password = Hasher.HashPassword(userDto.Password),
+                Password = userDto.Password,
                 NewsOn = userDto.NewsOn,
                 Addresses = new List<Address>(),
                 Invoices = new List<InvoiceInfo>()
@@ -42,21 +40,37 @@ namespace La_Renza.BLL.Services
 
         public async Task UpdateUser(UserDTO userDto)
         {
-            var user = new User
-            {
-                Id = userDto.Id,
-                Email = userDto.Email,
-                PhoneNumber = userDto.PhoneNumber,
-                FullName = userDto.FullName,
-                SurName = userDto.SurName,
-                BirthDate = userDto.BirthDate,
-                Gender = userDto.Gender,
-                Password = Hasher.HashPassword(userDto.Password),
-                NewsOn = userDto.NewsOn,
-                Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses),
-                Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices)
-            };
-            Database.Users.Update(user);
+            var user = await Database.Users.Get(userDto.Id);
+            if (user == null)
+                throw new Exception("User not found");
+            user.Id = userDto.Id;
+            user.Email = userDto.Email;
+            user.PhoneNumber = userDto.PhoneNumber;
+            user.FullName = userDto.FullName;
+            user.SurName = userDto.SurName;
+            user.BirthDate = userDto.BirthDate;
+            user.Gender = userDto.Gender;
+            user.Password = userDto.Password;
+            user.NewsOn = userDto.NewsOn;
+
+            user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);
+            user.Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices);
+
+            //var user = new User
+            //{
+            //    Id = userDto.Id,
+            //    Email = userDto.Email,
+            //    PhoneNumber = userDto.PhoneNumber,
+            //    FullName = userDto.FullName,
+            //    SurName = userDto.SurName,
+            //    BirthDate = userDto.BirthDate,
+            //    Gender = userDto.Gender,
+            //    Password = Hasher.HashPassword(userDto.Password),
+            //    NewsOn = userDto.NewsOn,
+            //    Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses),
+            //    Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices)
+            //};
+            //Database.Users.Update(user);
             await Database.Save();
         }
 

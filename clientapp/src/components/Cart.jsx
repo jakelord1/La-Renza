@@ -212,7 +212,7 @@ const Cart = () => {
   }
 
   return (
-    <section className="cart-page bg-light py-5">
+    <section className="cart-page py-5">
       <div className="container">
         <h2 className="text-center mb-4 text-purple fw-bold">Корзина</h2>
         {orderPlaced && (
