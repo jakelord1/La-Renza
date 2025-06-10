@@ -18,9 +18,10 @@ namespace La_Renza.BLL.DTO
         public string Phonenumber { get; set; }
 
         public List<OrderItemDTO> orderItems { get; set; }
-        public UserDTO User { get; set; }
+        public UserBase User { get; set; }
         public AddressDTO? Delivery { get; set; }
         public CouponDTO? Cupons { get; set; }
+        public DeliveryMethodDTO? DM { get; set; }
     }
  
 }

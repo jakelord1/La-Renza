@@ -31,6 +31,7 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Product, ProductDTO>()
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => src.Color))
                 .ForMember(dest => dest.Size, opt => opt.MapFrom(src => src.Size))
+                .ForMember(dest => dest.UsersLikesId, opt => opt.MapFrom(src => src.User.Select(u => u.Id).ToList()))
                 .ReverseMap();
             CreateMap<Image, ImageDTO>()
                 .ReverseMap();
@@ -56,6 +57,8 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Size, SizeBase>()
                .ReverseMap();
             CreateMap<InvoiceInfo, InvoiceInfoDTO>()
+                .ReverseMap();
+            CreateMap<User, UserBase>()
                 .ReverseMap();
         }
     }

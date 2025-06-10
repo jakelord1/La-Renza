@@ -18,7 +18,7 @@ namespace La_Renza.DAL.Entities
         public decimal Price { get; set; }
 
         public int CategoryId { get; set; }
-        public ICollection<Color> Colors { get; set; }
-        public ICollection<Image> Image { get; set; }
+        public ICollection<Color>? Colors { get; set; }
+        public ICollection<Image>? Image { get; set; }
     }
 }

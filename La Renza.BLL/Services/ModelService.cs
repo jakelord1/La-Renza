@@ -27,6 +27,7 @@ namespace La_Renza.BLL.Services
                 Id = modelDto.Id,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage,
+                CategoryId = modelDto.CategoryId,
                 Image = _mapper.Map<ICollection<Image>>(photos)
             };
 
@@ -45,6 +46,7 @@ namespace La_Renza.BLL.Services
                 MaterialInfo = modelDto.MaterialInfo,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage,
+                CategoryId = modelDto.CategoryId,
                 Image = _mapper.Map<ICollection<Image>>(photos)
             };
             _db.Models.Update(model);

@@ -27,22 +27,26 @@ namespace La_Renza.BLL.Services
             {
                 Path = imageDto.Path
             };
+
             await _db.Images.Create(image);
             await _db.Save();
         }
+
         public async Task UpdateImage(ImageDTO imageDto)
         {
-            var image = new Image
+            var savedImage = await _db.Images.Get(imageDto.Id);
+            if (savedImage != null)
             {
-                Path = imageDto.Path
-            };
-            var Saved = await _db.Images.Get(imageDto.Id);
-            if (Saved != null)
-                Saved = image;
+                savedImage.Path = imageDto.Path;
+                await _db.Save();
+            }
             else
-                throw new Exception();
-            await _db.Save();
+            {
+                throw new Exception("Изображение не найдено.");
+            }
         }
+
+
         public async Task DeleteImage(int id)
         {
             await _db.Images.Delete(id);
