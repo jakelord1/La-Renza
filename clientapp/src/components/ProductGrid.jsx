@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 
 const API_URL = 'https://localhost:7071/api/Adresses';
+
+
+const ProductGrid = () => {
+    const [mockProducts, setMockProducts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [alert, setAlert] = useState({ show: false, type: '', message: '' });
+
+
 
 const fetchModels = async () => {
     setLoading(true);
     try {
         const res = await fetch(API_URL);
         if (!res.ok) throw new Error('Помилка завантаження моделей');
-        const mockProducts = await res.json();
+        const data = await res.json();
+        setMockProducts(data);
     } catch (e) {
         setAlert({ show: true, type: 'danger', message: e.message });
     } finally {
@@ -19,8 +28,6 @@ const fetchModels = async () => {
 useEffect(() => {
     fetchModels();
 }, []);
-
-const ProductGrid = () => (
   <div className="container">
     <div className="row g-3 g-md-4">
       {mockProducts.map(product => (
@@ -30,6 +37,6 @@ const ProductGrid = () => (
       ))}
     </div>
   </div>
-);
+};
 
 export default ProductGrid;
