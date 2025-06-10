@@ -34,32 +34,54 @@ namespace La_Renza.Controllers
             return Ok(image);
         }
 
-        // PUT: api/image/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Putimage(int id, ImageDTO image)
+        [HttpPost]
+        public async Task<ActionResult<ImageDTO>> PostImage(IFormFile file)
         {
-            if (!ModelState.IsValid)
+            if (file == null || file.Length == 0)
             {
-                return BadRequest(ModelState);
-            }
-            if (!await _imageService.ExistsImage(image.Id))
-            {
-                return NotFound();
+                return BadRequest("Файл не загружен.");
             }
 
-            await _imageService.UpdateImage(image);
+            var filePath = Path.Combine("public", file.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var imageDto = new ImageDTO
+            {
+                Path = file.FileName
+            };
+
+            await _imageService.CreateImage(imageDto);
             return Ok();
         }
 
-        // POST: api/image
-        [HttpPost]
-        public async Task<ActionResult<ImageDTO>> Postimage(ImageDTO image)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutImage(int id, IFormFile file)
         {
-            if (!ModelState.IsValid)
+            if (file == null || file.Length == 0)
             {
-                return BadRequest(ModelState);
+                return BadRequest("Файл не загружен.");
             }
-            await _imageService.CreateImage(image);
+
+            if (!await _imageService.ExistsImage(id))
+            {
+                return NotFound();
+            }
+            var filePath = Path.Combine("public", file.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var imageDto = new ImageDTO
+            {
+                Id = id,
+                Path = file.FileName
+            };
+
+            await _imageService.UpdateImage(imageDto);
             return Ok();
         }
 
@@ -79,6 +101,15 @@ namespace La_Renza.Controllers
             }
             await _imageService.DeleteImage(id);
             return Ok();
+        }
+        [NonAction]
+        public async Task<byte[]> ConvertToByteArray(IFormFile formFile)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await formFile.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
+            }
         }
 
     }
