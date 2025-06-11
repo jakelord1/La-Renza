@@ -1,48 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Alert from 'react-bootstrap/Alert';
 import { Modal, Button } from 'react-bootstrap';
-const API_URL = 'https://localhost:7071/api/Account';
+import Spinner from 'react-bootstrap/Spinner';
 
-const mockOrders = [
-  {
-    id: '#12345',
-    status: 'completed',
-    deliveryId: 'DEL-001',
-    cuponsId: 'CUP-123',
-    orderName: 'Замовлення №12345',
-    createdAt: '2024-03-15T10:00:00',
-    completedAt: '2024-03-16T13:00:00',
-    paymentMethod: 'Карта',
-    phonenumber: '+380991112233',
-  },
-  {
-    id: '#12346',
-    status: 'processing',
-    deliveryId: 'DEL-002',
-    cuponsId: '',
-    orderName: 'Замовлення №12346',
-    createdAt: '2024-03-10T15:30:00',
-    completedAt: '',
-    paymentMethod: 'Готівка',
-    phonenumber: '+380992223344',
-  },
-  {
-    id: '#12347',
-    status: 'cancelled',
-    deliveryId: 'DEL-003',
-    cuponsId: 'CUP-999',
-    orderName: 'Замовлення №12347',
-    createdAt: '2024-03-05T09:15:00',
-    completedAt: '',
-    paymentMethod: 'Apple Pay',
-    phonenumber: '+380993334455',
-  }
-];
+
+const API_URL = 'https://localhost:7071/api/Account/accountOrders';
+
+
+
+
+
 
 const statusLabels = { completed: 'Виконано', processing: 'В обробці', cancelled: 'Скасовано' };
+const paymentMethods = {
+  0: 'Готівка',
+  1: 'Карта',
+  2: 'Apple Pay'
+};
 
 const AccountOrders = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+useEffect(() => {
+  fetch(API_URL, {
+    credentials: 'include'
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error('Failed to fetch orders');
+      return res.json();
+    })
+    .then((data) => setOrders(data))
+    .catch((err) => console.error('Error fetching orders:', err))
+    .finally(() => setLoading(false));
+}, []);
+
+
 
   const handleDetails = (order) => {
     setSelectedOrder(order);
@@ -56,6 +51,11 @@ const AccountOrders = () => {
   return (
     <div className="account-content">
       <h2 className="mb-4">Мої замовлення</h2>
+      {loading ? (
+        <div className="text-center"><Spinner animation="border" variant="primary" /></div>
+      ) : orders.length === 0 ? (
+        <p>Замовлення відсутні.</p>
+      ) : (
       <div className="table-responsive">
         <table className="orders-table">
           <thead>
@@ -69,16 +69,16 @@ const AccountOrders = () => {
             </tr>
           </thead>
           <tbody>
-            {mockOrders.map((order) => (
+            {orders.map((order) => (
               <tr key={order.id}>
                 <td>{order.orderName}</td>
                 <td>
-                  <span className={`order-status ${order.status}`}>
-                    {statusLabels[order.status]}
+                  <span className={`order-status ${order.status.toLowerCase()}`}>
+                      {statusLabels[order.status] || order.status}
                   </span>
                 </td>
                 <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                <td>{order.paymentMethod}</td>
+               <td>{paymentMethods[order.paymentMethod] || 'Невідомо'}</td>
                 <td>{order.phonenumber}</td>
                 <td>
                   <button className="btn btn-sm btn-outline-secondary" onClick={() => handleDetails(order)}>
@@ -90,7 +90,7 @@ const AccountOrders = () => {
           </tbody>
         </table>
       </div>
-
+      )}
       {showModal && selectedOrder && (
         <Modal
           show={showModal}
@@ -105,13 +105,22 @@ const AccountOrders = () => {
           </Modal.Header>
           <Modal.Body style={{ fontSize: 15 }}>
             <div><b>Назва:</b> {selectedOrder.orderName}</div>
-            <div><b>Статус:</b> {statusLabels[selectedOrder.status]}</div>
+            <div><b>Статус:</b> {statusLabels[selectedOrder.status]|| selectedOrder.status}</div>
             <div><b>ID доставки:</b> {selectedOrder.deliveryId}</div>
             <div><b>ID купону:</b> {selectedOrder.cuponsId || '-'}</div>
             <div><b>Створено:</b> {new Date(selectedOrder.createdAt).toLocaleString()}</div>
             <div><b>Завершено:</b> {selectedOrder.completedAt ? new Date(selectedOrder.completedAt).toLocaleString() : '-'}</div>
-            <div><b>Оплата:</b> {selectedOrder.paymentMethod}</div>
+            <div><b>Оплата:</b> {selectedOrder.paymentMethod  || 'Невідомо'}</div>
             <div><b>Телефон:</b> {selectedOrder.phonenumber}</div>
+             {selectedOrder.cupons && (
+              <div><b>Купон:</b> {selectedOrder.cupons.name} – {selectedOrder.cupons.description}</div>
+            )}
+            {selectedOrder.delivery && (
+              <div>
+                <b>Адреса:</b> {`${selectedOrder.delivery.city}, вул. ${selectedOrder.delivery.street}, буд. ${selectedOrder.delivery.houseNum}`}<br />
+                <b>Додаткова інформація:</b> {selectedOrder.delivery.additionalInfo}
+              </div>
+            )}
           </Modal.Body>
           <Modal.Footer style={{ borderTop: 'none', paddingTop: 0 }}>
             <Button 
