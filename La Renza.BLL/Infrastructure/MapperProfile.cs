@@ -14,6 +14,10 @@ namespace La_Renza.BLL.Infrastructure
     {
         public MapperProfile()
         {
+            CreateMap<Admin, AdminDTO>()
+                .ReverseMap();
+            CreateMap<Address, AddressDTO>()
+                .ReverseMap();
             CreateMap<Comment, CommentDTO>()
                 .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image))
                 .ReverseMap();
@@ -50,14 +54,13 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Coupon, CouponDTO>()
                 .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.User.Select(u => u.Id)))
                 .ReverseMap();
-            CreateMap<Address, AddressDTO>()
-                .ReverseMap();
             CreateMap<Model, ModelBase>()
                .ReverseMap();
             CreateMap<Size, SizeBase>()
                .ReverseMap();
             CreateMap<InvoiceInfo, InvoiceInfoDTO>()
-                .ReverseMap();
+               .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User.Email))
+               .ReverseMap();
             CreateMap<User, UserBase>()
                 .ReverseMap();
             CreateMap<Order, OrderDTO>()

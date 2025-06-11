@@ -10,11 +10,14 @@ namespace La_Renza.BLL.Services
     public class AddressService : IAddressService
     {
         IUnitOfWork Database { get; set; }
+        private readonly IMapper _mapper;
 
-        public AddressService(IUnitOfWork uow)
+        public AddressService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
+
 
         public async Task CreateAddress(AddressDTO adressDto)
         {
@@ -102,19 +105,16 @@ namespace La_Renza.BLL.Services
             var addresses = await Database.Addresses.GetAll();
             var userAddresses = addresses.Where(a => a.UserId == userId);
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>());
-            var mapper = new Mapper(config);
 
-            return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(userAddresses);
+            return _mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(userAddresses);
         }
 
 
 
         public async Task<IEnumerable<AddressDTO>> GetAddresses()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<Address, AddressDTO>());
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(await Database.Addresses.GetAll());
+        
+            return _mapper.Map<IEnumerable<Address>, IEnumerable<AddressDTO>>(await Database.Addresses.GetAll());
         }
 
         public async Task<bool> ExistsAddress(int id)

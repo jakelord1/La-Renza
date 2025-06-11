@@ -16,11 +16,13 @@ namespace La_Renza.Controllers
         private readonly IUserService _userService;
         private readonly IAddressService _addressService;
         private readonly ICouponService _couponService;
-        public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService)
+        private readonly IAccountService _accountService;
+        public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService)
         {
             _userService = userService;
             _addressService = addressService;
             _couponService = couponService;
+            _accountService = accountService;
         }
 
         private async Task<UserDTO?> GetCurrentUser()
@@ -288,7 +290,7 @@ namespace La_Renza.Controllers
             if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            var result = await _userService.AddCouponToUser(user.Email, couponId);
+            var result = await _accountService.AddCouponToUser(user.Email, couponId);
             if (!result.Success)
                 return BadRequest(new { message = result.ErrorMessage });
 
@@ -315,7 +317,7 @@ namespace La_Renza.Controllers
                 return Unauthorized(new { message = "User not logged in." });
 
 
-            var result = await _userService.AddFavoriteProductToUser(user.Email, productId);
+            var result = await _accountService.AddFavoriteProductToUser(user.Email, productId);
             if (!result.Success)
                 return BadRequest(new { message = result.ErrorMessage });
 
@@ -330,7 +332,7 @@ namespace La_Renza.Controllers
                 return Unauthorized(new { message = "User not logged in." });
 
 
-            var result = await _userService.RemoveFavoriteProductFromUser(user.Email, productId);
+            var result = await _accountService.RemoveFavoriteProductFromUser(user.Email, productId);
             if (!result.Success)
                 return BadRequest(new { message = result.ErrorMessage });
 
@@ -356,7 +358,7 @@ namespace La_Renza.Controllers
             if (user == null)
                 return Unauthorized(new { message = "User not authenticated." });
 
-            var result = await _userService.AddOrderToUser(user.Email, orderDto);
+            var result = await _accountService.AddOrderToUser(user.Email, orderDto);
 
             if (!result.Success)
                 return BadRequest(new { message = result.ErrorMessage });
