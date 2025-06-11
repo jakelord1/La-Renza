@@ -10,10 +10,12 @@ namespace La_Renza.BLL.Services
     public class InvoiceInfoService : IInvoiceInfoService
     {
         IUnitOfWork Database { get; set; }
+        private readonly IMapper _mapper;
 
-        public InvoiceInfoService(IUnitOfWork uow)
+        public InvoiceInfoService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
 
         public async Task CreateInvoiceInfo(InvoiceInfoDTO invoiceInfoDto)
@@ -81,10 +83,7 @@ namespace La_Renza.BLL.Services
 
         public async Task<IEnumerable<InvoiceInfoDTO>> GetInvoiceInfos()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<InvoiceInfo, InvoiceInfoDTO>()
-            .ForMember("User", opt => opt.MapFrom(c => c.User.Email)));
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<InvoiceInfo>, IEnumerable<InvoiceInfoDTO>>(await Database.Invoices.GetAll());
+            return _mapper.Map<IEnumerable<InvoiceInfo>, IEnumerable<InvoiceInfoDTO>>(await Database.Invoices.GetAll());
         }
 
         public async Task<bool> ExistsInvoiceInfo(int id)

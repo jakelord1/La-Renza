@@ -18,6 +18,7 @@ namespace La_Renza.BLL
     {
         public static void AddLaRenzaBLL(this IServiceCollection services)
         {
+            services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<ICategoryService, CategoryService>();
