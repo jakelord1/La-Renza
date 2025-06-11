@@ -63,6 +63,8 @@ namespace La_Renza.BLL.Infrastructure
                .ReverseMap();
             CreateMap<User, UserBase>()
                 .ReverseMap();
+            CreateMap<Size, SizeBase>()
+                .ReverseMap();
             CreateMap<Order, OrderDTO>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.Delivery, opt => opt.MapFrom(src => src.Delivery))
