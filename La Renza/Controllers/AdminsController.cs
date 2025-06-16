@@ -38,43 +38,27 @@ namespace La_Renza.Controllers
             }
             return new ObjectResult(admin);
         }
-        // POST: api/Users/login
-        [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            AdminDTO user = await _adminService.GetAdminByLogin(logon.Email);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            if (!passwordService.VerifyPassword(logon.Password, user.Password))
-            {
-                return Unauthorized(new { message = "Invalid login or password" });
-            }
-            if (logon.RememberMe)
-            {
-                CookieOptions option = new CookieOptions();
-                Response.Cookies.Append("login", logon.Email, option);
-            }
-            HttpContext.Session.SetString("Login", user.Email);
-            return Ok();
-        }
+    
         // PUT: api/Admins
         [HttpPut]
-        public async Task<IActionResult> PutAdmin(AdminDTO admin)
+        public async Task<IActionResult> PutAdmin(AdminDTO admin, [FromServices] PasswordHasher hasher)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (!await _adminService.ExistsAdmin(admin.Id))
+            var existAdmin = await _adminService.GetAdmin(admin.Id);
+            if (existAdmin == null)
             {
                 return NotFound();
+            }
+            if (!hasher.VerifyPassword(admin.Password, existAdmin.Password))
+            {
+                admin.Password = hasher.HashPassword(admin.Password);
+            }
+            else
+            {
+                admin.Password = existAdmin.Password;
             }
 
             await _adminService.UpdateAdmin(admin);
@@ -83,12 +67,13 @@ namespace La_Renza.Controllers
 
         // POST: api/Admins
         [HttpPost]
-        public async Task<ActionResult<AdminDTO>> PostAdmin(AdminDTO admin)
+        public async Task<ActionResult<AdminDTO>> PostAdmin(AdminDTO admin,[FromServices] PasswordHasher hasher)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            admin.Password = hasher.HashPassword(admin.Password);
             await _adminService.CreateAdmin(admin);
             return Ok(admin);
         }

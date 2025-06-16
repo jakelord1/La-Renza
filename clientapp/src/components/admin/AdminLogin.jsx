@@ -2,23 +2,52 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
 
+const API_URL = 'https://localhost:7071/api/Account';
+
+
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (email === 'admin@larenza.com' && password === 'admin123') {
-      localStorage.setItem('adminAuthenticated', 'true');
-      navigate('/admin/dashboard');
-    } else {
-      setError('Невірний email або пароль');
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
+  console.log('Submitting login:', { email, password ,rememberMe});
+
+  try {
+    const res = await fetch(`${API_URL}/loginAdmin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password, rememberMe})
+    });
+
+    console.log('Response status:', res.status);
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.log('Error data:', errorData);
+      throw new Error(errorData.message || 'Невдалий вхід');
     }
-  };
+     localStorage.setItem('adminAuthenticated', 'true');
+    navigate('/admin/dashboard');
+  } catch (err) {
+    console.error('Login error:', err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
+      
     <Container className="py-5">
       <Row className="justify-content-center">
         <Col md={6} lg={5}>
@@ -35,24 +64,30 @@ const AdminLogin = () => {
                 <Form.Group className="mb-3">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
+                    id="email"
+                    name="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="Введіть email"
                     className="rounded-3"
+                    disabled={loading}
                   />
                 </Form.Group>
                 
                 <Form.Group className="mb-4">
                   <Form.Label>Пароль</Form.Label>
                   <Form.Control
+                    id="password"
+                    name="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Введіть пароль"
                     className="rounded-3"
+                    disabled={loading}
                   />
                 </Form.Group>
                 
@@ -66,8 +101,9 @@ const AdminLogin = () => {
                     borderRadius: '12px',
                     height: '48px' 
                   }}
+                    disabled={loading}
                 >
-                  Увійти
+                  {loading ? 'Вхід...' : 'Увійти'}
                 </Button>
               </Form>
             </Card.Body>
@@ -75,6 +111,7 @@ const AdminLogin = () => {
         </Col>
       </Row>
     </Container>
+
   );
 };
 

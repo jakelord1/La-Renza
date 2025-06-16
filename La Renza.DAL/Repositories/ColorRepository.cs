@@ -19,6 +19,7 @@ namespace La_Renza.DAL.Repositories
         {
             return await db.Color
                   .Include(c => c.Model)
+                  .Include(c => c.Image)
                   .ToListAsync();
         }
 
