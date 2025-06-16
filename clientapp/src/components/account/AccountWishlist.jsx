@@ -1,38 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import Alert from 'react-bootstrap/Alert';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'https://localhost:7071/api/Account';
+const API_URL = 'https://localhost:7071/api/Account/accountFavoriteProducts';
 
-
-const mockWishlist = [
-  {
-    id: 1,
-    name: 'Floral Summer Dress',
-    price: '49.99',
-    image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-    inStock: true,
-    sizes: '98 - 140',
-    badges: ['НОВИНКА']
-  },
-  {
-    id: 2,
-    name: 'Casual Blazer',
-    price: '79.99',
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-    inStock: true,
-    sizes: '98 - 140',
-    badges: ['ХІТ ПРОДАЖУ']
-  },
-  {
-    id: 3,
-    name: 'Denim Jacket',
-    price: '69.99',
-    image: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-    inStock: false,
-    sizes: '98 - 140',
-    badges: ['ЦІНИ ВАУ!']
-  }
-];
 
 const BADGE_COLORS = {
   'НОВИНКА': 'bg-primary text-white',
@@ -42,18 +13,45 @@ const BADGE_COLORS = {
 
 const AccountWishlist = () => {
   const navigate = useNavigate();
+ const [wishlist, setWishlist] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    fetch(API_URL, {
+      credentials: 'include' 
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTPS error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+          console.log('Fetched data:', data); 
+         setWishlist(data);
+      })
+      .catch(error => {
+        console.error('Failed to fetch wishlist:', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const handleBack = () => {
     navigate('/');
   };
 
+if (loading) {
+    return <div className="text-center py-5">Завантаження...</div>;
+  }
   return (
     <div className="account-content">
       <div className="d-flex align-items-center justify-content-between mb-4">
         <h2 className="fw-bold mb-0" style={{fontSize: '2.1rem'}}>Мій список бажань</h2>
         <div className="d-flex align-items-center gap-3">
           <span className="text-muted" style={{fontSize: '1.1rem'}}>
-            {mockWishlist.length} товарів
+            {wishlist.length} товарів
           </span>
           <button 
             className="btn btn-outline-purple rounded-3 d-flex align-items-center gap-2"
@@ -81,7 +79,7 @@ const AccountWishlist = () => {
       </div>
 
       <div className="d-flex flex-wrap" style={{margin: '0 -10px'}}>
-        {mockWishlist.map((item) => (
+        {wishlist.map((item) => (
           <div key={item.id} className="product-card position-relative d-flex flex-column p-0" 
             style={{
               background:'#fff', 
@@ -98,7 +96,7 @@ const AccountWishlist = () => {
           >
             <div className="position-relative w-100" style={{flex:'1 1 auto', minHeight:200, height:200, width:'100%'}}>
               <img 
-                src={item.image} 
+                src={item.imageUrl} 
                 alt={item.name} 
                 className="w-100 h-100 object-fit-cover" 
                 style={{
@@ -136,9 +134,10 @@ const AccountWishlist = () => {
               </div>
 
               <div className="d-flex gap-1 flex-wrap mt-1">
-                {item.badges.map((b,i) => b && (
-                  <span key={i} className={`badge px-2 py-1 small fw-semibold ${BADGE_COLORS[b]||'bg-light text-dark'}`} style={{fontSize:'0.72rem',borderRadius:3,letterSpacing:0.2}}>{b}</span>
-                ))}
+             {(Array.isArray(item.badges) ? item.badges : []).map((b, i) => b && (
+             <span key={i} className={`badge px-2 py-1 small fw-semibold ${BADGE_COLORS[b]||'bg-light text-dark'}`} style={{fontSize:'0.72rem',borderRadius:3,letterSpacing:0.2}}>{b}</span>
+              ))}
+
               </div>
             </div>
 
@@ -166,7 +165,7 @@ const AccountWishlist = () => {
       </div>
 
       {/* Empty State */}
-      {mockWishlist.length === 0 && (
+      {wishlist.length === 0 && (
         <div className="text-center py-5">
           <div className="mb-4">
             <i className="bi bi-heart" style={{fontSize: '4rem', color: 'var(--purple)'}}></i>

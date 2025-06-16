@@ -4,16 +4,19 @@ using La_Renza.DAL.Interfaces;
 using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
+using ZstdSharp.Unsafe;
 
 namespace La_Renza.BLL.Services
 {
     public class DeliveryMethodService : IDeliveryMethodService
     {
         IUnitOfWork Database { get; set; }
+        private readonly IMapper _mapper;
 
-        public DeliveryMethodService(IUnitOfWork uow)
+        public DeliveryMethodService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
 
         public async Task CreateDeliveryMethod(DeliveryMethodDTO deliveryMethodDto)
@@ -61,12 +64,10 @@ namespace La_Renza.BLL.Services
             };
         }
 
-   
+
         public async Task<IEnumerable<DeliveryMethodDTO>> GetDeliveryMethods()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<DeliveryMethod, DeliveryMethodDTO>());
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<DeliveryMethod>, IEnumerable<DeliveryMethodDTO>>(await Database.DeliveryMethods.GetAll());
+            return _mapper.Map<IEnumerable<DeliveryMethod>, IEnumerable<DeliveryMethodDTO>>(await Database.DeliveryMethods.GetAll());
         }
         public async Task<bool> ExistsDeliveryMethod(int id)
         {

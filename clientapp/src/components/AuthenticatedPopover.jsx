@@ -48,7 +48,7 @@ const AuthenticatedPopover = ({ onClose }) => {
     e.preventDefault();
       console.log('handleLogout вызван');
       try {
-          const res = await fetch(`${API_URL}/logout`, {
+          const res = await fetch(`${API_URL}/LogoutUser`, {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',

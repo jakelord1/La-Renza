@@ -9,12 +9,14 @@ namespace La_Renza.BLL.Services
 {
     public class AdminService : IAdminService
     {
-        IUnitOfWork Database { get; set; }
-        PasswordHasher Hash { get; set; }
 
-        public AdminService(IUnitOfWork uow)
+        private readonly IUnitOfWork Database;
+        private readonly IMapper _mapper;
+
+        public AdminService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
+            _mapper = mapper;
         }
 
         public async Task CreateAdmin(AdminDTO adminDto)
@@ -23,7 +25,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = adminDto.Id,
                 Email = adminDto.Email,
-                Password =  Hash.HashPassword(adminDto.Password),
+                Password =  adminDto.Password,
                 Identifier = adminDto.Identifier
             };
             await Database.Admins.Create(admin);
@@ -36,7 +38,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = adminDto.Id,
                 Email = adminDto.Email,
-                Password = Hash.HashPassword(adminDto.Password),
+                Password =adminDto.Password,
                 Identifier = adminDto.Identifier
             };
             Database.Admins.Update(admin);
@@ -65,8 +67,7 @@ namespace La_Renza.BLL.Services
 
         public async Task<IEnumerable<AdminDTO>> GetAdmins()
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<Admin, AdminDTO>()).CreateMapper();
-            return mapper.Map<IEnumerable<Admin>, IEnumerable<AdminDTO>>(await Database.Admins.GetAll());
+             return _mapper.Map<IEnumerable<Admin>, IEnumerable<AdminDTO>>(await Database.Admins.GetAll());
         }
         public async Task<AdminDTO> GetAdminByLogin(string login)
         {
