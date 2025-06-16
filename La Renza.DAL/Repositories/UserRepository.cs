@@ -33,6 +33,10 @@ namespace La_Renza.DAL.Repositories
                 .Include(u => u.Cupon)
                 .Include(u => u.Product)
                     .ThenInclude(p => p.Color)
+                       .ThenInclude(c => c.Model)
+                 .Include(u => u.Product)
+                   .ThenInclude(p => p.Color)
+                      .ThenInclude(c => c.Image)
                 .Include(u => u.Product)
                     .ThenInclude(p => p.Size)
                 .FirstOrDefaultAsync(u => u.Id == id);

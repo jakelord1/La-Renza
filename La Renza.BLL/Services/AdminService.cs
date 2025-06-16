@@ -12,13 +12,11 @@ namespace La_Renza.BLL.Services
 
         private readonly IUnitOfWork Database;
         private readonly IMapper _mapper;
-        private readonly PasswordHasher Hash;
 
         public AdminService(IUnitOfWork uow, IMapper mapper)
         {
             Database = uow;
             _mapper = mapper;
-            Hash = new PasswordHasher();
         }
 
         public async Task CreateAdmin(AdminDTO adminDto)
@@ -27,7 +25,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = adminDto.Id,
                 Email = adminDto.Email,
-                Password =  Hash.HashPassword(adminDto.Password),
+                Password =  adminDto.Password,
                 Identifier = adminDto.Identifier
             };
             await Database.Admins.Create(admin);
@@ -40,7 +38,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = adminDto.Id,
                 Email = adminDto.Email,
-                Password = Hash.HashPassword(adminDto.Password),
+                Password =adminDto.Password,
                 Identifier = adminDto.Identifier
             };
             Database.Admins.Update(admin);
