@@ -17,12 +17,14 @@ namespace La_Renza.Controllers
         private readonly IAddressService _addressService;
         private readonly ICouponService _couponService;
         private readonly IAccountService _accountService;
-        public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService)
+        private readonly IAdminService _adminService;
+        public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService,IAdminService adminService)
         {
             _userService = userService;
             _addressService = addressService;
             _couponService = couponService;
             _accountService = accountService;
+            _adminService = adminService;
         }
 
         private async Task<UserDTO?> GetCurrentUser()
@@ -67,11 +69,53 @@ namespace La_Renza.Controllers
 
             return Ok(new { isAuthenticated = true, email = user.Email });
         }
+        // GET: api/Account/getRole
+        [HttpGet("getRole")]
+        public IActionResult GetRole()
+        {
+            var role = HttpContext.Session.GetString("Role");
+            if (string.IsNullOrEmpty(role))
+                return Unauthorized(new { message = "Not authenticated" });
 
+            return Ok(new { role });
+        }
 
-        // POST: api/Account/login
-        [HttpPost("login")]
-        public async Task<ActionResult> Login(LoginModel logon, [FromServices] PasswordHasher passwordService)
+        // POST: api/Account/loginAdmin
+        [HttpPost("loginAdmin")]
+        public async Task<ActionResult> LoginAdmin(LoginModel logon, [FromServices] PasswordHasher passwordService)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            AdminDTO admin = await _adminService.GetAdminByLogin(logon.Email);
+
+            if (admin == null)
+            {
+                return NotFound();
+            }
+
+            if (!passwordService.VerifyPassword(logon.Password, admin.Password))
+            {
+                return Unauthorized(new { message = "Invalid login or password" });
+            }
+            if (logon.RememberMe)
+            {
+                CookieOptions option = new CookieOptions();
+                option.Expires = DateTime.Now.AddDays(10);
+                Response.Cookies.Append("loginAdmin", logon.Email, option);
+                Response.Cookies.Append("AdminId", admin.Id.ToString(), option);
+
+            }
+            HttpContext.Session.SetString("LoginAdmin", admin.Email);
+            HttpContext.Session.SetString("AdminIdentifier", admin.Identifier);
+            HttpContext.Session.SetString("AdminId", admin.Id.ToString());
+            HttpContext.Session.SetString("RoleAdmin", "Admin");
+            return Ok(new { message = "Login successful like admin" });
+        }
+
+        // POST: api/Account/loginUser
+        [HttpPost("loginUser")]
+        public async Task<ActionResult> LoginUser(LoginModel logon, [FromServices] PasswordHasher passwordService)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -91,23 +135,34 @@ namespace La_Renza.Controllers
             {
                 CookieOptions option = new CookieOptions();
                 option.Expires = DateTime.Now.AddDays(10);
-                Response.Cookies.Append("login", logon.Email, option);
+                Response.Cookies.Append("loginUser", logon.Email, option);
                 Response.Cookies.Append("UserId", user.Id.ToString(), option);
 
             }
-            HttpContext.Session.SetString("Login", user.Email);
+            HttpContext.Session.SetString("LoginUser", user.Email);
             HttpContext.Session.SetString("UserName", user.FullName);
             HttpContext.Session.SetString("UserId", user.Id.ToString());
+            HttpContext.Session.SetString("RoleUser", "User");
             return Ok(new { message = "Login successful" });
         }
-        // GET: api/Account/logout
-        [HttpGet("logout")]
-        public async Task<ActionResult> Logout()
+        // GET: api/Account/logoutUser
+        [HttpGet("logoutUser")]
+        public async Task<ActionResult> LogoutUser()
         {
             HttpContext.Session.Clear();
-            Response.Cookies.Delete("login");
+            Response.Cookies.Delete("loginUser");
             Response.Cookies.Delete("UserId");
             return Ok(new { message = "Logout successful" });
+
+        }
+        // GET: api/Account/logoutAdmin
+        [HttpGet("logoutAdmin")]
+        public async Task<ActionResult> LogoutAdmin()
+        {
+            HttpContext.Session.Clear();
+            Response.Cookies.Delete("loginAdmin");
+            Response.Cookies.Delete("AdminId");
+            return Ok(new { message = "Logout successful like admin" });
 
         }
         // POST: api/Account/changeUserPassword
@@ -306,7 +361,18 @@ namespace La_Renza.Controllers
 
 
             var favoriteProducts = user.FavoriteProducts;
-            return Ok(favoriteProducts);
+            var result = favoriteProducts.Select(product => new FavoriteProductDTO
+            {
+                Id = product.Id,
+                Name = product.Color.Model.Name,
+                Price = product.Color.Model.Price,
+                ImageUrl = product.Color.Image.Path,
+                InStock = product.Quantity > 0,
+                Sizes = product.Size.Name,
+                Badges = new List<string> { product.Color.Model.Bage }
+            }).ToList();
+
+            return Ok(result);
         }
         // POST: api/Account/accountFavoriteProducts
         [HttpPost("accountFavoriteProducts")]

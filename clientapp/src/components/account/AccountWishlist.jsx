@@ -96,7 +96,7 @@ if (loading) {
           >
             <div className="position-relative w-100" style={{flex:'1 1 auto', minHeight:200, height:200, width:'100%'}}>
               <img 
-                src={item.image} 
+                src={item.imageUrl} 
                 alt={item.name} 
                 className="w-100 h-100 object-fit-cover" 
                 style={{

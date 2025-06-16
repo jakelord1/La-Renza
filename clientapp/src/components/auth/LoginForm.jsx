@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Alert from 'react-bootstrap/Alert';
 
 
-const API_URL = 'https://localhost:7071/api/Account/login';
+const API_URL = 'https://localhost:7071/api/Account/loginUser';
 
 
 const LoginForm = () => {

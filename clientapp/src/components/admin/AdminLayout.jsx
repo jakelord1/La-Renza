@@ -95,10 +95,23 @@ const AdminLayout = () => {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
+const handleLogout = async () => {
+  try {
+    const response = await fetch('https://localhost:7071/api/Account/logoutAdmin', {
+      method: 'GET',
+      credentials: 'include', 
+    });
+
+    if (!response.ok) {
+      console.error('Logout failed');
+      return;
+    }
     localStorage.removeItem('adminAuthenticated');
-    navigate('/admin');
-  };
+    navigate('/admin'); 
+  } catch (error) {
+    console.error('Error during logout:', error);
+  }
+};
 
   return (
     <Container fluid className="p-0 bg-light min-vh-100 admin-bg">
