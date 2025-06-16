@@ -11,7 +11,7 @@ const AdminLogin = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (email === 'admin@larenza.com' && password === 'admin123') {
-      localStorage.setItem('adminAuthenticated', 'true');
+  setLoading(true);
       navigate('/admin/dashboard');
     } else {
       setError('Невірний email або пароль');
