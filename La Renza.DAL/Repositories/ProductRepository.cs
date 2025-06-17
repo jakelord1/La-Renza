@@ -76,12 +76,17 @@ namespace La_Renza.DAL.Repositories
         public async Task<IEnumerable<Model>> GetModelsByUserId(int userId)
         {
             return await db.Product
-                 .Where(p => p.User.Any(u => u.Id == userId)).Select(p => p.Color.Model)
-                 .Distinct()
-                 .Include(m => m.Colors)
-                 .Include(m => m.Image)
-                 .ToListAsync();
+                .Where(p => p.User.Any(u => u.Id == userId))
+                .Select(p => p.Color.Model)
+                .Distinct()
+                .Include(m => m.Colors)
+                    .ThenInclude(c => c.Image)
+                .Include(m => m.Category)
+                    .ThenInclude(cat => cat.SizeOptions)
+                .Include(m => m.Image)
+                .ToListAsync();
         }
+
 
         public async Task<Model?> GetModelWithSpecificColor(int colorId)
         {
