@@ -22,6 +22,7 @@ namespace La_Renza.DAL.Repositories
                 .Include(u => u.Invoices)
                 .Include(u => u.Cupon)
                 .Include(u=> u.Product)
+                .Include(u => u.ShoppingCarts)
                 .ToListAsync();
         }
 
@@ -48,6 +49,7 @@ namespace La_Renza.DAL.Repositories
                 .Include(u => u.Addresses)
                 .Include(u => u.Invoices)
                 .Include(u => u.Cupon)
+                .Include(u => u.ShoppingCarts)
                 .Include(u => u.Product)
                     .ThenInclude(p => p.Color)
                         .ThenInclude(c => c.Model)

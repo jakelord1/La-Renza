@@ -21,7 +21,9 @@ namespace La_Renza.Controllers
         private readonly IAccountService _accountService;
         private readonly IAdminService _adminService;
         private readonly IProductService _productService;
-       public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService,IAdminService adminService,IProductService productService)
+        private readonly IOrderService _orderService;
+        private readonly IShopingCartService _shopingCartService;
+       public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService,IAdminService adminService,IProductService productService,IOrderService orderService,IShopingCartService shopingCartService)
         {
             _userService = userService;
             _addressService = addressService;
@@ -29,6 +31,8 @@ namespace La_Renza.Controllers
             _accountService = accountService;
             _adminService = adminService;
             _productService = productService;
+            _orderService = orderService;
+            _shopingCartService = shopingCartService;
         }
 
         private async Task<UserDTO?> GetCurrentUser()
@@ -484,13 +488,13 @@ namespace La_Renza.Controllers
 
         // GET: api/Account/accountOrders
         [HttpGet("accountOrders")]
-        public async Task<ActionResult> GetUserOrders([FromServices] IOrderService orderService)
+        public async Task<ActionResult> GetUserOrders()
         {
             UserDTO? user = await GetCurrentUser();
             if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            var orders = await orderService.GetOrdersByUserId(user.Id);
+            var orders = await _orderService.GetOrdersByUserId(user.Id);
             return Ok(orders);
         }
         // POST: api/Account/addOrder
@@ -509,6 +513,19 @@ namespace La_Renza.Controllers
             return Ok(new { message = "Order successfully added." });
         }
 
+
+        // GET: api/Account/accountShoppingCarts
+        [HttpGet("accountShoppingCarts")]
+        public async Task<ActionResult> GetUserShoppingCarts()
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+
+            var shoppingCarts = await _shopingCartService.GetShoppingCartsByUserId(user.Id);
+            return Ok(shoppingCarts);
+        }
 
     }
 }

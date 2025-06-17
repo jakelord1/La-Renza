@@ -20,6 +20,7 @@ namespace La_Renza.BLL.DTO
         public List<InvoiceInfoDTO>? Invoices { get; set; }
         public List<CouponDTO>? Cupons { get; set; }
         public List<ProductDTO>? FavoriteProducts { get; set; }
+        public List<ShopingCartDTO>? ShoppingCarts { get; set; }
     }
 
 }
