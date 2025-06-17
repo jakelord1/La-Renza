@@ -37,7 +37,7 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoDiscount, setPromoDiscount] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Temporary state for demo
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [savedAddresses, setSavedAddresses] = useState([
     { id: 1, name: 'Дім', address: 'вул. Шевченка, 10, кв. 5, Київ' },
     { id: 2, name: 'Робота', address: 'вул. Хрещатик, 22, офіс 15, Київ' }
@@ -92,7 +92,6 @@ const Cart = () => {
       favs.push(product);
       setFavorites(favs);
       setFavoritesState(favs);
-      // Видаляємо з корзини одразу після додавання в обране
       removeItem(product.id);
     }
   };
@@ -123,10 +122,9 @@ const Cart = () => {
   };
 
   const handlePromoCode = () => {
-    // Demo promo code logic
     if (promoCode.toLowerCase() === 'welcome10') {
       setPromoApplied(true);
-      setPromoDiscount(totalPrice * 0.1); // 10% discount
+      setPromoDiscount(totalPrice * 0.1); 
     } else {
       alert('Невірний промокод');
     }
@@ -141,7 +139,7 @@ const Cart = () => {
 
     useEffect(() => {
       if (quantity > 9) {
-        setCustom(false); // всегда возвращаем select после подтверждения
+        setCustom(false); 
         setCustomValue(quantity);
       } else {
         setCustom(false);
@@ -184,7 +182,6 @@ const Cart = () => {
       }
     };
 
-    // Fix: Always show the current quantity as a visible option if not standard
     const standardOptions = [1,2,3,4,5,6,7,8,9];
     const showCustomOption = quantity > 9 && !standardOptions.includes(quantity);
 
@@ -233,7 +230,6 @@ const Cart = () => {
     );
   }
 
-  // Добавим стили прямо в компонент
   const customStyles = `
     .address-list-group {
       border-radius: 16px;
