@@ -11,11 +11,26 @@ const BADGE_COLORS = {
   'ХІТ ПРОДАЖУ': 'bg-warning text-dark',
 };
 
+
 const AccountWishlist = () => {
   const navigate = useNavigate();
  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const handleRemoveFromWishlist = (productId) => {
+  fetch(`${API_URL}/${productId}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to remove product from wishlist');
+    }
+     setWishlist(prev => prev.filter(item => item.id !== productId));
+  })
+  .catch(error => {
+    console.error('Error deleting favorite product:', error);
+  });
+};
   useEffect(() => {
     fetch(API_URL, {
       credentials: 'include' 
@@ -108,6 +123,7 @@ if (loading) {
                 }} 
               />
               <button 
+                onClick={() => handleRemoveFromWishlist(item.id)}
                 className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" 
                 style={{
                   background:'rgba(255,255,255,0.96)', 
