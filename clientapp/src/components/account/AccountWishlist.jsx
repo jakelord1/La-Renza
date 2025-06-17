@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Alert from 'react-bootstrap/Alert';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'https://localhost:7071/api/Account/accountFavoriteProducts';
+const API_URL = 'https://localhost:7071/api/Account';
 
 
 const BADGE_COLORS = {
-  'НОВИНКА': 'bg-primary text-white',
+  'IsNew': 'bg-primary text-white',
   'ЦІНИ ВАУ!': 'bg-pink text-white',
   'ХІТ ПРОДАЖУ': 'bg-warning text-dark',
 };
@@ -16,8 +16,8 @@ const AccountWishlist = () => {
   const navigate = useNavigate();
  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  const handleRemoveFromWishlist = (productId) => {
-  fetch(`${API_URL}/${productId}`, {
+  const handleRemoveFromWishlist = (modelId) => {
+  fetch(`${API_URL}/accountModels/${modelId}`, {
     method: 'DELETE',
     credentials: 'include'
   })
@@ -25,14 +25,14 @@ const AccountWishlist = () => {
     if (!response.ok) {
       throw new Error('Failed to remove product from wishlist');
     }
-     setWishlist(prev => prev.filter(item => item.id !== productId));
+     setWishlist(prev => prev.filter(item => item.id !== modelId));
   })
   .catch(error => {
     console.error('Error deleting favorite product:', error);
   });
 };
   useEffect(() => {
-    fetch(API_URL, {
+    fetch(`${API_URL}/accountModels`, {
       credentials: 'include' 
     })
       .then(response => {

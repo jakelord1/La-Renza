@@ -54,9 +54,9 @@ namespace La_Renza.BLL.Services
             await _db.Save();
         }
     
-        public async Task<ModelDTO?> GetModelBySpecificColor(int modelId, int colorId)
+        public async Task<ModelDTO?> GetModelBySpecificColor( int colorId)
         {
-            var model = await _db.Products.GetModelWithSpecificColor(modelId, colorId);
+            var model = await _db.Products.GetModelWithSpecificColor( colorId);
             if (model == null)
                 return null;
 

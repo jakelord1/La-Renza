@@ -83,20 +83,22 @@ namespace La_Renza.DAL.Repositories
                  .ToListAsync();
         }
 
-        public async Task<Model?> GetModelWithSpecificColor(int modelId, int colorId)
+        public async Task<Model?> GetModelWithSpecificColor(int colorId)
         {
-            var model = await db.Model
-                .Include(m => m.Colors)
-                .Include(m => m.Image)
-                .FirstOrDefaultAsync(m => m.Id == modelId);
+            var color = await db.Color
+                .Include(c => c.Model)
+                    .ThenInclude(m => m.Colors)
+                .Include(c => c.Image)
+                .FirstOrDefaultAsync(c => c.Id == colorId);
 
-            if (model == null)
+            if (color == null || color.Model == null)
                 return null;
 
-            model.Colors = model.Colors.Where(c => c.Id == colorId).ToList();
+            color.Model.Colors = color.Model.Colors.Where(c => c.Id == colorId).ToList();
 
-            return model;
+            return color.Model;
         }
+
         public async Task<IEnumerable<Model>> GetModelsByUserAndColor(int userId, int colorId)
         {
             var products = await db.Product
@@ -106,6 +108,10 @@ namespace La_Renza.DAL.Repositories
                 .Include(p => p.Color)
                     .ThenInclude(c => c.Model)
                         .ThenInclude(m => m.Colors)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Category)
+                            .ThenInclude(cat => cat.SizeOptions)
                 .Where(p => p.User.Any(u => u.Id == userId) && p.Color.Id == colorId)
                 .ToListAsync();
 
@@ -121,6 +127,7 @@ namespace La_Renza.DAL.Repositories
 
             return models;
         }
+
 
 
 

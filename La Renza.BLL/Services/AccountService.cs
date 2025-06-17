@@ -79,6 +79,29 @@ namespace La_Renza.BLL.Services
 
             return (true, null);
         }
+        public async Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductsByModelId(string userEmail, int modelId)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
+
+            var productsToRemove = user.Product
+                .Where(p => p.Color != null && p.Color.ModelId == modelId)
+                .ToList();
+
+            if (!productsToRemove.Any())
+                return (false, "No products from this model found in favorites.");
+
+            foreach (var product in productsToRemove)
+            {
+                user.Product.Remove(product);
+            }
+
+            Database.Users.Update(user);
+            await Database.Save();
+
+            return (true, null);
+        }
 
 
         public async Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductFromUser(string userEmail, int productId)

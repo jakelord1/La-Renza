@@ -9,6 +9,6 @@ namespace La_Renza.DAL.Interfaces
         Task<IEnumerable<Product>> GetByUserId(int userId);
         Task<IEnumerable<Model>> GetModelsByUserId(int userId);
         Task<IEnumerable<Model>> GetModelsByUserAndColor(int userId, int colorId);
-        Task<Model?> GetModelWithSpecificColor(int modelId, int colorId);
+        Task<Model?> GetModelWithSpecificColor(int colorId);
     }
 }

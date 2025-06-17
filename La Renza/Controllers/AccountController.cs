@@ -364,19 +364,17 @@ namespace La_Renza.Controllers
                 return Unauthorized(new { message = "User not logged in." });
 
             var favoriteProducts = await _productService.GetProductsByUserId(user.Id);
-            //var favoriteProducts = user.FavoriteProducts;
-          //  var result = favoriteProducts.Select(product => new FavoriteProductDTO
-          //  {
-          //      Id = product.Color?.ModelId ?? 0,
-          //      Name = product.Color?.Model?.Name ?? "Unknown",
-          //      Price = product.Color?.Model?.Price ?? 0m,
-          //      ImageUrl = product.Color?.Image?.Path ?? "",
-          //      InStock = product.Quantity > 0,
-          //      Sizes = product.Color?.Model?.Sizes ?? new List<string>(),
-          //      Badges = !string.IsNullOrEmpty(product.Color?.Model?.Bage)
-          //? new List<string> { product.Color.Model.Bage! }
-          //: new List<string>()
-          //  }).ToList();
+            //var result = favoriteProducts.Select(product => new FavoriteProductDTO
+            //{
+            //    Id = product.Id, 
+            //    Name = product.Color?.Model?.Name ?? "Unknown",
+            //    Price = product.Color?.Model?.Price ?? 0,
+            //    ImageUrl = product.Color?.Image?.Path ?? "",
+            //    Sizes = product.Color ?.Model.Sizes ,
+            //    Badges = !string.IsNullOrEmpty(product.Color?.Model?.Bage)
+            //? new List<string> { product.Color.Model.Bage! }
+            //: new List<string>()
+            //}).ToList();
 
             return Ok(favoriteProducts);
         }
@@ -389,61 +387,85 @@ namespace La_Renza.Controllers
                 return Unauthorized(new { message = "User not logged in." });
 
             var favoriteModels = await _productService.GetModelsByUserId(user.Id);
-  
-            return Ok(favoriteModels);
+            var result = favoriteModels.Select(model => new FavoriteProductDTO
+            {
+                Id = model.Id,
+                Name = model.Name ?? "Unknown",
+                Price = model.Price,
+                ImageUrl = model.Colors.FirstOrDefault()?.Image?.Path ?? "",
+                Sizes = model.Sizes,
+                Badges = !string.IsNullOrEmpty(model.Bage)
+                  ? new List<string> { model.Bage! }
+                  : new List<string>()
+            }).ToList();
+
+            return Ok(result);
         }
         // GET: api/Account/
-        [HttpGet("accountModelByUserIdAndColor")]
-        public async Task<ActionResult> GetModelByUserIdAndColor()
+        [HttpGet("accountModelByUserIdAndColor/{colorId}")]
+        public async Task<ActionResult> GetModelsByUserIdAndColor(int colorId)
         {
             UserDTO? user = await GetCurrentUser();
             if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
 
-            var favoriteColorModel = await _productService.GetModelsByUserIdAndColor(user.Id, 28);
-        
-            return Ok(favoriteColorModel);
+            var favoriteColorModels = await _productService.GetModelsByUserIdAndColor(user.Id, colorId);
+            return Ok(favoriteColorModels);
         }
 
         // GET: api/Account/
-        [HttpGet("accountModelBySpecificColor")]
-        public async Task<ActionResult> GetModelBySpecificColor()
+        [HttpGet("accountModelBySpecificColor/{colorId}")]
+        public async Task<ActionResult> GetModelBySpecificColor(int colorId)
         {
-          
-            var colorModel = await _productService.GetModelBySpecificColor(2, 28);
+            var colorModel = await _productService.GetModelBySpecificColor(colorId);
 
             return Ok(colorModel);
         }
-        // POST: api/Account/accountFavoriteProducts
-        //[HttpPost("accountFavoriteProducts")]
-        //public async Task<IActionResult> AddFavoriteProduct([FromBody] int productId)
-        //{
-        //    UserDTO? user = await GetCurrentUser();
-        //    if (user == null)
-        //        return Unauthorized(new { message = "User not logged in." });
+        //POST: api/Account/accountProducts
+        [HttpPost("accountProducts")]
+        public async Task<IActionResult> AddUserProduct([FromBody] int productId)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
 
 
-        //    var result = await _accountService.AddFavoriteProductToUser(user.Email, productId);
-        //    if (!result.Success)
-        //        return BadRequest(new { message = result.ErrorMessage });
+            var result = await _accountService.AddFavoriteProductToUser(user.Email, productId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
 
-        //    return Ok(new { message = "Product added to favorites successfully." });
-        //}
-        // DELETE: api/Account/accountFavoriteProducts/5
-        //[HttpDelete("accountFavoriteProducts/{productId}")]
-        //public async Task<IActionResult> RemoveFavoriteProduct(int productId)
-        //{
-        //    UserDTO? user = await GetCurrentUser();
-        //    if (user == null)
-        //        return Unauthorized(new { message = "User not logged in." });
+            return Ok(new { message = "Product added to favorites successfully." });
+        }
+        //DELETE: api/Account/accountProducts/5
+        [HttpDelete("accountProducts/{modelId}")]
+        public async Task<IActionResult> RemoveUserProduct(int productId)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
 
 
-        //    var result = await _accountService.RemoveFavoriteProductFromUser(user.Email, productId);
-        //    if (!result.Success)
-        //        return BadRequest(new { message = result.ErrorMessage });
+            var result = await _accountService.RemoveFavoriteProductFromUser(user.Email, productId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
 
-        //    return Ok(new { message = "Product removed from favorites successfully." });
-        //}
+            return Ok(new { message = "Product removed from favorites successfully." });
+        }
+        // DELETE: api/Account/accountModels/5
+        [HttpDelete("accountModels/{modelId}")]
+        public async Task<IActionResult> RemoveUserProductsByModel(int modelId)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            var result = await _accountService.RemoveFavoriteProductsByModelId(user.Email, modelId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "All products of this model removed from favorites." });
+        }
+
 
         // GET: api/Account/accountOrders
         [HttpGet("accountOrders")]
