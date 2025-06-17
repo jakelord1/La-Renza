@@ -25,6 +25,7 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.ParentCategoryId, opt => opt.MapFrom(src => src.CategoryId))
                 .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.CategoryImage))
                 .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.SizeOptions))
+                .ForMember(dest => dest.Models, opt => opt.MapFrom(src => src.Models))
                 .ReverseMap();
             CreateMap<Size, SizeDTO>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
@@ -55,7 +56,9 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.User.Select(u => u.Id)))
                 .ReverseMap();
             CreateMap<Model, ModelBase>()
-               .ReverseMap();
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.Category.SizeOptions.Select(s => s.Name)))
+                .ReverseMap();
             CreateMap<Size, SizeBase>()
                .ReverseMap();
             CreateMap<InvoiceInfo, InvoiceInfoDTO>()

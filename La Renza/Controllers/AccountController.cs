@@ -6,6 +6,8 @@ using La_Renza.BLL.DTO;
 using La_Renza.BLL.Services;
 using La_Renza.DAL.Entities;
 using La_Renza.BLL;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace La_Renza.Controllers
 {
@@ -363,14 +365,17 @@ namespace La_Renza.Controllers
             var favoriteProducts = user.FavoriteProducts;
             var result = favoriteProducts.Select(product => new FavoriteProductDTO
             {
-                Id = product.Id,
-                Name = product.Color.Model.Name,
-                Price = product.Color.Model.Price,
-                ImageUrl = product.Color.Image.Path,
+                Id = product.Color?.ModelId ?? 0,
+                Name = product.Color?.Model?.Name ?? "Unknown",
+                Price = product.Color?.Model?.Price ?? 0m,
+                ImageUrl = product.Color?.Image?.Path ?? "",
                 InStock = product.Quantity > 0,
-                Sizes = product.Size.Name,
-                Badges = new List<string> { product.Color.Model.Bage }
+                Sizes = product.Color.Model.Sizes,
+                 //= product.Color?.Model?.Sizes ?? new List<string>(),
+                Badges = product.Color?.Model?.Bage != null ? new List<string> { product.Color.Model.Bage } : new List<string>()
             }).ToList();
+
+
 
             return Ok(result);
         }
