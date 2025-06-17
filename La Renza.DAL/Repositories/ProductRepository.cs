@@ -73,6 +73,21 @@ namespace La_Renza.DAL.Repositories
                 .Where(p => p.User.Any(u => u.Id == userId))
                 .ToListAsync();
         }
+        public async Task<IEnumerable<Product>> GetByModelId(int modelId)
+        {
+            return await db.Product
+                .Include(p => p.Color)
+                .Where(p => p.Color.ModelId == modelId)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Product>> GetFavoritesByModelId(int modelId, int userId)
+        {
+            return await db.Product
+                .Include(p => p.Color)
+                .Where(p => p.Color.ModelId == modelId && p.User.Any(u => u.Id == userId))
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Model>> GetModelsByUserId(int userId)
         {
             return await db.Product
@@ -134,6 +149,18 @@ namespace La_Renza.DAL.Repositories
         }
 
 
+        public async Task<IEnumerable<Product>> GetUnfavoritedProductsByModelId(int modelId, int userId)
+        {
+            var userFavoriteProductIds = await db.User
+                .Where(u => u.Id == userId)
+                .SelectMany(u => u.Product.Select(p => p.Id))
+                .ToListAsync();
+
+            return await db.Product
+                .Include(p => p.Color)
+                .Where(p => p.Color.ModelId == modelId && !userFavoriteProductIds.Contains(p.Id))
+                .ToListAsync();
+        }
 
 
 

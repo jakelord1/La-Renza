@@ -421,6 +421,21 @@ namespace La_Renza.Controllers
 
             return Ok(colorModel);
         }
+        // POST: api/Account/accountModels/5
+        [HttpPost("accountModels/{modelId}")]
+        public async Task<IActionResult> AddUserProductsByModel(int modelId)
+        {
+            UserDTO? user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            var result = await _accountService.AddFavoriteProductsByModelIdToUser(user.Email, modelId);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Products of this model added to favorites successfully." });
+        }
+
         //POST: api/Account/accountProducts
         [HttpPost("accountProducts")]
         public async Task<IActionResult> AddUserProduct([FromBody] int productId)

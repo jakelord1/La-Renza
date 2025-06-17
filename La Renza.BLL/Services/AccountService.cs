@@ -64,6 +64,31 @@ namespace La_Renza.BLL.Services
 
             return (true, null);
         }
+
+        public async Task<(bool Success, string? ErrorMessage)> AddFavoriteProductsByModelIdToUser(string userEmail, int modelId)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
+
+            var newFavorites = (await Database.Products
+              .GetUnfavoritedProductsByModelId(modelId, user.Id))
+              .ToList();
+
+            if (!newFavorites.Any())
+                return (false, "All products of this model are already in favorites.");
+
+            foreach (var product in newFavorites)
+            {
+                user.Product.Add(product);
+            }
+
+            Database.Users.Update(user);
+            await Database.Save();
+
+            return (true, null);
+        }
+
         public async Task<(bool Success, string? ErrorMessage)> AddOrderToUser(string userEmail, OrderDTO orderDto)
         {
             var user = await Database.Users.Get(userEmail);
@@ -85,9 +110,7 @@ namespace La_Renza.BLL.Services
             if (user == null)
                 return (false, "User not found.");
 
-            var productsToRemove = user.Product
-                .Where(p => p.Color != null && p.Color.ModelId == modelId)
-                .ToList();
+            var productsToRemove = (await Database.Products.GetFavoritesByModelId(modelId, user.Id)).ToList();
 
             if (!productsToRemove.Any())
                 return (false, "No products from this model found in favorites.");
