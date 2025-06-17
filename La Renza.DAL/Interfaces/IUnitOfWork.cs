@@ -16,10 +16,11 @@ namespace La_Renza.DAL.Interfaces
         IRepository<Model> Models { get; }
         IRepository<Order> Orders { get; }
         IRepository<OrderItem> OrderItems { get; }
-        IRepository<Product> Products { get; }
+        //IRepository<Product> Products { get; }
         IRepository<Size> Sizes { get; }
         IRepository<User> Users { get; }
         IRepository<ShoppingCart> ShopingCarts { get; }
+        IProductRepository Products { get; }
         Task Save();
     }
 }

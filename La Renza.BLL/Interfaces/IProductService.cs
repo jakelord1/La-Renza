@@ -14,6 +14,10 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteProduct(int id);
         Task<ProductDTO> GetProduct(int id);
         Task<IEnumerable<ProductDTO>> GetProducts();
+        Task<IEnumerable<ProductDTO>> GetProductsByUserId(int userId);
+        Task<IEnumerable<ModelDTO>> GetModelsByUserId(int userId);
+        Task<IEnumerable<ModelDTO>> GetModelsByUserIdAndColor(int userId, int colorId);
+        Task<ModelDTO?> GetModelBySpecificColor(int modelId, int colorId);
         Task<bool> ExistsProduct(int id);
     }
 }
