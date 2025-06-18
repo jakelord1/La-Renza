@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './PromoBanner.css';
 
 const PromoBanner = () => {
   const [promoText, setPromoText] = useState('');
@@ -19,21 +20,7 @@ const PromoBanner = () => {
   }, []);
 
   return (
-    <div className="larenza-font" style={{
-      width: '100%',
-      background: '#7326b6',
-      color: '#fff',
-      fontWeight: 700,
-      fontSize: 15,
-      minHeight: 38,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      letterSpacing: 0.1,
-      padding: '0 0',
-      border: 'none',
-      zIndex: 2000,
-    }}>
+    <div className="larenza-font promo-banner">
       {promoText}
     </div>
   );

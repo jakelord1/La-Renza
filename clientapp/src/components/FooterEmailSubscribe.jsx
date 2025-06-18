@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './FooterEmailSubscribe.css';
 
 const FooterEmailSubscribe = () => {
   const [email, setEmail] = useState('');
@@ -27,14 +28,14 @@ const FooterEmailSubscribe = () => {
     <section className="footer-subscribe-section py-3 mb-2 w-100" style={{background:'transparent'}}>
       <div className="container d-flex justify-content-center">
         <div className="col-12 col-md-10 col-lg-8 px-0">
-          <div className="rounded-4 bg-white p-4 p-md-5 mb-2 border border-light position-relative" style={{zIndex:2}}>
+          <div className="bg-white p-4 p-md-5 mb-2 border border-light position-relative" style={{zIndex:2}}>
             <div className="text-center mb-3">
               <h3 className="fw-bold mb-2" style={{fontSize:'1.25rem', color:'var(--purple)'}}>Підпишись на розсилку La'renza</h3>
               <div className="small text-secondary mb-2">
                 Отримуй спецпропозиції, секретні акції та персональні промокоди першими!
               </div>
             </div>
-            <form className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2" style={{maxWidth:520,margin:'0 auto'}} onSubmit={handleSubmit}>
+            <form className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2" onSubmit={handleSubmit}>
               <div className="input-group flex-grow-1">
                 <span className="input-group-text bg-white border-end-0"><i className="bi bi-envelope" /></span>
                 <input

@@ -1,0 +1,95 @@
+.footer-larenza .footer-link {
+  color: #222;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-larenza .footer-link:hover {
+  color: #6c63ff;
+  text-decoration: underline;
+}
+.footer-larenza .footer-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f6f6f6;
+  color: #6c63ff !important;
+  font-size: 1.3rem;
+  transition: background 0.2s, color 0.2s;
+}
+.footer-larenza .footer-social svg,
+.footer-larenza .footer-social i {
+  color: #6c63ff !important;
+  fill: #6c63ff !important;
+  transition: color 0.2s, fill 0.2s;
+}
+.footer-larenza .footer-social:hover {
+  background: #6c63ff;
+  color: #fff !important;
+}
+.footer-larenza .footer-social:hover svg,
+.footer-larenza .footer-social:hover i {
+  color: #fff !important;
+  fill: #fff !important;
+}
+
+.footer-larenza .bg-light.rounded-pill img {
+  margin-right: 0.5rem;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+.footer-larenza .footer-social:hover {
+  background: #6c63ff;
+  color: #fff;
+}
+@media (max-width: 991.98px) {
+  .footer-larenza .col-lg-3.text-md-start {
+    text-align: center !important;
+  }
+  .footer-larenza .col-lg-3.text-md-start .d-flex {
+    justify-content: center !important;
+  }
+  .footer-larenza .bg-light.rounded-pill.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .footer-larenza .row > [class^='col-'] {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .footer-larenza .footer-social {
+    margin: 0 auto;
+  }
+  .footer-larenza .d-flex.gap-2.mb-3 {
+    justify-content: center;
+  }
+  .footer-larenza .bg-light.rounded-pill {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+  }
+}
+@media (max-width: 575.98px) {
+  .footer-larenza .row {
+    gap: 0.5rem 0;
+  }
+  .footer-larenza .footer-social {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+  .footer-larenza .d-flex.gap-2.mb-3 img {
+    height: 26px !important;
+  }
+}
+.footer-larenza .bg-light.rounded-pill img {
+  margin-right: 0.5rem;
+}

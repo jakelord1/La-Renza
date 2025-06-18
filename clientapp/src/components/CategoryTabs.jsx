@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 const CategoryTabs = ({ active, setActive }) => {
-  const [tabs, setTabs] = useState(['Усі']);
+  const [tabs, setTabs] = useState([{ id: 'Усі', name: 'Усі' }]);
   useEffect(() => {
     let categories = [];
     let tabsIds = [];
@@ -21,15 +21,15 @@ const CategoryTabs = ({ active, setActive }) => {
             const orderedTabs = tabsIds
               .map(id => categories.find(cat => cat.id === id))
               .filter(Boolean);
-            setTabs(['Усі', ...orderedTabs.map(cat => cat.name)]);
+            setTabs([{ id: 'Усі', name: 'Усі' }, ...orderedTabs.map(cat => ({ id: cat.id, name: cat.name }))]);
           });
       })
       .catch(() => setTabs(['Усі']));
   }, []);
 
-  const handleClick = (tab, e) => {
+  const handleClick = (tabId, e) => {
     e.preventDefault();
-    setActive(tab);
+    setActive(tabId);
     const button = e.currentTarget;
     button.blur();
     button.focus();
@@ -40,28 +40,28 @@ const CategoryTabs = ({ active, setActive }) => {
       <div className="d-flex justify-content-center flex-wrap gap-2">
         {tabs.map(tab => (
           <button
-            key={tab}
+            key={tab.id}
             type="button"
-            className={`category-tab-btn-admin${active === tab ? ' active' : ''}`}
-            onClick={(e) => handleClick(tab, e)}
+            className={`category-tab-btn-admin${active === tab.id ? ' active' : ''}`}
+            onClick={(e) => handleClick(tab.id, e)}
             onMouseDown={(e) => e.preventDefault()}
             style={{
-              background: active === tab ? '#6f42c1' : '#fff',
-              color: active === tab ? '#fff' : '#6f42c1',
+              background: active === tab.id ? '#6f42c1' : '#fff',
+              color: active === tab.id ? '#fff' : '#6f42c1',
               border: '1.5px solid #6f42c1',
               borderRadius: 8,
               fontWeight: 600,
               fontSize: 16,
               minWidth: 90,
               minHeight: 38,
-              boxShadow: active === tab ? '0 2px 8px #a259e633' : 'none',
+              boxShadow: active === tab.id ? '0 2px 8px #a259e633' : 'none',
               transition: 'all 0.2s',
               outline: 'none',
               padding: '7px 20px',
               marginBottom: 2
             }}
           >
-            {tab}
+            {tab.name}
           </button>
         ))}
       </div>

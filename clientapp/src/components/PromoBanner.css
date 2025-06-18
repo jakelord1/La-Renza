@@ -1,0 +1,31 @@
+.promo-banner {
+  width: 100%;
+  background: #7326b6;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.1px;
+  padding: 0 0;
+  border: none;
+  z-index: 2000;
+  text-align: center;
+}
+@media (max-width: 991.98px) {
+  .promo-banner {
+    font-size: 14px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+@media (max-width: 575.98px) {
+  .promo-banner {
+    font-size: 13px;
+    padding-left: 8px;
+    padding-right: 8px;
+    min-height: 38px;
+  }
+}

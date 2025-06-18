@@ -1,0 +1,63 @@
+.main-carousel {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  max-height: 430px;
+  background: linear-gradient(90deg, #e0c3fc 0%, #8ec5fc 100%);
+}
+
+/* Стрілки видимі лише при наведенні на .main-carousel (ПК) */
+.main-carousel .carousel-arrow {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.main-carousel:hover .carousel-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Відступи для стрілок */
+.main-carousel .carousel-arrow-left {
+  left: 24px !important;
+}
+.main-carousel .carousel-arrow-right {
+  right: 24px !important;
+}
+.main-carousel img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  opacity: 0.85;
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-height: 380px;
+  max-height: 430px;
+}
+@media (max-width: 991.98px) {
+  .main-carousel {
+    min-height: 260px;
+    max-height: 320px;
+  }
+  .main-carousel img {
+    min-height: 260px;
+    max-height: 320px;
+  }
+  .main-carousel .carousel-arrow {
+    display: none !important;
+  }
+}
+@media (max-width: 575.98px) {
+  .main-carousel {
+    min-height: 180px;
+    max-height: 220px;
+  }
+  .main-carousel img {
+    min-height: 180px;
+    max-height: 220px;
+  }
+  .main-carousel .carousel-arrow {
+    display: none !important;
+  }
+}
