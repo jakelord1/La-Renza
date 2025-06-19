@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import './Navbar.css';
 import { Link, useLocation } from 'react-router-dom';
 import AccountPopover from './AccountPopover';
 import AuthenticatedPopover from './AuthenticatedPopover';
@@ -192,14 +193,15 @@ const Navbar = () => {
         style={{ boxShadow: 'none', zIndex: 1002, position: 'relative', borderBottom: '1px solid #e5e5e5' }}
       >
         <div className="container" style={{ maxWidth: 1080, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-          <div style={{ display: 'flex', alignItems: 'center', padding: '13px 0', width: '100%', position: 'relative' }}>
+          <div className="navbar-mobile-row" style={{ display: 'flex', alignItems: 'center', padding: '13px 0', width: '100%', position: 'relative' }}>
             <div style={{ flex: 1 }}></div>
             <Link className="navbar-brand" to="/" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
               <img src="/images/larenza-logo.png" alt="La'Renza" height="18" />
             </Link>
-            <div className="d-flex align-items-center" style={{ gap: 8, marginLeft: 'auto' }}>
+            {/* Desktop search (in row with icons) */}
+            <div className="d-none d-lg-block" style={{ minWidth: 260, margin: '0 auto', flex: '0 1 320px' }}>
               <div className="position-relative" ref={searchRef}>
-                <form className="search position-relative me-3" style={{ width: '200px' }} onSubmit={handleToggleSearch}>
+                <form className="search position-relative" style={{ width: '100%' }} onSubmit={handleToggleSearch}>
                   <i
                     className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
                     style={{ fontSize: '1rem', cursor: 'pointer' }}
@@ -217,6 +219,8 @@ const Navbar = () => {
                   />
                 </form>
               </div>
+            </div>
+            <div className="d-flex align-items-center navbar-mobile-icons" style={{ marginLeft: 'auto', gap: '18px' }}>
               <Link to="/favorites" className="nav-link px-2 text-warning position-relative">
                 <i className="bi bi-heart fs-5" style={{color:'#000'}}></i>
                 <FavoritesCount />
@@ -257,10 +261,36 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
-            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          {/* Mobile menu row: гамбургер + пошук на одній лінії */}
+          <div className="d-flex d-lg-none align-items-center flex-row w-100" style={{gap: '8px', padding: '0 8px 10px 8px'}}>
+            <button className="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style={{border: '1px solid #ddd', borderRadius: 6, background: '#fff', width: 44, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
               <span className="navbar-toggler-icon"></span>
             </button>
+            <div className="navbar-mobile-search flex-grow-1">
+              <div className="position-relative" ref={searchRef}>
+                <form className="search position-relative" style={{ width: '100%' }} onSubmit={handleToggleSearch}>
+                  <i
+                    className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
+                    style={{ fontSize: '1rem', cursor: 'pointer' }}
+                    onClick={handleToggleSearch}
+                  />
+                  <input
+                    type="search"
+                    name="title"
+                    className="form-control border-0 border-bottom"
+                    placeholder="Пошук"
+                    aria-label="Search"
+                    style={{ paddingLeft: '35px' }}
+                    onFocus={() => setShowSearch(true)}
+                    readOnly
+                  />
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+            {/* Гамбургер на десктопі видалено, він є лише у мобільному flex-row */}
             <div className="collapse navbar-collapse" id="navbarNav" style={{ flex: 1 }}>
               <ul className="navbar-nav mx-auto" style={{ position: 'relative' }}>
                 {categories.map((cat) => (

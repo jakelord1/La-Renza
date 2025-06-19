@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { BannerContext } from './BannerContext';
-
+import './MainBanner.css';
 
 
 const MainBanner = () => {
@@ -20,30 +20,14 @@ const MainBanner = () => {
 
   return (
     <div className="container mb-4">
-      <style>{`
-        .main-carousel { position: relative; }
-        .main-carousel .carousel-arrow {
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.3s;
-        }
-        .main-carousel:hover .carousel-arrow {
-          opacity: 1;
-          pointer-events: auto;
-        }
-        .carousel-arrow-left { margin-left: 25px; }
-        .carousel-arrow-right { margin-right: 25px; }
-      `}</style>
       <div
         className="main-carousel rounded-4 overflow-hidden position-relative w-100"
-        style={{ minHeight: 380, maxHeight: 430, background: 'linear-gradient(90deg, #e0c3fc 0%, #8ec5fc 100%)' }}
       >
         <a href={carouselItems[activeIndex].link} style={{ display: 'block' }}>
           <img
             src={carouselItems[activeIndex].image}
             alt="Promo"
-            className="w-100 h-100 position-absolute top-0 start-0 object-fit-cover"
-            style={{ opacity: 0.85, minHeight: 380, maxHeight: 430, objectFit: 'cover' }}
+            className="object-fit-cover"
           />
         </a>
         {/* Left Arrow */}
