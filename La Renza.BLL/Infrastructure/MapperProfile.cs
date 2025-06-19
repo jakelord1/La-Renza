@@ -25,6 +25,7 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.ParentCategoryId, opt => opt.MapFrom(src => src.CategoryId))
                 .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.CategoryImage))
                 .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.SizeOptions))
+                .ForMember(dest => dest.Models, opt => opt.MapFrom(src => src.Models))
                 .ReverseMap();
             CreateMap<Size, SizeDTO>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category))
@@ -42,20 +43,25 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Model, ModelDTO>()
                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Image))
                 .ForMember(dest => dest.Colors, opt => opt.MapFrom(src => src.Colors))
+                 .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.Category.SizeOptions.Select(s => s.Name)))
                 .ReverseMap();
             CreateMap<ShoppingCart, ShopingCartDTO>()
-                .ForMember(dest => dest.Product, opt => opt.MapFrom(c => c.Product))
+                //.ForMember(dest => dest.Product, opt => opt.MapFrom(c => c.Product))
                 .ReverseMap();
             CreateMap<User, UserDTO>()
                 .ForMember(dest => dest.Addresses, opt => opt.MapFrom(c => c.Addresses.ToList()))
                 .ForMember(dest => dest.Invoices, opt => opt.MapFrom(c => c.Invoices.ToList()))
                 .ForMember(dest => dest.Cupons, opt => opt.MapFrom(c => c.Cupon.ToList()))
+                .ForMember(dest => dest.ShoppingCarts, opt => opt.MapFrom(c => c.ShoppingCarts.ToList()))
                 .ReverseMap();
             CreateMap<Coupon, CouponDTO>()
                 .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.User))
                 .ReverseMap();
             CreateMap<Model, ModelBase>()
-               .ReverseMap();
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
+                 .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.Category.SizeOptions.Select(s => s.Name)))
+
+                .ReverseMap();
             CreateMap<Size, SizeBase>()
                .ReverseMap();
             CreateMap<InvoiceInfo, InvoiceInfoDTO>()

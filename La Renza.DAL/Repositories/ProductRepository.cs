@@ -6,7 +6,7 @@ using System.Drawing;
 
 namespace La_Renza.DAL.Repositories
 {
-    public class ProductRepository : IRepository<Product>
+    public class ProductRepository : IProductRepository
     {
         private LaRenzaContext db;
 
@@ -19,12 +19,15 @@ namespace La_Renza.DAL.Repositories
         public async Task<IEnumerable<Product>> GetAll()
         {
             return await db.Product
-                .Include(p => p.Color)
-                .Include(p => p.Color.Model)
-                .Include(p => p.Size)
-                .Include(p => p.Comments)
-                .Include(p => p.User)
-                .ToListAsync();
+             .Include(p => p.Color)
+                .ThenInclude(c => c.Model)
+                    .ThenInclude(m => m.Category)
+                       .ThenInclude(cat => cat.SizeOptions)
+            .Include(p => p.Size)
+            .Include(p => p.Comments)
+            .Include(p => p.User)
+            .ToListAsync();
+
         }
 
         public async Task<Product> Get(int id)
@@ -58,6 +61,109 @@ namespace La_Renza.DAL.Repositories
             Product? product = products?.FirstOrDefault();
             return product!;
         }
+
+        public async Task<IEnumerable<Product>> GetByUserId(int userId)
+        {
+            return await db.Product
+                .Include(p => p.User)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Category)
+                            .ThenInclude(cat => cat.SizeOptions)
+                .Include(p => p.Size)
+                .Where(p => p.User.Any(u => u.Id == userId))
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Product>> GetByModelId(int modelId)
+        {
+            return await db.Product
+                .Include(p => p.Color)
+                .Where(p => p.Color.ModelId == modelId)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Product>> GetFavoritesByModelId(int modelId, int userId)
+        {
+            return await db.Product
+                .Include(p => p.Color)
+                .Where(p => p.Color.ModelId == modelId && p.User.Any(u => u.Id == userId))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Model>> GetModelsByUserId(int userId)
+        {
+            return await db.Product
+                .Where(p => p.User.Any(u => u.Id == userId))
+                .Select(p => p.Color.Model)
+                .Distinct()
+                .Include(m => m.Colors)
+                    .ThenInclude(c => c.Image)
+                .Include(m => m.Category)
+                    .ThenInclude(cat => cat.SizeOptions)
+                .Include(m => m.Image)
+                .ToListAsync();
+        }
+
+
+        public async Task<Model?> GetModelWithSpecificColor(int colorId)
+        {
+            var color = await db.Color
+                .Include(c => c.Model)
+                    .ThenInclude(m => m.Colors)
+                .Include(c => c.Image)
+                .FirstOrDefaultAsync(c => c.Id == colorId);
+
+            if (color == null || color.Model == null)
+                return null;
+
+            color.Model.Colors = color.Model.Colors.Where(c => c.Id == colorId).ToList();
+
+            return color.Model;
+        }
+
+        public async Task<IEnumerable<Model>> GetModelsByUserAndColor(int userId, int colorId)
+        {
+            var products = await db.Product
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Image)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Colors)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Category)
+                            .ThenInclude(cat => cat.SizeOptions)
+                .Where(p => p.User.Any(u => u.Id == userId) && p.Color.Id == colorId)
+                .ToListAsync();
+
+            var models = products
+                .Select(p => p.Color.Model)
+                .Distinct()
+                .ToList();
+
+            foreach (var model in models)
+            {
+                model.Colors = model.Colors.Where(c => c.Id == colorId).ToList();
+            }
+
+            return models;
+        }
+
+
+        public async Task<IEnumerable<Product>> GetUnfavoritedProductsByModelId(int modelId, int userId)
+        {
+            var userFavoriteProductIds = await db.User
+                .Where(u => u.Id == userId)
+                .SelectMany(u => u.Product.Select(p => p.Id))
+                .ToListAsync();
+
+            return await db.Product
+                .Include(p => p.Color)
+                .Where(p => p.Color.ModelId == modelId && !userFavoriteProductIds.Contains(p.Id))
+                .ToListAsync();
+        }
+
+
 
         public async Task Create(Product product)
         {

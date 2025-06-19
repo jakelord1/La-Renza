@@ -21,6 +21,6 @@ namespace La_Renza.BLL.DTO
         public ICollection<ColorDTO> Colors { get; set; }
         public ICollection<ImageDTO> Photos { get; set; }
         public int CategoryId { get; set; }
-        
+        public List<string> Sizes { get; set; } = new();
     }
 }

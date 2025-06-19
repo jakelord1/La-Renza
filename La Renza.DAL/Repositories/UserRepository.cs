@@ -22,6 +22,7 @@ namespace La_Renza.DAL.Repositories
                 .Include(u => u.Invoices)
                 .Include(u => u.Cupon)
                 .Include(u=> u.Product)
+                .Include(u => u.ShoppingCarts)
                 .ToListAsync();
         }
 
@@ -44,15 +45,24 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<User> Get(string email)
         {
-            var users = await db.User
+            return await db.User
                 .Include(u => u.Addresses)
                 .Include(u => u.Invoices)
                 .Include(u => u.Cupon)
+                .Include(u => u.ShoppingCarts)
                 .Include(u => u.Product)
-                .Where(u => u.Email == email).ToListAsync(); 
-            User? user = users?.FirstOrDefault();
-            return user!;
+                    .ThenInclude(p => p.Color)
+                        .ThenInclude(c => c.Model)
+                            .ThenInclude(m => m.Category)
+                                .ThenInclude(cat => cat.SizeOptions)
+                .Include(u => u.Product)
+                    .ThenInclude(p => p.Color)
+                        .ThenInclude(c => c.Image)
+                .Include(u => u.Product)
+                    .ThenInclude(p => p.Size)
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
+
 
         public async Task Create(User user)
         {

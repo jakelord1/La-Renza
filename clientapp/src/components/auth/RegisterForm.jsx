@@ -228,7 +228,7 @@ const RegisterForm = () => {
                                                 id="genderMale"
                                                 value={true}
                                                 checked={formData.gender === true}
-                                              onChange={() => setFormData({ ...formData, gender: true })}
+                                                onChange={() => setFormData(prev => ({ ...prev, gender: true }))}
                                             />
                                             <label className="form-check-label" htmlFor="genderMale">Мужской</label>
                                         </div>
@@ -240,7 +240,7 @@ const RegisterForm = () => {
                                                 id="genderFemale"
                                                 value={false}
                                                 checked={formData.gender === false}
-                                                onChange={() => setFormData({ ...formData, gender: false })}
+                                                onChange={() => setFormData(prev => ({ ...prev, gender: false }))}
                                             />
                                             <label className="form-check-label" htmlFor="genderFemale">Женский</label>
                                         </div>

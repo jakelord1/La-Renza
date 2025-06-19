@@ -20,5 +20,6 @@ namespace La_Renza.DAL.Entities
         public int CategoryId { get; set; }
         public ICollection<Color>? Colors { get; set; }
         public ICollection<Image>? Image { get; set; }
+        public Category Category { get; set; }
     }
 }

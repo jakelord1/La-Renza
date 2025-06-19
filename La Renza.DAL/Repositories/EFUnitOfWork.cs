@@ -143,7 +143,16 @@ namespace La_Renza.DAL.Repositories
             }
         }
 
-        public IRepository<Product> Products
+        //public IRepository<Product> Products
+        //{
+        //    get
+        //    {
+        //        if (productRepository == null)
+        //            productRepository = new ProductRepository(db);
+        //        return productRepository;
+        //    }
+        //}
+        public IProductRepository Products
         {
             get
             {

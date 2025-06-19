@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using La_Renza.DAL.Entities;
 
 namespace La_Renza.BLL.DTO
 {
@@ -17,5 +18,7 @@ namespace La_Renza.BLL.DTO
         public decimal? Rate { get; set; }
         public string? Bage { get; set; }
         public int CategoryId { get; set; }
+        public string Category { get; set; }
+        public List<string> Sizes { get; set; }
     }
 }

@@ -64,6 +64,31 @@ namespace La_Renza.BLL.Services
 
             return (true, null);
         }
+
+        public async Task<(bool Success, string? ErrorMessage)> AddFavoriteProductsByModelIdToUser(string userEmail, int modelId)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
+
+            var newFavorites = (await Database.Products
+              .GetUnfavoritedProductsByModelId(modelId, user.Id))
+              .ToList();
+
+            if (!newFavorites.Any())
+                return (false, "All products of this model are already in favorites.");
+
+            foreach (var product in newFavorites)
+            {
+                user.Product.Add(product);
+            }
+
+            Database.Users.Update(user);
+            await Database.Save();
+
+            return (true, null);
+        }
+
         public async Task<(bool Success, string? ErrorMessage)> AddOrderToUser(string userEmail, OrderDTO orderDto)
         {
             var user = await Database.Users.Get(userEmail);
@@ -75,6 +100,27 @@ namespace La_Renza.BLL.Services
             order.User = user;
 
             await Database.Orders.Create(order);
+            await Database.Save();
+
+            return (true, null);
+        }
+        public async Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductsByModelId(string userEmail, int modelId)
+        {
+            var user = await Database.Users.Get(userEmail);
+            if (user == null)
+                return (false, "User not found.");
+
+            var productsToRemove = (await Database.Products.GetFavoritesByModelId(modelId, user.Id)).ToList();
+
+            if (!productsToRemove.Any())
+                return (false, "No products from this model found in favorites.");
+
+            foreach (var product in productsToRemove)
+            {
+                user.Product.Remove(product);
+            }
+
+            Database.Users.Update(user);
             await Database.Save();
 
             return (true, null);

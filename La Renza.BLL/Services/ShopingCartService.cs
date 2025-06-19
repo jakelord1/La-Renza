@@ -66,7 +66,16 @@ namespace La_Renza.BLL.Services
             };
         }
 
-   
+        public async Task<IEnumerable<ShopingCartDTO>> GetShoppingCartsByUserId(int userId)
+        {
+            var shopingCarts = await Database.ShopingCarts.GetAll();
+            var userShopingCarts = shopingCarts.Where(a => a.UserId == userId);
+
+
+            return _mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(userShopingCarts);
+        }
+
+
         public async Task<IEnumerable<ShopingCartDTO>> GetShopingCarts()
         {
             return _mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(await Database.ShopingCarts.GetAll());
