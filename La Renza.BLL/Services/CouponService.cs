@@ -19,25 +19,13 @@ namespace La_Renza.BLL.Services
 
         public async Task CreateCoupon(CouponDTO couponDto)
         {
-            var users = new List<User>();
-            
-            foreach (var userId in couponDto.Users)
-            {
-                var user = await Database.Users.Get(userId);
-                if (user != null)
-                {
-                    users.Add(user);
-                }
-            }
-
             var coupon = new Coupon
             {
                 Id = couponDto.Id,
                 Name = couponDto.Name,
                 Description = couponDto.Description,
                 Price = couponDto.Price,
-                User = users
-
+                User = _mapper.Map<ICollection<User>>(couponDto.Users)
             };
             await Database.Coupons.Create(coupon);
             await Database.Save();
@@ -50,7 +38,8 @@ namespace La_Renza.BLL.Services
                 Id = couponDto.Id,
                 Name = couponDto.Name,
                 Description = couponDto.Description,
-                Price = couponDto.Price
+                Price = couponDto.Price,
+                User = couponDto.Users.Count == 0 ? _mapper.Map<ICollection<User>>(new List<User>()) : _mapper.Map<ICollection<User>>(couponDto.Users)
             };
             Database.Coupons.Update(coupon);
             await Database.Save();

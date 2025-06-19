@@ -13,6 +13,7 @@ namespace La_Renza.BLL.DTO
         public string Name { get; set; }
 
         public int? ParentCategoryId { get; set; }
+        public int? ImageId { get; set; }
         public bool IsGlobal { get; set; }
         public ImageDTO Image { get; set; }
         public ICollection<SizeBase> Sizes { get; set; }

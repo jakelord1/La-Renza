@@ -17,18 +17,17 @@ namespace La_Renza.BLL.Services
         }
         public async Task CreateModel(ModelDTO modelDto)
         {
-            var photos = _mapper.Map<IEnumerable<Image>>(modelDto.Photos);
             var model = new Model
             {
                 Name = modelDto.Name,
                 Description = modelDto.Description,
                 StartDate = modelDto.StartDate,
                 MaterialInfo = modelDto.MaterialInfo,
-                Id = modelDto.Id,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage,
                 CategoryId = modelDto.CategoryId,
-                Image = _mapper.Map<ICollection<Image>>(photos)
+                Image = _mapper.Map<ICollection<Image>>(modelDto.Photos),
+                Colors = new List<Color>()
             };
 
             await _db.Models.Create(model);

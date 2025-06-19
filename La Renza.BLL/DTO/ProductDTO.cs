@@ -15,7 +15,7 @@ namespace La_Renza.BLL.DTO
         public int Quantity { get; set; }
 
         public SizeBase Size { get; set; }
-        public ColorDTO Color { get; set; }
+        public ColorProductDTO Color { get; set; }
         public List<int>? UsersLikesId { get; set; }
     }
 }

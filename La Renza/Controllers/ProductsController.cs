@@ -12,6 +12,7 @@ namespace La_Renza.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly ISizeService _sizeService;
         public ProductsController(IProductService productService)
         {
             _productService = productService;

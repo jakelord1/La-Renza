@@ -54,6 +54,7 @@ namespace La_Renza.BLL.Services
                 Saved = comment;
             else
                 throw new Exception();
+            _db.Comments.Update(comment);
             await _db.Save();
         }
         public async Task DeleteComment(int id)
