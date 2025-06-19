@@ -13,9 +13,9 @@ namespace La_Renza.DAL.Entities
         public string? Description { get; set; }
         public string? MaterialInfo { get; set; }
         public DateTime StartDate { get; set; }
-        public decimal? Rate { get; set; }
+        public float? Rate { get; set; }
         public string? Bage { get; set; }
-        public decimal Price { get; set; }
+        public float Price { get; set; }
 
         public int CategoryId { get; set; }
         public ICollection<Color>? Colors { get; set; }
