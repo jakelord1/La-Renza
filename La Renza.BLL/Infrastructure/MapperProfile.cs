@@ -77,6 +77,7 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image))
                 .ReverseMap();
 
+
         }
     }
 }
