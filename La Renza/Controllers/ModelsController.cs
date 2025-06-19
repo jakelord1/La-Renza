@@ -12,6 +12,8 @@ namespace La_Renza.Controllers
     public class ModelsController : ControllerBase
     {
         private readonly IModelService _modelService;
+        
+
         public ModelsController(IModelService modelService)
         {
             _modelService = modelService;
@@ -63,6 +65,9 @@ namespace La_Renza.Controllers
                 return BadRequest(ModelState);
             }
             await _modelService.CreateModel(model);
+
+
+
             return Ok(model);
         }
 

@@ -40,7 +40,7 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Image, ImageDTO>()
                 .ReverseMap();
             CreateMap<Model, ModelDTO>()
-                 .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Image))
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Image))
                 .ForMember(dest => dest.Colors, opt => opt.MapFrom(src => src.Colors))
                 .ReverseMap();
             CreateMap<ShoppingCart, ShopingCartDTO>()
@@ -52,7 +52,7 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.Cupons, opt => opt.MapFrom(c => c.Cupon.ToList()))
                 .ReverseMap();
             CreateMap<Coupon, CouponDTO>()
-                .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.User.Select(u => u.Id)))
+                .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.User))
                 .ReverseMap();
             CreateMap<Model, ModelBase>()
                .ReverseMap();
@@ -72,6 +72,9 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.DM, opt => opt.MapFrom(src => src.DeliveryMethod))
                 .ReverseMap();
             CreateMap<DeliveryMethod, DeliveryMethodDTO>()
+                .ReverseMap();
+            CreateMap<Color, ColorProductDTO>()
+                .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image))
                 .ReverseMap();
 
         }

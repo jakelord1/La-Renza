@@ -27,9 +27,23 @@ namespace La_Renza.BLL.Services
                 Name = colorDto.Name,
                 ModelId = colorDto.ModelId,
                 ImageId = colorDto.ImageId,
-                Image = _mapper.Map<Image>(colorDto.Image)
+                Image = _mapper.Map<Image>(colorDto.Image),
+                Model = await _db.Models.Get(colorDto.ModelId)
             };
             await _db.Colors.Create(color);
+            List<Size> sizes = (await _db.Sizes.GetAll()).Where(s => s.CategoryId == color.Model.CategoryId).ToList();
+            foreach (Size size in sizes)
+            {
+                Product product = new Product
+                {
+                    ColorId = color.Model.CategoryId,
+                    SizeId = size.Id,
+                    Quantity = 0,
+                    Color = color,
+                    Size = size
+                };
+                await _db.Products.Create(product);
+            }
             await _db.Save();
         }
         public async Task UpdateColor(ColorDTO colorDto)
@@ -46,6 +60,7 @@ namespace La_Renza.BLL.Services
                 Saved = color;
             else
                 throw new Exception();
+            _db.Colors.Update(color);
             await _db.Save();
         }
 

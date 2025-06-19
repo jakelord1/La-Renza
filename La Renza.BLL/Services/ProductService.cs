@@ -34,14 +34,14 @@ namespace La_Renza.BLL.Services
         }
         public async Task UpdateProduct(ProductDTO productDto)
         {
-           
+            Product orig = await _db.Products.Get(productDto.Id);
             var product = new Product
             {
                 Id = productDto.Id,
                 ColorId = productDto.ColorId,
                 SizeId = productDto.SizeId,
                 Quantity = productDto.Quantity,
-                User = _mapper.Map<ICollection<User>>(productDto.UsersLikesId)
+                User = orig.User
             };
             _db.Products.Update(product);
             await _db.Save();

@@ -42,7 +42,7 @@ namespace La_Renza.Controllers
                 return BadRequest("Файл не загружен.");
             }
 
-            var filePath = Path.Combine("public", file.FileName);
+            var filePath = Path.Combine("../clientapp/public/images/", file.FileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
