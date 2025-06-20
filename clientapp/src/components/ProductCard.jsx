@@ -12,6 +12,28 @@ const BADGE_COLORS = {
 
 const API_URL = 'https://localhost:7071/api/Users/Model';
 
+const isFavorite = (product) => {
+  try {
+    const favs = JSON.parse(localStorage.getItem('favorites')) || [];
+    return favs.some((item) => item.id === product.id);
+  } catch (error) { /* ignore parse error */ }
+  return false;
+};
+
+// const toggleFavorite = (product) => {
+//   let favs = [];
+//   try {
+//     favs = JSON.parse(localStorage.getItem('favorites')) || [];
+//   } catch (error) { /* ignore parse error */ }
+//   if (favs.some((item) => item.id === product.id)) {
+//     favs = favs.filter((item) => item.id !== product.id);
+//   } else {
+//     favs.push(product);
+//   }
+//   localStorage.setItem('favorites', JSON.stringify(favs));
+//   window.dispatchEvent(new Event('favorites-updated'));
+// };
+
 const getCart = () => {
   try {
     return JSON.parse(localStorage.getItem('cart')) || [];
@@ -28,9 +50,15 @@ const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
 
   const badges = model.badges || [model.isNew && 'НОВИНКА'].filter(Boolean);
 
-  const sizes = Array.from(new Set(products.map(p => p.size?.name).filter(Boolean)));
+  const [favorite, setFavorite] = React.useState(isFavorite(product));
+  const [inCart, setInCart] = React.useState(isInCart(product));
+  const [showModal, setShowModal] = React.useState(false);
 
-  const minPrice = products.length ? Math.min(...products.map(p => p.price || 0)) : (model.price || 0);
+  React.useEffect(() => {
+    const update = () => setFavorite(isFavorite(product));
+    window.addEventListener('favorites-updated', update);
+    return () => window.removeEventListener('favorites-updated', update);
+  }, [product]);
 
   const [activeColorId, setActiveColorId] = React.useState((model.colors && model.colors[0]?.id) || null);
   const colorProduct = React.useMemo(() => (
@@ -81,10 +109,10 @@ const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
       onClick={onCardClick}
     >
       <div className="position-relative w-100" style={{flex:'1 1 auto', minHeight:200, height:200, width:'100%'}}>
-        <img src={mainPhoto} alt={model.name} className="w-100 h-100 object-fit-cover" style={{display:'block', borderRadius: '0', background:'#f6f6f6', height:'100%', objectFit:'cover'}} />
-        <button className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={e => { e.stopPropagation(); handleLikeClick(e); }}>
-          <svg width="22" height="22" fill={liked ? 'var(--purple)' : 'none'} stroke={liked ? 'var(--purple)' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        <img src={product.image} alt={product.name} className="w-100 h-100 object-fit-cover" style={{display:'block', borderRadius: '0', background:'#f6f6f6', height:'100%', objectFit:'cover'}} />
+        <button className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.96)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={() => toggleFavorite(product)}>
+          <svg width="22" height="22" fill={favorite ? 'red' : 'none'} stroke={favorite ? 'red' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0l-.54.54-.54-.54a5.5 5.5 0 0 0-7.78 7.78l.54.54L12 21.35l7.78-8.42.54-.54a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
       </div>
