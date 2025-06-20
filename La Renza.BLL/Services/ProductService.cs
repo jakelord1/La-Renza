@@ -80,6 +80,13 @@ namespace La_Renza.BLL.Services
             return _mapper.Map<IEnumerable<ModelDTO>>(models);
         }
 
+
+        public async Task<IEnumerable<ModelDTO>> GetModels()
+        {
+            var models = await _db.Products.GetAllModels();
+            return _mapper.Map<IEnumerable<ModelDTO>>(models);
+        }
+
         public async Task<IEnumerable<ModelDTO>> GetModelsByUserIdAndColor(int userId, int colorId)
         {
             var models = await _db.Products.GetModelsByUserAndColor(userId, colorId);

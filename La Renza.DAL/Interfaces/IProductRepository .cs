@@ -13,6 +13,6 @@ namespace La_Renza.DAL.Interfaces
         Task<IEnumerable<Product>> GetFavoritesByModelId(int modelId, int userId);
         Task<IEnumerable<Product>> GetByModelId(int modelId);
         Task<IEnumerable<Product>> GetUnfavoritedProductsByModelId(int modelId, int userId);
-
+        Task<IEnumerable<Model>> GetAllModels();
     }
 }

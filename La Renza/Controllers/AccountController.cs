@@ -391,20 +391,54 @@ namespace La_Renza.Controllers
                 return Unauthorized(new { message = "User not logged in." });
 
             var favoriteModels = await _productService.GetModelsByUserId(user.Id);
-            var result = favoriteModels.Select(model => new FavoriteProductDTO
+            var result = favoriteModels.Select(model => new ModelProduct
             {
                 Id = model.Id,
                 Name = model.Name ?? "Unknown",
-                Price = model.Price,
+                Description = model.Description,
+                MaterialInfo = model.MaterialInfo,
+                StartDate = model.StartDate,
+                Price = (decimal)model.Price,
                 ImageUrl = model.Colors.FirstOrDefault()?.Image?.Path ?? "",
+                Rate = model.Rate,
                 Sizes = model.Sizes,
-                Badges = !string.IsNullOrEmpty(model.Bage)
+                CategoryId = model.CategoryId,
+                Bages = !string.IsNullOrEmpty(model.Bage)
                   ? new List<string> { model.Bage! }
                   : new List<string>()
+
             }).ToList();
 
             return Ok(result);
         }
+
+        // GET: api/Account/
+        [HttpGet("allModels")]
+        public async Task<ActionResult> GetModels()
+        {
+           
+            var models = await _productService.GetModels();
+            var result = models.Select(m => new ModelProduct
+            {
+                Id = m.Id,
+                Name = m.Name ?? "Unknown",
+                Description = m.Description,
+                MaterialInfo = m.MaterialInfo,
+                StartDate = m.StartDate,
+                Price = (decimal)m.Price,
+                Rate = m.Rate,
+                ImageUrl = m.Colors.FirstOrDefault()?.Image?.Path ?? "",
+                Sizes = m.Sizes ?? new List<string>(),
+                Bages = !string.IsNullOrEmpty(m.Bage)
+                  ? new List<string> { m.Bage! }
+                  : new List<string>(),
+                CategoryId = m.CategoryId
+            }).ToList();
+
+            return Ok(result);
+        }
+
+
         // GET: api/Account/
         [HttpGet("accountModelByUserIdAndColor/{colorId}")]
         public async Task<ActionResult> GetModelsByUserIdAndColor(int colorId)
