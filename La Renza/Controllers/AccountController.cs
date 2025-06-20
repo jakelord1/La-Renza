@@ -395,7 +395,7 @@ namespace La_Renza.Controllers
             {
                 Id = model.Id,
                 Name = model.Name ?? "Unknown",
-                Price = model.Price,
+                Price = (decimal)model.Price,
                 ImageUrl = model.Colors.FirstOrDefault()?.Image?.Path ?? "",
                 Sizes = model.Sizes,
                 Badges = !string.IsNullOrEmpty(model.Bage)
