@@ -59,7 +59,7 @@ namespace La_Renza.BLL.Infrastructure
                 .ReverseMap();
             CreateMap<Model, ModelBase>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
-                 .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.Category.SizeOptions.Select(s => s.Name)))
+                .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.Category.SizeOptions.Select(s => s.Name)))
 
                 .ReverseMap();
             CreateMap<Size, SizeBase>()

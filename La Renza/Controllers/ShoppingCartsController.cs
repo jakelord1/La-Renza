@@ -35,7 +35,18 @@ namespace La_Renza.Controllers
             }
             return new ObjectResult(shopingCart);
         }
+        [HttpGet("CurrentUser")]
+        public async Task<ActionResult<IEnumerable<ShopingCartDTO>>> GetCurrentUserShopingCart()
+        {
+            int id = int.Parse(HttpContext.Session.GetString("UserId"));
+            ShopingCartDTO shopingCart = await _shopingCartService.GetShopingCart((int)id);
 
+            if (shopingCart == null)
+            {
+                return NotFound();
+            }
+            return new ObjectResult(shopingCart);
+        }
         // PUT: api/ShopingCart/5
         [HttpPut]
         public async Task<IActionResult> PutShopingCart(ShopingCartDTO cart)

@@ -14,8 +14,8 @@ namespace La_Renza.BLL.DTO
         public string? Description { get; set; }
         public string? MaterialInfo { get; set; }
         public DateTime StartDate { get; set; }
-        public float Price { get; set; }
-        public float? Rate { get; set; }
+        public decimal Price { get; set; }
+        public decimal? Rate { get; set; }
         public string? Bage { get; set; }
 
         public ICollection<ColorDTO> Colors { get; set; }
