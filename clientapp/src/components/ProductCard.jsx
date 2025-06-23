@@ -108,7 +108,7 @@ const ProductCard = ({ model, products }) => {
           {(model.colors || []).map(color => {
             let colorImg = color.image?.path || '';
             if (colorImg.startsWith('/public/')) colorImg = colorImg.replace(/^\/public/, '');
-            colorImg = colorImg ? `/images/${colorImg.replace(/^\, '')}` : null;
+            colorImg = colorImg ? `/images/${colorImg.replace(/^\//, '')}` : null;
             return (
               <span
                 key={color.id}
