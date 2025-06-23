@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountShoppingCarts`;
+const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
+
 const getCart = () => {
   try {
     return JSON.parse(localStorage.getItem('cart')) || [];
   } catch {
     return [];
   }
+};
+
+const fetchShopCart = async () => {
+    setLoading(true);
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Помилка завантаження моделей');
+        const mockProducts = await res.json();
+    } catch (e) {
+        setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+        setLoading(false);
+    }
 };
 
 const getFavorites = () => {
@@ -22,7 +38,8 @@ const setFavorites = (favorites) => {
 };
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
+    const [cartItems, setCartItems] = useState([]);
+    const [products, setProducts] = useState([]);
   const [isCheckout, setIsCheckout] = useState(true);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,7 +63,7 @@ const Cart = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setCartItems(getCart());
+    setCartItems(fetchShopCart());
     setFavoritesState(getFavorites());
     const update = () => setCartItems(getCart());
     window.addEventListener('cart-updated', update);

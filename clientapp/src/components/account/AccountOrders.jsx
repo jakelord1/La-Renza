@@ -6,11 +6,6 @@ import Spinner from 'react-bootstrap/Spinner';
 
 const API_URL = 'https://localhost:7071/api/Account/accountOrders';
 
-
-
-
-
-
 const statusLabels = { completed: 'Виконано', processing: 'В обробці', cancelled: 'Скасовано' };
 const paymentMethods = {
   0: 'Готівка',
