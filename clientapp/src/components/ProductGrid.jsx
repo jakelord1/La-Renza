@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import ProductCard from './ProductCard';
 
-const API_URL = 'https://localhost:7071/api/Products';
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Products`;
 
 const ProductGrid = ({ activeCategory = 'Усі' }) => {
   const [products, setProducts] = useState([]);
