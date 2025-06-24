@@ -23,7 +23,7 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
     }
 
     alert('Товар додано в корзину');
-    window.dispatchEvent(new Event('cart-updated'));
+  
   } catch (error) {
     alert(error.message);
   }
@@ -149,11 +149,7 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   const handleSelectSize =async  (size) => {
     setSelectedSize(size);
    console.log('Selected size:', size);
-    // let cart = [];
-    // try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
-    // cart.push({ ...product, selectedSize: size });
-    // localStorage.setItem('cart', JSON.stringify(cart));
-    // window.dispatchEvent(new Event('cart-updated'));
+
     // setStep('added');
   const modelId = product.modelId || product.id; 
   const sizeName = size;
@@ -161,6 +157,11 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
 
   try {
     await addToCart(modelId, sizeName, quantity);
+    let cart = [];
+    try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
+    cart.push({ ...product, selectedSize: size });
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new Event('cart-updated'));
     setStep('added');
   } catch (error) {
       alert('Не вдалося додати товар в корзину');
