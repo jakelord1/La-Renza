@@ -146,7 +146,7 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   };
 
 
-  const handleSelectSize = (size) => {
+  const handleSelectSize = async (size) => {
     if (step !== 'select' || isAdding) return; // Захист від повторного виклику
     setIsAdding(true);
     setSelectedSize(size);
