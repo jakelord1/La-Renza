@@ -56,6 +56,21 @@ namespace La_Renza.Controllers
             await _imageService.CreateImage(imageDto);
             return Ok();
         }
+        [HttpPost("Upload")]
+        public async Task<ActionResult<ImageDTO>> PostOnlyImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("Файл не загружен.");
+            }
+
+            var filePath = Path.Combine("../clientapp/public/images/", file.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            return Ok();
+        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutImage(int id, IFormFile file)

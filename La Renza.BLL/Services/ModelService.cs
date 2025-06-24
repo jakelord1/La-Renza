@@ -35,7 +35,6 @@ namespace La_Renza.BLL.Services
         }
         public async Task UpdateModel(ModelDTO modelDto)
         {
-            var photos = _mapper.Map<IEnumerable<Image>>(modelDto.Photos);
             var model = new Model
             {
                 Id = modelDto.Id,
@@ -47,7 +46,7 @@ namespace La_Renza.BLL.Services
                 Price = modelDto.Price,
                 Bage = modelDto.Bage,
                 CategoryId = modelDto.CategoryId,
-                Image = _mapper.Map<ICollection<Image>>(photos)
+                Image = _mapper.Map<ICollection<Image>>(modelDto.Photos)
             };
             _db.Models.Update(model);
             await _db.Save();

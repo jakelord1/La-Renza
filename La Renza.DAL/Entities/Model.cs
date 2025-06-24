@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -14,9 +15,11 @@ namespace La_Renza.DAL.Entities
         public string? Description { get; set; }
         public string? MaterialInfo { get; set; }
         public DateTime StartDate { get; set; }
-        [Column(TypeName = "decimal(1,2)")]
+        [Range(0, 5)]
+        [Column(TypeName = "decimal(3,2)")]
         public decimal? Rate { get; set; }
         public string? Bage { get; set; }
+
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
 
