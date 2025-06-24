@@ -23,7 +23,8 @@ namespace La_Renza.Controllers
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
         private readonly IShopingCartService _shopingCartService;
-       public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService,IAdminService adminService,IProductService productService,IOrderService orderService,IShopingCartService shopingCartService)
+        private readonly ISizeService _sizeService;
+        public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService,IAdminService adminService,IProductService productService,IOrderService orderService,IShopingCartService shopingCartService,ISizeService sizeService)
         {
             _userService = userService;
             _addressService = addressService;
@@ -33,6 +34,7 @@ namespace La_Renza.Controllers
             _productService = productService;
             _orderService = orderService;
             _shopingCartService = shopingCartService;
+            _sizeService= sizeService;
         }
 
         private async Task<UserDTO?> GetCurrentUser()
@@ -190,6 +192,11 @@ namespace La_Renza.Controllers
                 return BadRequest(new { message = "Current password is incorrect." });
             }
             user.Password = hasher.HashPassword(model.NewPassword);
+            user.Cupons = null;
+            user.FavoriteProducts = null;
+            user.Invoices = null;
+            user.Addresses = null;
+
 
             await _userService.UpdateUser(user);
 
@@ -391,20 +398,54 @@ namespace La_Renza.Controllers
                 return Unauthorized(new { message = "User not logged in." });
 
             var favoriteModels = await _productService.GetModelsByUserId(user.Id);
-            var result = favoriteModels.Select(model => new FavoriteProductDTO
+            var result = favoriteModels.Select(model => new ModelProduct
             {
                 Id = model.Id,
                 Name = model.Name ?? "Unknown",
+                Description = model.Description,
+                MaterialInfo = model.MaterialInfo,
+                StartDate = model.StartDate,
                 Price = (decimal)model.Price,
                 ImageUrl = model.Colors.FirstOrDefault()?.Image?.Path ?? "",
+                Rate = model.Rate,
                 Sizes = model.Sizes,
-                Badges = !string.IsNullOrEmpty(model.Bage)
+                CategoryId = model.CategoryId,
+                Bages = !string.IsNullOrEmpty(model.Bage)
                   ? new List<string> { model.Bage! }
                   : new List<string>()
+
             }).ToList();
 
             return Ok(result);
         }
+
+        // GET: api/Account/
+        [HttpGet("allModels")]
+        public async Task<ActionResult> GetModels()
+        {
+           
+            var models = await _productService.GetModels();
+            var result = models.Select(m => new ModelProduct
+            {
+                Id = m.Id,
+                Name = m.Name ?? "Unknown",
+                Description = m.Description,
+                MaterialInfo = m.MaterialInfo,
+                StartDate = m.StartDate,
+                Price = (decimal)m.Price,
+                Rate = m.Rate,
+                ImageUrl = m.Colors.FirstOrDefault()?.Image?.Path ?? "",
+                Sizes = m.Sizes ?? new List<string>(),
+                Bages = !string.IsNullOrEmpty(m.Bage)
+                  ? new List<string> { m.Bage! }
+                  : new List<string>(),
+                CategoryId = m.CategoryId
+            }).ToList();
+
+            return Ok(result);
+        }
+
+
         // GET: api/Account/
         [HttpGet("accountModelByUserIdAndColor/{colorId}")]
         public async Task<ActionResult> GetModelsByUserIdAndColor(int colorId)
@@ -525,6 +566,38 @@ namespace La_Renza.Controllers
 
             var shoppingCarts = await _shopingCartService.GetShoppingCartsByUserId(user.Id);
             return Ok(shoppingCarts);
+        }
+        // POST: api/Account/addToCartByModel
+        [HttpPost("addToCartByModel")]
+        public async Task<IActionResult> AddToCartByModel([FromBody] AddCartByModel dto)
+        {
+            var user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+            int? sizeId = await _sizeService.GetSizeIdByName(dto.SizeName);
+            if (sizeId == null)
+                return BadRequest(new { message = $"Розмір '{dto.SizeName}' не знайдений." });
+
+
+            var result = await _accountService.AddProductToCartByModelAndSize(user.Email, dto.ModelId, sizeId.Value, dto.Quantity);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Product added to cart." });
+        }
+
+        [HttpDelete("removeFromCartByProduct/{productId}")]
+        public async Task<IActionResult> RemoveFromCartByProduct(int productId)
+        {
+            var user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            var result = await _accountService.RemoveFromCartByUserAndProduct(user.Id, productId);
+            if (!result.Success)
+                return NotFound(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Item removed from cart." });
         }
 
     }

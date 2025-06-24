@@ -20,20 +20,19 @@ const isFavorite = (product) => {
   return false;
 };
 
-const toggleFavorite = (product) => {
-  let favs = [];
-  try {
-    favs = JSON.parse(localStorage.getItem('favorites')) || [];
-  } catch (error) { 
-  }
-  if (favs.some((item) => item.id === product.id)) {
-    favs = favs.filter((item) => item.id !== product.id);
-  } else {
-    favs.push(product);
-  }
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  window.dispatchEvent(new Event('favorites-updated'));
-};
+// const toggleFavorite = (product) => {
+//   let favs = [];
+//   try {
+//     favs = JSON.parse(localStorage.getItem('favorites')) || [];
+//   } catch (error) { /* ignore parse error */ }
+//   if (favs.some((item) => item.id === product.id)) {
+//     favs = favs.filter((item) => item.id !== product.id);
+//   } else {
+//     favs.push(product);
+//   }
+//   localStorage.setItem('favorites', JSON.stringify(favs));
+//   window.dispatchEvent(new Event('favorites-updated'));
+// };
 
 const getCart = () => {
   try {
@@ -59,6 +58,53 @@ const ProductCard = ({ model, products }) => {
   const [favorite, setFavorite] = React.useState(isFavorite(mainProduct));
   const [inCart, setInCart] = React.useState(isInCart(mainProduct));
   const [showModal, setShowModal] = React.useState(false);
+  const [favoriteLoading, setFavoriteLoading] = React.useState(false);
+
+   const toggleFavorite = async () => {
+  if (favoriteLoading) return;
+  setFavoriteLoading(true);
+
+  try {
+    let favs = [];
+    try {
+      favs = JSON.parse(localStorage.getItem('favorites')) || [];
+    } catch {
+    }
+
+    if (!favorite) {
+      const res = await fetch(`https://localhost:7071/api/Account/accountModels/${product.id}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Не удалось добавить в избранное');
+     
+      if (!favs.some(item => item.id === product.id)) {
+        favs.push(product);
+      }
+      localStorage.setItem('favorites', JSON.stringify(favs));
+      setFavorite(true);
+
+    } else {
+      const res = await fetch(`https://localhost:7071/api/Account/accountModels/${product.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Не удалось удалить из избранного');
+
+     favs = favs.filter(item => item.id !== product.id);
+      localStorage.setItem('favorites', JSON.stringify(favs));
+      setFavorite(false);
+    }
+
+    window.dispatchEvent(new Event('favorites-updated'));
+
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    setFavoriteLoading(false);
+  }
+};
+
 
   React.useEffect(() => {
     const update = () => setFavorite(isFavorite(mainProduct));
@@ -85,8 +131,8 @@ const ProductCard = ({ model, products }) => {
   return (
     <div className="product-card position-relative d-flex flex-column p-0" style={{background:'#fff', borderRadius: '10px', minWidth: 260, maxWidth: 260, width: 260, height: 420, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', border: 'none', overflow:'hidden', margin:'0 10px 18px 10px'}}>
       <div className="position-relative w-100" style={{flex:'1 1 auto', minHeight:200, height:200, width:'100%'}}>
-        <img src={mainPhoto} alt={model.name} className="w-100 h-100 object-fit-cover" style={{display:'block', borderRadius: '0', background:'#f6f6f6', height:'100%', objectFit:'cover'}} />
-        <button className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.96)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={() => toggleFavorite(mainProduct)}>
+        <img src={product.image} alt={product.name} className="w-100 h-100 object-fit-cover" style={{display:'block', borderRadius: '0', background:'#f6f6f6', height:'100%', objectFit:'cover'}} />
+        <button   disabled={favoriteLoading} className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.96)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)', cursor: favoriteLoading ? 'wait' : 'pointer'}}   onClick={toggleFavorite}>
           <svg width="22" height="22" fill={favorite ? 'red' : 'none'} stroke={favorite ? 'red' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0l-.54.54-.54-.54a5.5 5.5 0 0 0-7.78 7.78l.54.54L12 21.35l7.78-8.42.54-.54a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>

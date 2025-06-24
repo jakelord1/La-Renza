@@ -6,14 +6,19 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    public class FavoriteProductDTO
+    public class ModelProduct
     {
         public int Id { get; set; }
         public string Name { get; set; } // Model.Name
+        public string? Description { get; set; }
+        public string? MaterialInfo { get; set; }
+        public DateTime StartDate { get; set; }
         public decimal Price { get; set; } // Model.Price
+        public float? Rate { get; set; }
         public string ImageUrl { get; set; } // Color.Image.Url
         public List<string> Sizes { get; set; }
-        public List<string> Badges { get; set; } // ["НОВИНКА"]
+        public List<string> Bages { get; set; } // ["НОВИНКА"]
+        public int CategoryId { get; set; }
     }
 
 }
