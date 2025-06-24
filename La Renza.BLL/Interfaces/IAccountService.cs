@@ -10,5 +10,6 @@ namespace La_Renza.BLL.Interfaces
         Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductFromUser(string email, int productId);
         Task<(bool Success, string? ErrorMessage)> RemoveFavoriteProductsByModelId(string userEmail, int modelId);
         Task<(bool Success, string? ErrorMessage)> AddOrderToUser(string userEmail, OrderDTO orderDto);
+        Task<(bool Success, string? ErrorMessage)> AddProductToCartByModelAndSize(string userEmail, int modelId, int sizeId, int quantity);
     }
 }

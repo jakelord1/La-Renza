@@ -565,6 +565,20 @@ namespace La_Renza.Controllers
             var shoppingCarts = await _shopingCartService.GetShoppingCartsByUserId(user.Id);
             return Ok(shoppingCarts);
         }
+        // POST: api/Account/addToCartByModel
+        [HttpPost("addToCartByModel")]
+        public async Task<IActionResult> AddToCartByModel([FromBody] AddCartByModel dto)
+        {
+            var user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            var result = await _accountService.AddProductToCartByModelAndSize(user.Email, dto.ModelId, dto.SizeId, dto.Quantity);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Product added to cart." });
+        }
 
     }
 }
