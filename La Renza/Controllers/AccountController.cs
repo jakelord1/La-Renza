@@ -23,7 +23,8 @@ namespace La_Renza.Controllers
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
         private readonly IShopingCartService _shopingCartService;
-       public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService,IAdminService adminService,IProductService productService,IOrderService orderService,IShopingCartService shopingCartService)
+        private readonly ISizeService _sizeService;
+        public AccountController(IUserService userService, IAddressService addressService,ICouponService couponService,IAccountService accountService,IAdminService adminService,IProductService productService,IOrderService orderService,IShopingCartService shopingCartService,ISizeService sizeService)
         {
             _userService = userService;
             _addressService = addressService;
@@ -33,6 +34,7 @@ namespace La_Renza.Controllers
             _productService = productService;
             _orderService = orderService;
             _shopingCartService = shopingCartService;
+            _sizeService= sizeService;
         }
 
         private async Task<UserDTO?> GetCurrentUser()
@@ -572,8 +574,12 @@ namespace La_Renza.Controllers
             var user = await GetCurrentUser();
             if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
+            int? sizeId = await _sizeService.GetSizeIdByName(dto.SizeName);
+            if (sizeId == null)
+                return BadRequest(new { message = $"Розмір '{dto.SizeName}' не знайдений." });
 
-            var result = await _accountService.AddProductToCartByModelAndSize(user.Email, dto.ModelId, dto.SizeId, dto.Quantity);
+
+            var result = await _accountService.AddProductToCartByModelAndSize(user.Email, dto.ModelId, sizeId.Value, dto.Quantity);
             if (!result.Success)
                 return BadRequest(new { message = result.ErrorMessage });
 

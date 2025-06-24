@@ -52,6 +52,15 @@ namespace La_Renza.BLL.Services
             var size = await _db.Sizes.Get(id);
             return _mapper.Map<SizeDTO>(size);
         }
+        public async Task<int?> GetSizeIdByName(string sizeName)
+        {
+            var size = await _db.Sizes.Get(sizeName);
+            if (size == null)
+                return null;
+
+            return size.Id;
+        }
+
         public async Task<IEnumerable<SizeDTO>> GetSizes()
         {
             var size = await _db.Sizes.GetAll();
