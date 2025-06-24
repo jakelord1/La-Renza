@@ -407,7 +407,7 @@ namespace La_Renza.Controllers
                 StartDate = model.StartDate,
                 Price = (decimal)model.Price,
                 ImageUrl = model.Colors.FirstOrDefault()?.Image?.Path ?? "",
-                Rate = (float)model.Rate,
+                Rate = model.Rate,
                 Sizes = model.Sizes,
                 CategoryId = model.CategoryId,
                 Bages = !string.IsNullOrEmpty(model.Bage)
@@ -433,7 +433,7 @@ namespace La_Renza.Controllers
                 MaterialInfo = m.MaterialInfo,
                 StartDate = m.StartDate,
                 Price = (decimal)m.Price,
-                Rate = (float)m.Rate,
+                Rate = m.Rate,
                 ImageUrl = m.Colors.FirstOrDefault()?.Image?.Path ?? "",
                 Sizes = m.Sizes ?? new List<string>(),
                 Bages = !string.IsNullOrEmpty(m.Bage)
