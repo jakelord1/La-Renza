@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountShoppingCarts`;
 const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
@@ -31,8 +31,8 @@ const setFavorites = (favorites) => {
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  
+  
   const [isCheckout, setIsCheckout] = useState(true);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,12 +47,13 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoDiscount, setPromoDiscount] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
-  const [savedAddresses, setSavedAddresses] = useState([
-    { id: 1, name: 'Дім', address: 'вул. Шевченка, 10, кв. 5, Київ' },
-    { id: 2, name: 'Робота', address: 'вул. Хрещатик, 22, офіс 15, Київ' }
-  ]);
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const [addresses, setAddresses] = useState([]);
+const [addressLoading, setAddressLoading] = useState(false);
+const [addressError, setAddressError] = useState(null);
+const [selectedAddress, setSelectedAddress] = useState('');
+  
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,12 +66,58 @@ const Cart = () => {
     return () => window.removeEventListener('cart-updated', update);
   }, []);
 
-  const deliveryOptions = [
-    { id: 'nova', name: 'Нова Пошта (отримання у відділенні)', price: 50, eta: '1-5 днів' },
-    { id: 'meest_pay', name: 'Meest Пошта (оплата при отриманні)', price: 50, eta: '2-9 днів' },
-    { id: 'meest_online', name: 'Meest Пошта (онлайн оплата)', price: 0, eta: '2-9 днів' },
-    { id: 'nova_online', name: 'Нова Пошта (онлайн оплата)', price: 0, eta: '1-5 днів' },
-  ];
+  // Визначаємо залогіненого користувача як у Navbar.jsx
+  const location = useLocation();
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountProfile`, { credentials: 'include' })
+      .then(res => {
+        if (res.status === 401 || !res.ok) {
+          setIsLoggedIn(false);
+          return;
+        }
+        return res.json().then(data => {
+          setIsLoggedIn(!!data && !!data.email);
+        });
+      })
+      .catch(() => setIsLoggedIn(false));
+  }, [location]);
+
+  // Якщо залогінений — фетчимо адреси
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setAddresses([]);
+      setAddressError(null);
+      setSelectedAddress('');
+      setAddressLoading(false);
+      return;
+    }
+    setAddressLoading(true);
+    setAddressError(null);
+    fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountAddresses`, {
+      credentials: 'include',
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Помилка при отриманні адрес');
+        return res.json();
+      })
+      .then(data => {
+        setAddresses(Array.isArray(data) ? data : []);
+        if (Array.isArray(data) && data.length > 0) setSelectedAddress(data[0].id || '');
+      })
+      .catch(err => setAddressError(err.message))
+      .finally(() => setAddressLoading(false));
+  }, [isLoggedIn]);
+
+  const [deliveryOptions, setDeliveryOptions] = useState([]);
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/DeliveryMethods`)
+      .then(res => {
+        if (!res.ok) throw new Error('Помилка при отриманні методів доставки');
+        return res.json();
+      })
+      .then(data => setDeliveryOptions(Array.isArray(data) ? data : []));
+  }, []);
   const paymentOptions = [
     { id: 'card', name: 'Банківська карта' },
     { id: 'gpay', name: 'Google Pay' },
@@ -111,8 +158,9 @@ const Cart = () => {
   const isFavorite = (id) => favorites.some(item => item.id === id);
 
   const totalPrice = cartItems.reduce((sum, item) => sum + ((Number(item.price) || 0) * (item.quantity || 1)), 0);
-  const deliveryPrice = selectedDelivery ? deliveryOptions.find(opt => opt.id === selectedDelivery)?.price || 0 : 0;
-  const totalWithDelivery = totalPrice + deliveryPrice;
+  // Вартість доставки для підрахунку (беремо deliveryPrice, як у UI)
+  const deliveryCost = selectedDelivery ? Number(deliveryOptions.find(opt => opt.id === selectedDelivery)?.deliveryPrice ?? 0) : 0;
+  
 
   const removeItem = (id) => {
     const updated = getCart().filter(item => item.id !== id);
@@ -121,16 +169,86 @@ const Cart = () => {
   };
 
   const handleCheckout = () => setIsCheckout(true);
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedDelivery || !selectedPayment) return;
-    console.log('Order placed', { cartItems, formData, selectedDelivery, selectedPayment });
-    localStorage.removeItem('cart');
-    window.dispatchEvent(new Event('cart-updated'));
-    setCartItems([]);
-    setIsCheckout(false);
-    setOrderPlaced(true);
+    if (!selectedDelivery || !selectedPayment || !selectedAddress) return;
+
+    try {
+      // 1. Отримати профіль користувача
+      const profileRes = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountProfile`, { credentials: 'include' });
+      if (!profileRes.ok) throw new Error('Не вдалося отримати профіль користувача');
+      const profile = await profileRes.json();
+
+      // 2. Знайти адресу
+      const addressObj = addresses.find(a => a.id === selectedAddress);
+      if (!addressObj) throw new Error('Адресу не знайдено');
+
+      // 3. Зібрати orderItems
+      const orderItems = cartItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+        price: Number(item.price) || 0
+      }));
+
+      // 4. Зібрати orderData
+      // Формуємо дату у форматі YYYY-MM-DDTHH:mm:ss
+      const now = new Date();
+      const pad = n => n.toString().padStart(2, '0');
+      const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      // TODO: отримати об'єкт купона якщо застосовано
+      const appliedCoupon = promoApplied && window.appliedCouponObj ? window.appliedCouponObj : null;
+
+      const orderData = {
+        UserId: profile.id,
+        Status: 'processing',
+        DeliveryId: Number(addressObj.id),
+        CuponsId: appliedCoupon ? appliedCoupon.id : null,
+        OrderName: profile.fullName || profile.email || '',
+        CreatedAt: dateStr,
+        CompletedAt: null,
+        PaymentMethod: Number(selectedPayment),
+        DeliveryMethodId: Number(selectedDelivery),
+        Phonenumber: profile.phoneNumber || '',
+        orderItems: orderItems,
+        User: {
+          Id: profile.id,
+          Email: profile.email,
+          PhoneNumber: profile.phoneNumber || '',
+          FullName: profile.fullName || '',
+          SurName: profile.surName || '',
+          BirthDate: profile.birthDate || '',
+          Gender: typeof profile.gender !== 'undefined' ? profile.gender : null,
+          Password: '',
+          NewsOn: typeof profile.newsOn !== 'undefined' ? profile.newsOn : false,
+          LaRenzaPoints: typeof profile.laRenzaPoints !== 'undefined' ? profile.laRenzaPoints : 0
+        },
+        delivery: addressObj,
+        cupons: appliedCoupon || null,
+        dm: null
+      };
+
+      // 5. Відправити POST
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/addOrder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ orderDto: orderData })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Помилка при оформленні замовлення');
+      }
+      // 6. Очищення корзини і повідомлення
+      localStorage.removeItem('cart');
+      window.dispatchEvent(new Event('cart-updated'));
+      setCartItems([]);
+      setIsCheckout(false);
+      setOrderPlaced(true);
+      alert('Замовлення успішно оформлено!');
+    } catch (error) {
+      alert(error.message || 'Помилка оформлення замовлення');
+    }
   };
 
   const handlePromoCode = () => {
@@ -142,8 +260,8 @@ const Cart = () => {
     }
   };
 
-  const totalWithDiscount = totalPrice - promoDiscount;
-  const finalTotal = totalWithDiscount + deliveryPrice;
+  
+  
 
   function QuantitySelector({ quantity, onChange }) {
     const [custom, setCustom] = useState(false);
@@ -404,14 +522,7 @@ const Cart = () => {
                             <p className="mb-0">Отримайте доступ до збережених адрес та історії замовлень</p>
                           </div>
                         </div>
-                        <button 
-                          type="button" 
-                          className="btn mt-2 text-white" 
-                          style={{background: 'var(--purple)'}}
-                          onClick={() => setIsLoggedIn(true)}
-                        >
-                          Увійти
-                        </button>
+                        <a href="/login" className="btn mt-2 text-white" style={{background: 'var(--purple)'}}>Увійти</a>
                       </div>
                     )}
 
@@ -431,67 +542,18 @@ const Cart = () => {
                               required
                             />
                             <label className="form-check-label" htmlFor={`delivery-${opt.id}`}>
-                              {opt.name} <span className="text-muted">({opt.eta})</span> — <span className="fw-bold">{opt.price === 0 ? 'Безкоштовно' : `${opt.price} UAH`}</span>
+                              {opt.name} <span className="ms-2">{opt.deliveryPrice} UAH</span>
                             </label>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {isLoggedIn ? (
-                      <div className="mb-3">
-                        <label className="form-label">Виберіть адресу доставки</label>
-                        <div className="address-list-group">
-                          {savedAddresses.map(address => (
-                            <label key={address.id} className="list-group-item d-flex align-items-center" style={{border: 'none', borderBottom: '1px solid #eee', borderRadius: 0, padding: '16px 20px', cursor: 'pointer'}}>
-                              <input
-                                type="radio"
-                                name="savedAddress"
-                                className="address-radio"
-                                checked={selectedAddress === address.id}
-                                onChange={() => {
-                                  setSelectedAddress(address.id);
-                                  setFormData(prev => ({ ...prev, address: address.address }));
-                                }}
-                              />
-                              <div>
-                                <strong style={{color: selectedAddress === address.id ? 'var(--purple)' : undefined}}>{address.name}</strong>
-                                <p className="mb-0 text-muted">{address.address}</p>
-                              </div>
-                            </label>
-                          ))}
-                          <button type="button" className="add-address-btn w-100 py-3 px-3 border-0" >
-                            <i className="bi bi-plus-circle"></i>
-                            Додати нову адресу
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="mb-3">
-                          <label className="form-label">Ім'я</label>
-                          <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} required />
-                        </div>
-                        <div className="mb-3">
-                          <label className="form-label">Email</label>
-                          <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
-                        </div>
-                        <div className="mb-3">
-                          <label className="form-label">Телефон</label>
-                          <input type="tel" className="form-control" name="phone" value={formData.phone} onChange={handleChange} required />
-                        </div>
-                        <div className="mb-3">
-                          <label className="form-label">Адреса доставки</label>
-                          <textarea className="form-control" name="address" value={formData.address} onChange={handleChange} rows={3} required />
-                        </div>
-                      </>
-                    )}
-
                     <div className="mb-3">
                       <label className="form-label">Виберіть спосіб оплати</label>
                       <div>
                         {paymentOptions.map(opt => (
-                          <div className="form-check form-check-inline" key={opt.id}>
+                          <div className="form-check mb-1" key={opt.id}>
                             <input
                               className="form-check-input"
                               type="radio"
@@ -507,6 +569,64 @@ const Cart = () => {
                         ))}
                       </div>
                     </div>
+
+                    {/* Поле телефону */}
+                    <div className="mb-3">
+                      <label className="form-label">Телефон</label>
+                      <input
+                        type="tel"
+                        className="form-control"
+                        placeholder="Введіть номер телефону"
+                        value={formData.phone}
+                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    {/* Селектор адрес */}
+                    {isLoggedIn && (
+                      <div className="mb-3">
+                        <label className="form-label">Оберіть адресу доставки</label>
+                        {addressLoading && <div>Завантаження адрес...</div>}
+                        {addressError && <div className="text-danger">{addressError}</div>}
+                        {!addressLoading && !addressError && addresses.length === 0 && (
+                          <div>У вас немає збережених адрес.</div>
+                        )}
+                        {!addressLoading && !addressError && addresses.length > 0 && (
+                          <div className="address-list-group bg-light p-2 mb-2">
+                            {addresses.map(addr => (
+                              <label key={addr.id} className="d-flex align-items-start py-2 px-3 mb-0 flex-column flex-md-row" style={{ cursor: 'pointer', gap: 8 }}>
+                                <div className="d-flex align-items-start" style={{minWidth:32}}>
+                                  <input
+                                    type="radio"
+                                    className="address-radio me-2 mt-1"
+                                    name="address"
+                                    value={addr.id}
+                                    checked={selectedAddress === addr.id}
+                                    onChange={() => setSelectedAddress(addr.id)}
+                                    required
+                                  />
+                                </div>
+                                <div className="flex-grow-1">
+                                  <div><b>{addr.fullName || addr.recipientName || ''}</b> {addr.phone && <span className="ms-2">{addr.phone}</span>}</div>
+                                  <div>{addr.city}, {addr.street} {addr.house}{addr.flat ? ", кв. " + addr.flat : ''}</div>
+                                  {addr.postIndex && <div>Індекс: {addr.postIndex}</div>}
+                                  {addr.addressLine && <div className="text-muted small">{addr.addressLine}</div>}
+                                  {addr.comment && <div className="text-muted small">{addr.comment}</div>}
+                                </div>
+                                <div className="d-flex flex-column align-items-end ms-md-2 mt-2 mt-md-0">
+                                  {addr.isMain && <span className="badge bg-purple mb-1">Основна</span>}
+                                </div>
+                                {addr.isMain && <span className="badge bg-purple ms-2">Основна</span>}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                        <button type="button" className="add-address-btn mt-2" style={{fontWeight:500}} onClick={() => window.location.href='/account/addresses'}>
+                          <i className="bi bi-plus-circle me-2"></i> Додати нову адресу
+                        </button>
+                      </div>
+                    )}
 
                     <div className="mb-3">
                       <label className="form-label">Промокод</label>
@@ -550,11 +670,15 @@ const Cart = () => {
                       )}
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <span>Доставка:</span>
-                        <span className="fw-bold">{selectedDelivery ? `${deliveryPrice} UAH` : '—'}</span>
+                        <span className="fw-bold">
+                          {selectedDelivery
+                            ? `${(deliveryOptions.find(opt => opt.id === selectedDelivery)?.deliveryPrice ?? 0)} UAH`
+                            : '—'}
+                        </span>
                       </div>
                       <div className="d-flex justify-content-between align-items-center">
                         <span className="fw-bold">Загальна сума:</span>
-                        <span className="fw-bold text-purple fs-5">{finalTotal.toFixed(2)} UAH</span>
+                        <span className="fw-bold text-purple fs-5">{(totalPrice - (promoApplied ? promoDiscount : 0) + deliveryCost).toFixed(2)} UAH</span>
                       </div>
                     </div>
 

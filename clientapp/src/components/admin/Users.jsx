@@ -5,9 +5,8 @@ const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
 const API_COUPONS_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Coupons`;
 
 const genderOptions = [
-  { value: 0, label: 'Жіночий' },
-  { value: 1, label: 'Чоловічий' },
-  { value: 2, label: 'Інше' }
+  { value: false, label: 'Жіночий' },
+  { value: true, label: 'Чоловічий' }
 ];
 
 // Добавим кастомные стили прямо в компонент
@@ -101,43 +100,57 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !phoneNumber || !fullName || !surName || !birthDate) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
+      setAlert({ show: true, type: 'danger', message: "Будь ласка, заповніть всі обов'язкові поля" });
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
       const newUser = {
-        id: users.length + 1,
         email,
         phoneNumber,
         fullName,
         surName,
         birthDate,
-        gender: parseInt(gender),
-        newsOn: newsOn ? 1 : 0,
+        gender: gender === '1' || gender === 1 || gender === true || gender === 'true' ? true : false,
+        newsOn: !!newsOn,
         laRenzaPoints: parseInt(laRenzaPoints) || 0,
         cupons: [],
-        favoriteProducts: favoriteProducts
+        favoriteProducts: favoriteProducts,
+        addresses: [],
+        invoices: [],
+        shoppingCarts: [],
       };
-      setUsers([...users, newUser]);
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      });
+      if (!res.ok) throw new Error('Помилка при додаванні користувача');
+      const created = await res.json();
+      setUsers([...users, created]);
       resetForm();
       setAlert({ show: true, type: 'success', message: 'Користувача додано!' });
-      setLoading(false);
       setShowAddModal(false);
-    }, 1000);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdateUser = (e) => {
+  const handleUpdateUser = async (e) => {
     e.preventDefault();
     if (!email || !phoneNumber || !fullName || !surName || !birthDate) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
+      setAlert({ show: true, type: 'danger', message: "Будь ласка, заповніть всі обов'язкові поля" });
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
       const updatedUser = {
         ...editingUser,
         email,
@@ -145,24 +158,48 @@ const Users = () => {
         fullName,
         surName,
         birthDate,
-        gender: parseInt(gender),
-        newsOn: newsOn ? 1 : 0,
+        gender: gender === '1' || gender === 1 || gender === true || gender === 'true' ? true : false,
+        newsOn: !!newsOn,
         laRenzaPoints: parseInt(laRenzaPoints) || 0,
-        favoriteProducts: favoriteProducts
+        favoriteProducts: favoriteProducts,
+        // Не додаємо password!
       };
-      setUsers(users.map(u => u.id === editingUser.id ? updatedUser : u));
+      const res = await fetch(API_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedUser),
+      });
+      if (!res.ok) throw new Error('Помилка при оновленні користувача');
+      const result = await res.json();
+      setUsers(users.map(u => u.id === editingUser.id ? result : u));
       resetForm();
       setAlert({ show: true, type: 'success', message: 'Користувача оновлено!' });
-      setLoading(false);
       setShowEditModal(false);
       setEditingUser(null);
-    }, 1000);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteUser = (id) => {
+  const handleDeleteUser = async (id) => {
     if (window.confirm('Ви впевнені, що хочете видалити цього користувача?')) {
-      setUsers(users.filter(u => u.id !== id));
-      setAlert({ show: true, type: 'success', message: 'Користувача видалено!' });
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/${id}`, {
+          method: 'DELETE',
+        });
+        if (!res.ok) throw new Error('Помилка при видаленні користувача');
+        setUsers(users.filter(u => u.id !== id));
+        setAlert({ show: true, type: 'success', message: 'Користувача видалено!' });
+      } catch (e) {
+        setAlert({ show: true, type: 'danger', message: e.message });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

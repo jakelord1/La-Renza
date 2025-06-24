@@ -2,13 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
 import FavoritesCount from './FavoritesCount';
 
-const getFavorites = () => {
-  try {
-    return JSON.parse(localStorage.getItem('favorites')) || [];
-  } catch {
-    return [];
-  }
-};
+const API_URL = import.meta.env.VITE_BACKEND_API_LINK;
 
 const recommended = [
   { id: 1, name: 'Трикотажний комплект', image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=facearea&w=400&q=80', price: 219, sizes: '98 - 140' },
@@ -23,13 +17,48 @@ const recommended = [
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Проверка авторизации и загрузка избранного
+  const fetchFavorites = async () => {
+    setLoading(true);
+    // Проверить авторизацию
+    const authRes = await fetch('/api/Account/accountProfile', { credentials: 'include' });
+    setIsAuthenticated(authRes.ok);
+    if (!authRes.ok) {
+      setFavorites([]);
+      setLoading(false);
+      return;
+    }
+    // Загрузить избранные модели
+    const res = await fetch(`${API_URL}/api/Account/accountModels`, { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      setFavorites(Array.isArray(data) ? data : []);
+    } else {
+      setFavorites([]);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    setFavorites(getFavorites());
-    const update = () => setFavorites(getFavorites());
+    fetchFavorites();
+    const update = () => fetchFavorites();
     window.addEventListener('favorites-updated', update);
     return () => window.removeEventListener('favorites-updated', update);
   }, []);
+
+  // Удаление из избранного через API
+  const handleRemoveFavorite = async (modelId) => {
+    const res = await fetch(`${API_URL}/api/Account/accountModels/${modelId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (res.ok) {
+      window.dispatchEvent(new Event('favorites-updated'));
+    }
+  };
 
   return (
     <section className="favorites-page py-5">
@@ -41,7 +70,9 @@ const Favorites = () => {
         </div>
         <hr style={{marginTop: 0, marginBottom: '40px', borderColor: '#eee'}} />
         <div style={{marginBottom: '50px'}}></div>
-        {favorites.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-5">Завантаження...</div>
+        ) : !isAuthenticated ? (
           <>
             <div className="row justify-content-center text-center my-5">
               <div className="col-md-4 mb-4">
@@ -79,11 +110,19 @@ const Favorites = () => {
               </div>
             </div>
           </>
+        ) : favorites.length === 0 ? (
+          <div className="text-center py-5">У вас немає обраних товарів.</div>
         ) : (
           <div className="catalog-grid">
-            {favorites.map(product => (
-              <div key={product.id} className="catalog-grid-item">
-                <ProductCard product={product} />
+            {favorites.map(model => (
+              <div key={model.id} className="catalog-grid-item position-relative">
+                <ProductCard
+                  model={model}
+                  sizes={model.sizes || model.size || model.Sizes || []}
+                  isAuthenticated={isAuthenticated}
+                  isFavorite={true}
+                  onFavoriteChange={() => window.dispatchEvent(new Event('favorites-updated'))}
+                />
               </div>
             ))}
           </div>

@@ -6,19 +6,19 @@ import { Pagination } from 'react-bootstrap';
 
 const API_URL = import.meta.env.VITE_BACKEND_API_LINK;
 
-const ProductDetails = ({ model, products = [], comments = [] }) => {
+const ProductDetails = ({ model, products = [] }) => {
   const [userNames, setUserNames] = useState({});
-  const [showLikeTooltip, setShowLikeTooltip] = useState(null);  id коммента для тултипа
+  const [showLikeTooltip, setShowLikeTooltip] = useState(null);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [categoryName, setCategoryName] = useState('');
-   Унікальні розміри з products
+
   const uniqueSizes = Array.from(new Set(products.map(p => p.size?.name).filter(Boolean)));
   const [selectedSize, setSelectedSize] = useState(uniqueSizes[0] || '');
 
-   Додаємо стейт для активного кольору
+
   const [activeColorId, setActiveColorId] = useState((model.colors && model.colors[0]?.id) || null);
 
-   Получаем имя категории по categoryId
+
   useEffect(() => {
     const catId = model?.categoryId;
     if (!catId) return;
@@ -30,14 +30,14 @@ const ProductDetails = ({ model, products = [], comments = [] }) => {
       .catch(() => setCategoryName('Категорія'));
   }, [model?.categoryId]);
 
-   Знаходимо продукт для активного кольору та розміру
+
   const activeProduct = products.find(
     p =>
       (activeColorId ? (p.color && p.color.id === activeColorId) : true) &&
       (selectedSize ? (p.size && p.size.name === selectedSize) : true)
   ) || products[0] || {};
 
-   Додавання в кошик
+
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
 const [addedProduct, setAddedProduct] = useState(null);
 
@@ -47,12 +47,12 @@ const handleAddToCart = () => {
   try {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
   } catch (e) { cart = []; }
-   Знаходимо продукт для обраного розміру та кольору
+
   const selectedProduct = products.find(p => (p.size?.name || '') === selectedSize && (!activeColorId || (p.color && p.color.id === activeColorId))) || products[0];
   if (!selectedProduct) return;
   const mainPhoto = model.photos && model.photos[0]?.path ? `/images/${model.photos[0].path}` : (selectedProduct.image || '');
   const exists = cart.find(item => item.id === selectedProduct.id);
-   Визначаємо ціну: пріоритет — selectedProduct.price, далі product.color.model.price, далі model.price
+
   let finalPrice = selectedProduct.price;
   if (finalPrice == null) {
     if (selectedProduct.color && selectedProduct.color.model && selectedProduct.color.model.price != null) {
@@ -75,18 +75,67 @@ const handleAddToCart = () => {
   setShowAddToCartModal(true);
 };
   
-  const [showModal, setShowModal] = useState(false);  для інших модалок
- AddToCartModal state додано вище
+  const [showModal, setShowModal] = useState(false);
+
   const [showSortList, setShowSortList] = useState(false);
   const [sort, setSort] = useState('ВІД НАЙНОВІШИХ');
   const [likedReviews, setLikedReviews] = useState({});
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // Проверка, есть ли товар в избранном при монтировании
+  useEffect(() => {
+    let favs = [];
+    try {
+      favs = JSON.parse(localStorage.getItem('favorites')) || [];
+    } catch { favs = []; }
+    setIsFavorite(!!favs.find(item => item.id === model.id));
+  }, [model.id]);
+
+  // Обработчик добавления/удаления из избранного
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) {
+      setShowFavoriteModal(true);
+      return;
+    }
+    let favs = [];
+    try {
+      favs = JSON.parse(localStorage.getItem('favorites')) || [];
+    } catch { favs = []; }
+    let apiRes = null;
+    if (!isFavorite) {
+      // Добавить в избранное API
+      apiRes = await fetch(`${API_URL}/api/Account/accountModels/${model.id}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!apiRes.ok) {
+        alert('Не удалось добавить в обране');
+        return;
+      }
+      favs.push(model);
+      setIsFavorite(true);
+    } else {
+      // Удалить из избранного API
+      apiRes = await fetch(`${API_URL}/api/Account/accountModels/${model.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!apiRes.ok) {
+        alert('Не удалось видалити з обраного');
+        return;
+      }
+      favs = favs.filter(item => item.id !== model.id);
+      setIsFavorite(false);
+    }
+    localStorage.setItem('favorites', JSON.stringify(favs));
+    window.dispatchEvent(new Event('favorites-updated'));
+  };
   const [showFavoriteModal, setShowFavoriteModal] = useState(false);
   const modalRef = useRef(null);
   const [openSections, setOpenSections] = useState({ description: true, features: false });
   const [reviews, setReviews] = useState([]);
 
-   === Підрахунок відсотків відгуків ===
+
   const totalReviews = reviews.length;
   const countLess = reviews.filter(r => r.rating >= 1 && r.rating <= 3).length;
   const countIdeal = reviews.filter(r => r.rating === 4).length;
@@ -95,7 +144,7 @@ const handleAddToCart = () => {
   const percentIdeal = totalReviews ? Math.round((countIdeal / totalReviews) * 100) : 0;
   const percentMore = totalReviews ? Math.round((countMore / totalReviews) * 100) : 0;
 
-   Фетчимо коментарі з /api/Comments для цього товару
+
   useEffect(() => {
     async function fetchComments() {
       try {
@@ -105,15 +154,15 @@ const handleAddToCart = () => {
          console.log('products:', products);
          console.log('allComments:', allComments);
         if (Array.isArray(products) && products.length > 0) {
-           Всі можливі productId з products
+
           const productIds = products.map(p => p.id).filter(Boolean);
-           console.log('productIds:', productIds);
+
           filtered = Array.isArray(allComments)
             ? allComments.filter(c => productIds.includes(c.productId))
             : [];
-           console.log('filtered:', filtered);
+
         } else {
-           Fallback: як раніше
+
           filtered = Array.isArray(allComments)
             ? allComments.filter(c => c.productId === model.id)
             : [];
@@ -155,7 +204,7 @@ const handleAddToCart = () => {
       if (!res.ok) throw new Error('Помилка завантаження моделей');
       await res.json();
     } catch (e) {
-       handle error if needed
+      console.error('Error fetching models:', e);
     }
   };
 
@@ -215,7 +264,7 @@ const handleAddToCart = () => {
   }
   function formatDate(dateStr) {
     if (!dateStr) return '';
-     Прибрати T, залишити тільки дату і час
+
     return dateStr.replace('T', ' ').replace(/:00.000Z$/, '');
   }
 
@@ -242,8 +291,6 @@ const handleAddToCart = () => {
       return { ...prev, [id]: !alreadyLiked };
     });
   };
-
-   Pagination calculations
   const sortedReviews = getSortedReviews();
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -264,7 +311,7 @@ const handleAddToCart = () => {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-     Previous button
+
     pages.push(
       <Pagination.Prev 
         key="prev" 
@@ -273,7 +320,7 @@ const handleAddToCart = () => {
       />
     );
 
-     First page
+
     if (startPage > 1) {
       pages.push(
         <Pagination.Item key={1} onClick={() => handlePageChange(1)}>
@@ -285,7 +332,6 @@ const handleAddToCart = () => {
       }
     }
 
-     Page numbers
     for (let number = startPage; number <= endPage; number++) {
       pages.push(
         <Pagination.Item 
@@ -298,7 +344,6 @@ const handleAddToCart = () => {
       );
     }
 
-     Last page
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.push(<Pagination.Ellipsis key="ellipsis2" disabled />);
@@ -310,7 +355,7 @@ const handleAddToCart = () => {
       );
     }
 
-     Next button
+
     pages.push(
       <Pagination.Next 
         key="next" 
@@ -322,8 +367,14 @@ const handleAddToCart = () => {
     return pages;
   };
 
-   --- временная переменная для авторизации ---
-  const isLoggedIn = false;  Замените на реальную проверку
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/Account/accountProfile', { credentials: 'include' })
+      .then(res => setIsAuthenticated(res.ok))
+      .catch(() => setIsAuthenticated(false));
+  }, []);
 
   return (
     <div className="product-details-page container py-4">
@@ -442,9 +493,9 @@ const handleAddToCart = () => {
       {model.colors.map((clr, idx) => {
   let colorImg = clr && clr.image && clr.image.path ? clr.image.path : (clr && clr.photo && clr.photo.path ? clr.photo.path : null);
   if (colorImg && colorImg.startsWith('/public/')) colorImg = colorImg.replace(/^\/public/, '');
-  colorImg = colorImg ? `/images/${colorImg.replace(/^\, '')}` : null;
+  colorImg = colorImg ? `/images/${colorImg.replace(/^\//, '')}` : null;
   const isActive = (clr.id && clr.id === activeColorId) || (!clr.id && idx === 0 && !activeColorId);
-   Якщо clr — об'єкт з картинкою
+
   if (colorImg) {
     return (
       <span
@@ -469,7 +520,7 @@ const handleAddToCart = () => {
       </span>
     );
   } else {
-     Якщо clr — просто рядок кольору або об'єкт без картинки
+
     let bg = typeof clr === 'string' ? clr : (clr && clr.hex ? clr.hex : '#ccc');
     return (
       <span
@@ -551,13 +602,7 @@ const handleAddToCart = () => {
                 }}
                 onMouseOver={e => e.currentTarget.style.background = '#5a32a3'}
                 onMouseOut={e => e.currentTarget.style.background = '#a259e6'}
-                onClick={() => {
-                  if (!isLoggedIn) {
-                    setShowFavoriteModal(true);
-                    return;
-                  }
-                  setIsFavorite(f => !f);
-                }}
+                onClick={handleToggleFavorite}
                 aria-label={isFavorite ? 'Видалити з обраного' : 'Додати в обране'}
               >
                 <svg width="26" height="26" viewBox="0 0 24 24" fill={isFavorite ? '#fff' : 'none'} stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -662,7 +707,7 @@ const handleAddToCart = () => {
                     userSelect: 'none',
                   }}
                   onClick={() => {
-                    if (!isLoggedIn) {
+                    if (!isAuthenticated) {
                       setShowLikeTooltip(r.id);
                       setTimeout(() => setShowLikeTooltip(null), 2000);
                       return;
@@ -695,7 +740,7 @@ const handleAddToCart = () => {
         )}
       </div>
 
-      { Модальне вікно підтвердження додавання в кошик */}
+      
       <AddToCartModal
         show={showAddToCartModal}
         product={addedProduct ? {
@@ -710,7 +755,7 @@ const handleAddToCart = () => {
         selectedSize={selectedSize}
       />
 
-      { Модалка для входа в избранное */}
+      
       <LoginToFavoriteModal
         show={showFavoriteModal}
         onClose={() => setShowFavoriteModal(false)}

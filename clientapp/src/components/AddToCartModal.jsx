@@ -38,7 +38,6 @@ const AddToCartModal = ({ show, product, onClose, onCheckout, modalRef, selected
     }
   }, [show, modalRef]);
 
-   Закрытие по клику вне панели
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
