@@ -190,6 +190,11 @@ namespace La_Renza.Controllers
                 return BadRequest(new { message = "Current password is incorrect." });
             }
             user.Password = hasher.HashPassword(model.NewPassword);
+            user.Cupons = null;
+            user.FavoriteProducts = null;
+            user.Invoices = null;
+            user.Addresses = null;
+
 
             await _userService.UpdateUser(user);
 
