@@ -25,6 +25,7 @@ namespace La_Renza.BLL.Services
                 MaterialInfo = modelDto.MaterialInfo,
                 Rate = modelDto.Rate,
                 Bage = modelDto.Bage,
+                Price = modelDto.Price,
                 CategoryId = modelDto.CategoryId,
                 Image = _mapper.Map<ICollection<Image>>(modelDto.Photos),
                 Colors = new List<Color>()
