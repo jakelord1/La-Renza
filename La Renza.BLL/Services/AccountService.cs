@@ -166,6 +166,18 @@ namespace La_Renza.BLL.Services
             return (true, null);
         }
 
+        public async Task<(bool Success, string? ErrorMessage)> RemoveFromCartByUserAndProduct(int userId, int productId)
+        {
+            var carts = await Database.ShopingCarts.GetAll();
+            var cartItem = carts.FirstOrDefault(c => c.UserId == userId && c.ProductId == productId);
+            if (cartItem == null)
+                return (false, "Cart item not found.");
+
+            await Database.ShopingCarts.Delete(cartItem.Id);
+            await Database.Save();
+
+            return (true, null);
+        }
 
     }
 }
