@@ -26,7 +26,7 @@ const ProductDetails = ({ product }) => {
       });
   }, [product.id]);
 
-    const API_URL = 'https://localhost:7071/api/Adresses';
+    const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Models`;
 
     const fetchModels = async () => {
         setLoading(true);

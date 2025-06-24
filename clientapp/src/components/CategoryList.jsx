@@ -32,11 +32,11 @@ const CategoryList = ({ onCategoryClick }) => {
         {categories.map((cat, idx) => (
           <div key={cat.id || idx} className="text-center" style={{ minWidth: 90, cursor: 'pointer' }} onClick={() => onCategoryClick && onCategoryClick(cat)}>
             <img
-  src={cat.image?.path ? cat.image.path.replace(/^\/public/, '') : '/images/no-image.jpg'}
-  alt={cat.name}
-  className="rounded-circle border border-2 border-purple mb-2"
-  style={{ width: 64, height: 64, objectFit: 'cover', background: '#eee' }}
-/>
+              src={cat.image?.path ? `/images/${cat.image.path}` : '/images/no-image.jpg'}
+              alt={cat.name}
+              className="rounded-circle border border-2 border-purple mb-2"
+              style={{ width: 64, height: 64, objectFit: 'cover', background: '#eee' }}
+            />
             <div className="fw-semibold small text-dark">{cat.name}</div>
           </div>
         ))}

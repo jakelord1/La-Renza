@@ -44,6 +44,7 @@ namespace La_Renza.BLL.Services
                 StartDate = modelDto.StartDate,
                 MaterialInfo = modelDto.MaterialInfo,
                 Rate = modelDto.Rate,
+                Price = modelDto.Price,
                 Bage = modelDto.Bage,
                 CategoryId = modelDto.CategoryId,
                 Image = _mapper.Map<ICollection<Image>>(photos)

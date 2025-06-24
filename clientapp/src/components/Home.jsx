@@ -13,7 +13,7 @@ const Home = () => {
       <CategoryList />
       <MainBanner />
       <CategoryTabs active={activeTab} setActive={setActiveTab} />
-      <ProductGrid />
+      <ProductGrid activeCategory={activeTab} />
       <FooterEmailSubscribe />
     </div>
   );

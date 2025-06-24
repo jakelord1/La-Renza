@@ -32,7 +32,7 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Product> Get(int id)
         {
-            Product? product = await db.Product.FindAsync(id);
+            Product? product = await db.Product.Include(p => p.Color).Include(p => p.Size).Where(p => p.Id == id).FirstOrDefaultAsync();
             return product!;
         }
 

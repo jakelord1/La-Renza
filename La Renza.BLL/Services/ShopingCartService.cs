@@ -68,11 +68,9 @@ namespace La_Renza.BLL.Services
 
         public async Task<IEnumerable<ShopingCartDTO>> GetShoppingCartsByUserId(int userId)
         {
-            var shopingCarts = await Database.ShopingCarts.GetAll();
-            var userShopingCarts = shopingCarts.Where(a => a.UserId == userId);
+            var shopingCarts = (await Database.ShopingCarts.GetAll()).Where(a => a.UserId == userId);
 
-
-            return _mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(userShopingCarts);
+            return _mapper.Map<IEnumerable<ShoppingCart>, IEnumerable<ShopingCartDTO>>(shopingCarts);
         }
 
 

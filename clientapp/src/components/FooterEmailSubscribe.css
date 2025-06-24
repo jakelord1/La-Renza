@@ -1,0 +1,63 @@
+.footer-subscribe-section .rounded-4 {
+  box-shadow: 0 2px 12px #0001;
+}
+.footer-subscribe-section form {
+  max-width: 520px;
+  margin: 0 auto;
+}
+@media (max-width: 991.98px) {
+  .footer-subscribe-section .rounded-4 {
+    padding: 24px 12px !important;
+  }
+  .footer-subscribe-section form {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+  .footer-subscribe-section .input-group {
+    width: 100%;
+  }
+  .footer-subscribe-section button[type="submit"] {
+    width: 100%;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+  }
+  .footer-subscribe-section .d-flex.align-items-center.justify-content-center.gap-2.mt-2.mb-0 {
+    display: grid !important;
+    grid-template-columns: 24px 1fr;
+    align-items: flex-start !important;
+    gap: 0 8px !important;
+    margin-top: 12px !important;
+    width: 100%;
+  }
+  .footer-subscribe-section input[type="checkbox"] {
+    margin-right: 0;
+    margin-top: 2px;
+    grid-row: 1;
+    grid-column: 1;
+    justify-self: start;
+  }
+  .footer-subscribe-section label[for="footer-privacy"] {
+    grid-row: 1;
+    grid-column: 2;
+    min-width: 0;
+    word-break: break-word;
+    text-align: left;
+    margin-left: 0;
+    margin-top: 0;
+  }
+}
+@media (max-width: 575.98px) {
+  .footer-subscribe-section .rounded-4 {
+    padding: 16px 4px !important;
+  }
+  .footer-subscribe-section h3 {
+    font-size: 1.1rem !important;
+  }
+  .footer-subscribe-section .input-group-text {
+    font-size: 1.1rem;
+  }
+  .footer-subscribe-section form {
+    gap: 8px !important;
+  }
+}

@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountShoppingCarts`;
+const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
+
 const getCart = () => {
   try {
     return JSON.parse(localStorage.getItem('cart')) || [];
   } catch {
     return [];
   }
+};
+
+const fetchShopCart = async () => {
+    setLoading(true);
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Помилка завантаження моделей');
+        const mockProducts = await res.json();
+    } catch (e) {
+        setAlert({ show: true, type: 'danger', message: e.message });
+    } finally {
+        setLoading(false);
+    }
 };
 
 const getFavorites = () => {
@@ -22,7 +38,8 @@ const setFavorites = (favorites) => {
 };
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
+    const [cartItems, setCartItems] = useState([]);
+    const [products, setProducts] = useState([]);
   const [isCheckout, setIsCheckout] = useState(true);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,10 +51,19 @@ const Cart = () => {
   const [favorites, setFavoritesState] = useState(getFavorites());
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const [savedAddresses, setSavedAddresses] = useState([
+    { id: 1, name: 'Дім', address: 'вул. Шевченка, 10, кв. 5, Київ' },
+    { id: 2, name: 'Робота', address: 'вул. Хрещатик, 22, офіс 15, Київ' }
+  ]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setCartItems(getCart());
+    setCartItems(fetchShopCart());
     setFavoritesState(getFavorites());
     const update = () => setCartItems(getCart());
     window.addEventListener('cart-updated', update);
@@ -83,7 +109,6 @@ const Cart = () => {
       favs.push(product);
       setFavorites(favs);
       setFavoritesState(favs);
-      // Видаляємо з корзини одразу після додавання в обране
       removeItem(product.id);
     }
   };
@@ -113,13 +138,25 @@ const Cart = () => {
     setOrderPlaced(true);
   };
 
+  const handlePromoCode = () => {
+    if (promoCode.toLowerCase() === 'welcome10') {
+      setPromoApplied(true);
+      setPromoDiscount(totalPrice * 0.1); 
+    } else {
+      alert('Невірний промокод');
+    }
+  };
+
+  const totalWithDiscount = totalPrice - promoDiscount;
+  const finalTotal = totalWithDiscount + deliveryPrice;
+
   function QuantitySelector({ quantity, onChange }) {
     const [custom, setCustom] = useState(false);
     const [customValue, setCustomValue] = useState(quantity > 9 ? quantity : '');
 
     useEffect(() => {
       if (quantity > 9) {
-        setCustom(false); // всегда возвращаем select после подтверждения
+        setCustom(false); 
         setCustomValue(quantity);
       } else {
         setCustom(false);
@@ -162,7 +199,6 @@ const Cart = () => {
       }
     };
 
-    // Fix: Always show the current quantity as a visible option if not standard
     const standardOptions = [1,2,3,4,5,6,7,8,9];
     const showCustomOption = quantity > 9 && !standardOptions.includes(quantity);
 
@@ -211,12 +247,107 @@ const Cart = () => {
     );
   }
 
+  const customStyles = `
+    .address-list-group {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+    }
+    .address-radio {
+      appearance: none;
+      -webkit-appearance: none;
+      background: #fff;
+      border: 2px solid #bbb;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 12px;
+      position: relative;
+      outline: none;
+      transition: border-color 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      cursor: pointer;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    .address-radio:checked {
+      border-color: var(--purple, #8000ff);
+    }
+    .address-radio:checked::after {
+      content: '';
+      display: block;
+      width: 10px;
+      height: 10px;
+      background: var(--purple, #8000ff);
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+    }
+    .add-address-btn {
+      background: var(--purple, #8000ff) !important;
+      color: #fff !important;
+      border-radius: 0 0 16px 16px !important;
+      border: none !important;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: flex-start;
+      margin-top: 0;
+      width: 100%;
+      padding-left: 32px;
+      padding-right: 32px;
+      box-sizing: border-box;
+      transition: background 0.2s;
+    }
+    .add-address-btn:hover, .add-address-btn:focus {
+      background: #6a00cc !important;
+      color: #fff !important;
+    }
+    .add-address-btn .bi {
+      color: #fff !important;
+    }
+    .btn-fav-outline {
+      color: var(--purple, #8000ff) !important;
+      border: 1.5px solid var(--purple, #8000ff) !important;
+      background: #fff !important;
+      font-weight: 500;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-fav-outline:hover, .btn-fav-outline:focus {
+      background: var(--purple, #8000ff) !important;
+      color: #fff !important;
+    }
+    .btn-fav-filled {
+      background: var(--purple, #8000ff) !important;
+      color: #fff !important;
+      border: 1.5px solid var(--purple, #8000ff) !important;
+      font-weight: 500;
+    }
+  `;
+
   return (
     <section className="cart-page py-5">
+      <style>{customStyles}</style>
       <div className="container">
         <h2 className="text-center mb-4 text-purple fw-bold">Корзина</h2>
         {orderPlaced && (
-          <div className="alert alert-success text-center">Дякуємо за ваше замовлення!</div>
+          <div className="card bg-white rounded-4 p-4 shadow-sm text-center mx-auto" style={{ maxWidth: '600px' }}>
+            <div className="mb-4">
+              <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '4rem' }}></i>
+            </div>
+            <h3 className="text-success mb-3">Дякуємо за ваше замовлення!</h3>
+            <p className="mb-3">Ваше замовлення успішно оформлено. Ми надіслали підтвердження на вашу електронну пошту.</p>
+            <div className="bg-light rounded-3 p-3 mb-3">
+              <p className="mb-2">Номер замовлення: <strong>#{Math.floor(Math.random() * 1000000)}</strong></p>
+              <p className="mb-0">Очікувана дата доставки: <strong>{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</strong></p>
+            </div>
+            <div className="d-flex justify-content-center gap-3">
+              <button className="btn btn-outline-primary" onClick={() => navigate('/')}>Повернутися до магазину</button>
+              <button className="btn btn-primary" onClick={() => navigate('/orders')}>Переглянути замовлення</button>
+            </div>
+          </div>
         )}
         {!orderPlaced && (
           cartItems.length === 0 ? (
@@ -235,7 +366,6 @@ const Cart = () => {
                           <h5 className="mb-1">{product.name}</h5>
                           <p className="mb-0 text-purple fw-bold">{product.price} UAH</p>
                           <div className="d-flex align-items-center mt-2 gap-2">
-                            {/* Кількість: селект + "10+" */}
                             <span>Кількість:</span>
                             <QuantitySelector
                               quantity={product.quantity || 1}
@@ -244,24 +374,16 @@ const Cart = () => {
                           </div>
                         </div>
                         <button className="btn btn-outline-danger btn-sm me-2" onClick={() => removeItem(product.id)}>Видалити</button>
-                        <button className={`btn btn-${isFavorite(product.id) ? 'secondary' : 'outline-primary'} btn-sm`} onClick={() => addToFavorites(product)} disabled={isFavorite(product.id)}>
+                        <button
+                          className={`btn btn-sm ${isFavorite(product.id) ? 'btn-fav-filled' : 'btn-fav-outline'}`}
+                          onClick={() => addToFavorites(product)}
+                          disabled={isFavorite(product.id)}
+                        >
                           {isFavorite(product.id) ? 'В обраному' : 'В обране'}
                         </button>
                       </div>
                     </div>
                   ))}
-                </div>
-                <div className="d-flex justify-content-between align-items-center bg-white rounded-3 shadow-sm p-3">
-                  <h4 className="mb-0">Вартість:</h4>
-                  <h4 className="mb-0 text-purple fw-bold">{totalPrice.toFixed(2)} UAH</h4>
-                </div>
-                <div className="d-flex justify-content-between align-items-center bg-white rounded-3 shadow-sm p-3 mt-2">
-                  <span>Доставка:</span>
-                  <span className="fw-bold">{selectedDelivery ? `${deliveryPrice} UAH` : '—'}</span>
-                </div>
-                <div className="d-flex justify-content-between align-items-center bg-white rounded-3 shadow-sm p-3 mt-2">
-                  <span>Загальна сума:</span>
-                  <span className="fw-bold text-purple">{totalWithDelivery.toFixed(2)} UAH</span>
                 </div>
                 {!isCheckout && (
                   <div className="text-end mt-3">
@@ -273,6 +395,31 @@ const Cart = () => {
                 {isCheckout && (
                   <form onSubmit={handleSubmit} className="card p-4 bg-white rounded-4 shadow-sm" style={{ width: '100%' }}>
                     <h3 className="text-center mb-4 text-purple">Оформлення замовлення</h3>
+                    
+                    {!isLoggedIn && (
+                      <div className="alert mb-4" style={{ 
+                        backgroundColor: 'rgba(var(--purple-rgb), 0.1)', 
+                        borderColor: 'var(--purple)',
+                        color: 'var(--purple)'
+                      }}>
+                        <div className="d-flex align-items-center">
+                          <i className="bi bi-info-circle me-2"></i>
+                          <div>
+                            <strong>Увійдіть для оформлення замовлення</strong>
+                            <p className="mb-0">Отримайте доступ до збережених адрес та історії замовлень</p>
+                          </div>
+                        </div>
+                        <button 
+                          type="button" 
+                          className="btn mt-2 text-white" 
+                          style={{background: 'var(--purple)'}}
+                          onClick={() => setIsLoggedIn(true)}
+                        >
+                          Увійти
+                        </button>
+                      </div>
+                    )}
+
                     <div className="mb-3">
                       <label className="form-label">Виберіть спосіб доставки</label>
                       <div>
@@ -295,6 +442,56 @@ const Cart = () => {
                         ))}
                       </div>
                     </div>
+
+                    {isLoggedIn ? (
+                      <div className="mb-3">
+                        <label className="form-label">Виберіть адресу доставки</label>
+                        <div className="address-list-group">
+                          {savedAddresses.map(address => (
+                            <label key={address.id} className="list-group-item d-flex align-items-center" style={{border: 'none', borderBottom: '1px solid #eee', borderRadius: 0, padding: '16px 20px', cursor: 'pointer'}}>
+                              <input
+                                type="radio"
+                                name="savedAddress"
+                                className="address-radio"
+                                checked={selectedAddress === address.id}
+                                onChange={() => {
+                                  setSelectedAddress(address.id);
+                                  setFormData(prev => ({ ...prev, address: address.address }));
+                                }}
+                              />
+                              <div>
+                                <strong style={{color: selectedAddress === address.id ? 'var(--purple)' : undefined}}>{address.name}</strong>
+                                <p className="mb-0 text-muted">{address.address}</p>
+                              </div>
+                            </label>
+                          ))}
+                          <button type="button" className="add-address-btn w-100 py-3 px-3 border-0" >
+                            <i className="bi bi-plus-circle"></i>
+                            Додати нову адресу
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mb-3">
+                          <label className="form-label">Ім'я</label>
+                          <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} required />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Email</label>
+                          <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Телефон</label>
+                          <input type="tel" className="form-control" name="phone" value={formData.phone} onChange={handleChange} required />
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label">Адреса доставки</label>
+                          <textarea className="form-control" name="address" value={formData.address} onChange={handleChange} rows={3} required />
+                        </div>
+                      </>
+                    )}
+
                     <div className="mb-3">
                       <label className="form-label">Виберіть спосіб оплати</label>
                       <div>
@@ -315,25 +512,73 @@ const Cart = () => {
                         ))}
                       </div>
                     </div>
+
                     <div className="mb-3">
-                      <label className="form-label">Ім'я</label>
-                      <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} required />
+                      <label className="form-label">Промокод</label>
+                      <div className="input-group">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Введіть промокод"
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value)}
+                          disabled={promoApplied}
+                        />
+                        <button
+                          type="button"
+                          className="btn text-white"
+                          style={{background: 'var(--purple)'}}
+                          onClick={handlePromoCode}
+                          disabled={promoApplied}
+                        >
+                          Застосувати
+                        </button>
+                      </div>
+                      {promoApplied && (
+                        <div className="text-success mt-2">
+                          <i className="bi bi-check-circle me-1"></i>
+                          Промокод успішно застосовано
+                        </div>
+                      )}
                     </div>
-                    <div className="mb-3">
-                      <label className="form-label">Email</label>
-                      <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
+
+                    <div className="border-top pt-3 mb-3">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span>Вартість товарів:</span>
+                        <span className="fw-bold">{totalPrice.toFixed(2)} UAH</span>
+                      </div>
+                      {promoApplied && (
+                        <div className="d-flex justify-content-between align-items-center mb-2 text-success">
+                          <span>Знижка:</span>
+                          <span className="fw-bold">-{promoDiscount.toFixed(2)} UAH</span>
+                        </div>
+                      )}
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span>Доставка:</span>
+                        <span className="fw-bold">{selectedDelivery ? `${deliveryPrice} UAH` : '—'}</span>
+                      </div>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="fw-bold">Загальна сума:</span>
+                        <span className="fw-bold text-purple fs-5">{finalTotal.toFixed(2)} UAH</span>
+                      </div>
                     </div>
-                    <div className="mb-3">
-                      <label className="form-label">Телефон</label>
-                      <input type="tel" className="form-control" name="phone" value={formData.phone} onChange={handleChange} required />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Адреса доставки</label>
-                      <textarea className="form-control" name="address" value={formData.address} onChange={handleChange} rows={3} required />
-                    </div>
+
                     <div className="text-end">
-                      <button type="submit" className="btn text-white px-4 py-2" style={{background: 'var(--purple)'}} disabled={!selectedDelivery || !selectedPayment}>Підтвердити замовлення</button>
-                      <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/')}>Продовжити покупки</button>
+                      <button 
+                        type="submit" 
+                        className="btn text-white px-4 py-2" 
+                        style={{background: 'var(--purple)'}} 
+                        disabled={!selectedDelivery || !selectedPayment}
+                      >
+                        Підтвердити замовлення
+                      </button>
+                      <button 
+                        type="button" 
+                        className="btn btn-outline-purple ms-2" 
+                        onClick={() => navigate('/')}
+                      >
+                        Продовжити покупки
+                      </button>
                     </div>
                   </form>
                 )}
