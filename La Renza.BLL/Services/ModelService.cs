@@ -35,7 +35,6 @@ namespace La_Renza.BLL.Services
         }
         public async Task UpdateModel(ModelDTO modelDto)
         {
-            var photos = _mapper.Map<IEnumerable<Image>>(modelDto.Photos);
             var model = new Model
             {
                 Id = modelDto.Id,

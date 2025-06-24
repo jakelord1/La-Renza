@@ -92,16 +92,43 @@ namespace La_Renza.DAL.Repositories
         public async Task<IEnumerable<Model>> GetModelsByUserId(int userId)
         {
             return await db.Product
-                .Where(p => p.User.Any(u => u.Id == userId))
+                .Where(p => p.User.Any(u => u.Id == userId))  
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Colors)
+                            .ThenInclude(c => c.Image)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Category)
+                            .ThenInclude(cat => cat.SizeOptions)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Image)
                 .Select(p => p.Color.Model)
                 .Distinct()
-                .Include(m => m.Colors)
-                    .ThenInclude(c => c.Image)
-                .Include(m => m.Category)
-                    .ThenInclude(cat => cat.SizeOptions)
-                .Include(m => m.Image)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Model>> GetAllModels()
+        {
+            return await db.Product
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Colors)
+                            .ThenInclude(c => c.Image)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Category)
+                            .ThenInclude(cat => cat.SizeOptions)
+                .Include(p => p.Color)
+                    .ThenInclude(c => c.Model)
+                        .ThenInclude(m => m.Image)
+                .Select(p => p.Color.Model)
+                .Distinct()
+                .ToListAsync();
+        }
+
+
 
 
         public async Task<Model?> GetModelWithSpecificColor(int colorId)
@@ -161,6 +188,14 @@ namespace La_Renza.DAL.Repositories
                 .Include(p => p.Color)
                 .Where(p => p.Color.ModelId == modelId && !userFavoriteProductIds.Contains(p.Id))
                 .ToListAsync();
+        }
+        public async Task<Product?> GetByModelAndSize(int modelId, int sizeId)
+        {
+            return await db.Product
+                .Include(p => p.Color)
+                .ThenInclude(c => c.Model)
+                .Include(p => p.Size)
+                .FirstOrDefaultAsync(p => p.Color.ModelId == modelId && p.SizeId == sizeId);
         }
 
 

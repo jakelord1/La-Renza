@@ -12,6 +12,7 @@ const BADGE_COLORS = {
 
 const API_URL = 'https://localhost:7071/api/Users/Model';
 
+
 const getCart = () => {
   try {
     return JSON.parse(localStorage.getItem('cart')) || [];

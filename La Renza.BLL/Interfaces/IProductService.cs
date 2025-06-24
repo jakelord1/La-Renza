@@ -18,6 +18,7 @@ namespace La_Renza.BLL.Interfaces
         Task<IEnumerable<ModelDTO>> GetModelsByUserId(int userId);
         Task<IEnumerable<ModelDTO>> GetModelsByUserIdAndColor(int userId, int colorId);
         Task<ModelDTO?> GetModelBySpecificColor(int colorId);
+        Task<IEnumerable<ModelDTO>> GetModels();
         Task<bool> ExistsProduct(int id);
     }
 }
