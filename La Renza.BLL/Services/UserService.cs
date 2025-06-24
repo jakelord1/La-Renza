@@ -47,7 +47,7 @@ namespace La_Renza.BLL.Services
             var user = await Database.Users.Get(userDto.Id);
             if (user == null)
                 throw new Exception("User not found");
-            user.Id = userDto.Id;
+ 
             user.Email = userDto.Email;
             user.PhoneNumber = userDto.PhoneNumber;
             user.FullName = userDto.FullName;
@@ -58,14 +58,12 @@ namespace La_Renza.BLL.Services
             user.NewsOn = userDto.NewsOn;
             user.LaRenzaPoints = userDto.LaRenzaPoints;
 
-
             if (userDto.Addresses != null)
             {
                 user.Addresses.Clear();
                 foreach (var addrDto in userDto.Addresses)
                 {
-                    var address = _mapper.Map<Address>(addrDto);
-                    user.Addresses.Add(address);
+                    user.Addresses.Add(_mapper.Map<Address>(addrDto));
                 }
             }
 
@@ -75,10 +73,10 @@ namespace La_Renza.BLL.Services
                 foreach (var invDto in userDto.Invoices)
                 {
                     var invoice = _mapper.Map<InvoiceInfo>(invDto);
+                    invoice.User = user; 
                     user.Invoices.Add(invoice);
                 }
             }
-
             if (userDto.Cupons != null)
             {
                 user.Cupon.Clear();
@@ -95,7 +93,7 @@ namespace La_Renza.BLL.Services
                 user.Product.Clear();
                 foreach (var prodDto in userDto.FavoriteProducts)
                 {
-                    var product = await Database.Products.Get(prodDto.Id); 
+                    var product = await Database.Products.Get(prodDto.Id);
                     if (product != null)
                         user.Product.Add(product);
                 }

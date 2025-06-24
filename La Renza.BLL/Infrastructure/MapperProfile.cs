@@ -65,8 +65,11 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Size, SizeBase>()
                .ReverseMap();
             CreateMap<InvoiceInfo, InvoiceInfoDTO>()
-               .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User.Email))
-               .ReverseMap();
+               .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User.Email));
+
+            CreateMap<InvoiceInfoDTO, InvoiceInfo>()
+                .ForMember(dest => dest.User, opt => opt.Ignore());
+
             CreateMap<User, UserBase>()
                 .ReverseMap();
             CreateMap<Size, SizeBase>()
