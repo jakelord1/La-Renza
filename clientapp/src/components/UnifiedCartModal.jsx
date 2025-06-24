@@ -5,6 +5,30 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   const [step, setStep] = React.useState('select'); // 'select' | 'added'
   const [selectedSize, setSelectedSize] = React.useState(null);
 
+  const addToCart = async (modelId, sizeName, quantity) => {
+  try {
+    const response = await fetch('https://localhost:7071/api/Account/addToCartByModel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ modelId, sizeName, quantity }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to add to cart');
+    }
+
+    alert('Товар додано в корзину');
+    window.dispatchEvent(new Event('cart-updated'));
+  } catch (error) {
+    alert(error.message);
+  }
+};
+
+
   React.useEffect(() => {
     if (show) {
       setStep('select');
@@ -14,8 +38,9 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
 
   if (!product) return null;
   const sizes = product.sizes && Array.isArray(product.sizes)
-    ? product.sizes
-    : (typeof product.sizes === 'string' ? [product.sizes] : ['ОДИН РОЗМІР']);
+  ? product.sizes
+  : (typeof product.sizes === 'string' ? product.sizes.split(',').map(s => s.trim()) : ['ОДИН РОЗМІР']);
+
   const images = product.images && product.images.length > 0
     ? product.images
     : [product.image];
@@ -119,15 +144,25 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   };
 
 
-  const handleSelectSize = (size) => {
+  const handleSelectSize =async  (size) => {
     setSelectedSize(size);
+   console.log('Selected size:', size);
+    // let cart = [];
+    // try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
+    // cart.push({ ...product, selectedSize: size });
+    // localStorage.setItem('cart', JSON.stringify(cart));
+    // window.dispatchEvent(new Event('cart-updated'));
+    // setStep('added');
+  const modelId = product.modelId || product.id; 
+  const sizeName = size;
+  const quantity = 1;
 
-    let cart = [];
-    try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
-    cart.push({ ...product, selectedSize: size });
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new Event('cart-updated'));
+  try {
+    await addToCart(modelId, sizeName, quantity);
     setStep('added');
+  } catch (error) {
+      alert('Не вдалося додати товар в корзину');
+  }
   };
 
   return ReactDOM.createPortal(
