@@ -57,17 +57,49 @@ namespace La_Renza.BLL.Services
             user.Password = userDto.Password;
             user.NewsOn = userDto.NewsOn;
             user.LaRenzaPoints = userDto.LaRenzaPoints;
+
+
             if (userDto.Addresses != null)
-                user.Addresses = _mapper.Map<ICollection<Address>>(userDto.Addresses);
+            {
+                user.Addresses.Clear();
+                foreach (var addrDto in userDto.Addresses)
+                {
+                    var address = _mapper.Map<Address>(addrDto);
+                    user.Addresses.Add(address);
+                }
+            }
 
             if (userDto.Invoices != null)
-                user.Invoices = _mapper.Map<ICollection<InvoiceInfo>>(userDto.Invoices);
+            {
+                user.Invoices.Clear();
+                foreach (var invDto in userDto.Invoices)
+                {
+                    var invoice = _mapper.Map<InvoiceInfo>(invDto);
+                    user.Invoices.Add(invoice);
+                }
+            }
 
             if (userDto.Cupons != null)
-                user.Cupon = _mapper.Map<ICollection<Coupon>>(userDto.Cupons);
+            {
+                user.Cupon.Clear();
+                foreach (var cupDto in userDto.Cupons)
+                {
+                    var coupon = await Database.Coupons.Get(cupDto.Id);
+                    if (coupon != null)
+                        user.Cupon.Add(coupon);
+                }
+            }
 
             if (userDto.FavoriteProducts != null)
-                user.Product = _mapper.Map<ICollection<Product>>(userDto.FavoriteProducts);
+            {
+                user.Product.Clear();
+                foreach (var prodDto in userDto.FavoriteProducts)
+                {
+                    var product = await Database.Products.Get(prodDto.Id); 
+                    if (product != null)
+                        user.Product.Add(product);
+                }
+            }
             //var user = new User
             //{
             //    Id = userDto.Id,
