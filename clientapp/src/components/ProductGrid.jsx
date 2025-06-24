@@ -10,6 +10,12 @@ const MODELS_API_URL = '/api/Models';
 const PRODUCTS_API_URL = '/api/Products';
 
 const ProductGrid = ({ activeCategory = 'Усі' }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    fetch('/api/Account/accountProfile', { credentials: 'include' })
+      .then(res => setIsAuthenticated(res.ok))
+      .catch(() => setIsAuthenticated(false));
+  }, []);
   const [models, setModels] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -88,6 +94,7 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
   products={model.products} 
   onAddToCart={handleAddToCart} 
   onCardClick={() => window.location.href = `/product/${model.id}`}
+  isAuthenticated={isAuthenticated}
 />
               </div>
             ))

@@ -15,42 +15,70 @@ const API_URL = 'https://localhost:7071/api/Users/Model';
 const getCart = () => {
   try {
     return JSON.parse(localStorage.getItem('cart')) || [];
-  } catch (error) { 
+  } catch (error) {
+    console.error(error);
   }
   return [];
 };
 
 const isInCart = (product) => getCart().some((item) => item.id === product.id);
 
-const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
-  if (!model) return null;
-  const mainPhoto = (model.photos && model.photos.length > 0 && model.photos[0].path) ? `/images/${model.photos[0].path}` : '';
+const ProductCard = ({ model, products, sizes: propSizes, isAuthenticated, isFavorite: propIsFavorite, onFavoriteChange, onAddToCart, onCardClick }) => {
+  // All hooks must be called before any early return!
+  const mainPhoto = (model && model.photos && model.photos.length > 0 && model.photos[0].path)
+  ? `/images/${model.photos[0].path}`
+  : '';
 
-  const badges = model.badges || [model.isNew && 'НОВИНКА'].filter(Boolean);
+  const badges = model ? (model.badges || [model.isNew && 'НОВИНКА'].filter(Boolean)) : [];
+  const sizes = Array.isArray(propSizes) && propSizes.length > 0
+  ? propSizes
+  : (model && products ? Array.from(new Set(products.map(p => p.size?.name).filter(Boolean))) : []);
 
-  const sizes = Array.from(new Set(products.map(p => p.size?.name).filter(Boolean)));
-
-  const minPrice = products.length ? Math.min(...products.map(p => p.price || 0)) : (model.price || 0);
-
-  const [activeColorId, setActiveColorId] = React.useState((model.colors && model.colors[0]?.id) || null);
+  const minPrice = products && products.length ? Math.min(...products.map(p => p.price || 0)) : (model ? model.price || 0 : 0);
+  const [activeColorId, setActiveColorId] = React.useState((model && model.colors && model.colors[0]?.id) || null);
   const colorProduct = React.useMemo(() => (
-    products.find(p => p.color && p.color.id === activeColorId) || products[0] || {}
+    products && products.find(p => p.color && p.color.id === activeColorId) || (products && products[0]) || {}
   ), [products, activeColorId]);
-
-  const [liked, setLiked] = React.useState(false);
+  const [liked, setLiked] = React.useState(!!propIsFavorite);
+React.useEffect(() => { setLiked(!!propIsFavorite); }, [propIsFavorite]);
   const [showFavoriteModal, setShowFavoriteModal] = React.useState(false);
   const [inCart, setInCart] = React.useState(isInCart(colorProduct));
-
   React.useEffect(() => {
     const updateCart = () => setInCart(isInCart(colorProduct));
     window.addEventListener('cart-updated', updateCart);
     return () => window.removeEventListener('cart-updated', updateCart);
   }, [colorProduct]);
+  if (!model) return null;
 
-  const handleLikeClick = (e) => {
+  const handleLikeClick = async (e) => {
     e.stopPropagation();
-    setLiked(true);
-    setShowFavoriteModal(true);
+    if (!isAuthenticated) {
+      setShowFavoriteModal(true);
+      return;
+    }
+    // API: добавить/убрать из избранного
+    const API_URL = import.meta.env.VITE_BACKEND_API_LINK;
+    if (!liked) {
+      // Добавить в избранное
+      const res = await fetch(`${API_URL}/api/Account/accountModels/${model.id}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setLiked(true);
+        onFavoriteChange && onFavoriteChange(true);
+      }
+    } else {
+      // Удалить из избранного
+      const res = await fetch(`${API_URL}/api/Account/accountModels/${model.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setLiked(false);
+        onFavoriteChange && onFavoriteChange(false);
+      }
+    }
   };
 
   const handleCloseFavoriteModal = () => {
@@ -66,11 +94,7 @@ const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
     window.location.href = '/register';
   };
 
-  const handleCloseModal = () => setShowModal(false);
-  const handleCheckout = () => {
-    setShowModal(false);
-    window.location.href = '/cart';
-  };
+  if (!model) return null;
 
   return (
     <div 
@@ -82,7 +106,7 @@ const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
     >
       <div className="position-relative w-100" style={{flex:'1 1 auto', minHeight:200, height:200, width:'100%'}}>
         <img src={mainPhoto} alt={model.name} className="w-100 h-100 object-fit-cover" style={{display:'block', borderRadius: '0', background:'#f6f6f6', height:'100%', objectFit:'cover'}} />
-        <button className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={e => { e.stopPropagation(); handleLikeClick(e); }}>
+        <button className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={handleLikeClick}>
           <svg width="22" height="22" fill={liked ? 'var(--purple)' : 'none'} stroke={liked ? 'var(--purple)' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
           </svg>
@@ -90,21 +114,21 @@ const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
       </div>
 
       <div className="px-3 pt-3 pb-2 d-flex flex-column gap-1 flex-grow-1 w-100" style={{fontSize:'0.98rem', background:'#fff'}}>
-        <div className="text-secondary small lh-1 mb-1" style={{minHeight:18}}>{sizes.length ? sizes.join(', ') : 'Без розміру'}</div>
+        <div className="text-secondary small lh-1 mb-1" style={{minHeight:18}}>{sizes && sizes.length ? sizes.join(', ') : 'Без розміру'}</div>
         <div className="fw-normal text-truncate mb-1" title={model.name} style={{fontSize:'1rem',lineHeight:'1.2'}}>{model.name}</div>
         <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
           <span className="fw-bold" style={{fontSize:'1.08rem',color:'var(--purple)'}}>{minPrice} UAH</span>
         </div>
         <div className="d-flex gap-1 flex-wrap mt-1">
-          {badges.map((b,i) => b && (
+          {badges.map((b) => b && (
             <span key={b} className={`badge px-2 py-1 small fw-semibold ${BADGE_COLORS[b]||'bg-light text-dark'}`} style={{fontSize:'0.72rem',borderRadius:3,letterSpacing:0.2}}>{b}</span>
           ))}
         </div>
         <div className="d-flex gap-2 mt-2 flex-wrap align-items-center">
-          {(model.colors || []).map(color => {
+          {(model.colors || []).map((color) => {
             let colorImg = color.image?.path || '';
             if (colorImg.startsWith('/public/')) colorImg = colorImg.replace(/^\/public/, '');
-            colorImg = colorImg ? `/images/${colorImg.replace(/^\, '')}` : null;
+            colorImg = colorImg ? `/images/${colorImg.replace(/^\//, '')}` : null;
             const isActive = color.id === activeColorId;
             return (
               <span
@@ -141,7 +165,7 @@ const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
         price: colorProduct.price,
         color: (colorProduct.color && colorProduct.color.name) || (model.colors && model.colors.find(c => c.id === activeColorId)?.name) || '',
         image: (colorProduct.color && colorProduct.color.image && colorProduct.color.image.path)
-          ? `/images/${colorProduct.color.image.path.replace(/^\/public/, '').replace(/^\, '')}`
+          ? `/images/${colorProduct.color.image.path.replace(/^\/public/, '').replace(/^\//, '')}`
           : (model.photos && model.photos[0]?.path ? `/images/${model.photos[0].path}` : ''),
         sizes: Array.from(new Set(products.map(p => p.size?.name).filter(Boolean)))
       }); }}>
