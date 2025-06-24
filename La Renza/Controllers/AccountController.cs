@@ -580,5 +580,19 @@ namespace La_Renza.Controllers
             return Ok(new { message = "Product added to cart." });
         }
 
+        [HttpDelete("removeFromCartByProduct/{productId}")]
+        public async Task<IActionResult> RemoveFromCartByProduct(int productId)
+        {
+            var user = await GetCurrentUser();
+            if (user == null)
+                return Unauthorized(new { message = "User not logged in." });
+
+            var result = await _accountService.RemoveFromCartByUserAndProduct(user.Id, productId);
+            if (!result.Success)
+                return NotFound(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Item removed from cart." });
+        }
+
     }
 }
