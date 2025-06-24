@@ -189,6 +189,14 @@ namespace La_Renza.DAL.Repositories
                 .Where(p => p.Color.ModelId == modelId && !userFavoriteProductIds.Contains(p.Id))
                 .ToListAsync();
         }
+        public async Task<Product?> GetByModelAndSize(int modelId, int sizeId)
+        {
+            return await db.Product
+                .Include(p => p.Color)
+                .ThenInclude(c => c.Model)
+                .Include(p => p.Size)
+                .FirstOrDefaultAsync(p => p.Color.ModelId == modelId && p.SizeId == sizeId);
+        }
 
 
 

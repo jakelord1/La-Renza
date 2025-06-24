@@ -22,7 +22,7 @@ namespace La_Renza.BLL.Services
         {
             var shopingCart = new ShoppingCart
             {
-                Id = shopingCartDto.Id,
+              
                 UserId = shopingCartDto.UserId,
                 ProductId = shopingCartDto.ProductId,
                 Quantity = shopingCartDto.Quantity
