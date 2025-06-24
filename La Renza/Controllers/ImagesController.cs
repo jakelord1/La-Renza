@@ -52,9 +52,9 @@ namespace La_Renza.Controllers
             {
                 Path = file.FileName
             };
+            var created = await _imageService.CreateImage(imageDto);
 
-            await _imageService.CreateImage(imageDto);
-            return Ok();
+            return Ok(created);
         }
         [HttpPost("Upload")]
         public async Task<ActionResult<ImageDTO>> PostOnlyImage(IFormFile file)

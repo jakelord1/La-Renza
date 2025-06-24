@@ -21,15 +21,32 @@ namespace La_Renza.BLL.Services
             _db = db;
             _mapper = mapper;
         }
-        public async Task CreateImage(ImageDTO imageDto)
+        //public async Task CreateImage(ImageDTO imageDto)
+        //{
+        //    var image = new Image
+        //    {
+        //        Path = imageDto.Path
+        //    };
+
+        //    await _db.Images.Create(image);
+        //    await _db.Save();
+        //}
+        public async Task<ImageDTO> CreateImage(ImageDTO imageDto)
         {
-            var image = new Image
+        
+            var image = new Image 
             {
                 Path = imageDto.Path
             };
 
             await _db.Images.Create(image);
             await _db.Save();
+
+            return new ImageDTO
+            {
+                Id = image.Id,
+                Path = image.Path
+            };
         }
 
         public async Task UpdateImage(ImageDTO imageDto)

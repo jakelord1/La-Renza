@@ -9,7 +9,8 @@ namespace La_Renza.BLL.Interfaces
 {
     public interface IImageService
     {
-        Task CreateImage(ImageDTO imageDto);
+        //Task CreateImage(ImageDTO imageDto);
+        Task<ImageDTO> CreateImage(ImageDTO imageDto);
         Task UpdateImage(ImageDTO imageDto);
         Task DeleteImage(int id);
         Task<ImageDTO> GetImage(int id);
