@@ -15,6 +15,7 @@ namespace La_Renza.DAL.Entities
         public string? Description { get; set; }
         public string? MaterialInfo { get; set; }
         public DateTime StartDate { get; set; }
+
         [Range(0, 5)]
         [Column(TypeName = "decimal(3,2)")]
         public decimal? Rate { get; set; }

@@ -50,7 +50,6 @@ namespace La_Renza.BLL.Services
             };
             _db.Models.Update(model);
             await _db.Save();
-
         }
         public async Task DeleteModel(int id)
         {

@@ -1,6 +1,8 @@
 ﻿using La_Renza.DAL.Entities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +17,9 @@ namespace La_Renza.BLL.DTO
         public ImageDTO? Image { get; set; }
 
         public string Text { get; set; }
+
+        [Range(0, 5)]
+        [Column(TypeName = "decimal(3,2)")]
         public decimal? Rating { get; set; }
         public DateTime Date { get; set; }
         public int LikesAmount { get; set; }
