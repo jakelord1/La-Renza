@@ -20,6 +20,7 @@ namespace La_Renza.DAL.Entities
         [Column(TypeName = "decimal(3,2)")]
         public decimal? Rate { get; set; }
         public string? Bage { get; set; }
+
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
 

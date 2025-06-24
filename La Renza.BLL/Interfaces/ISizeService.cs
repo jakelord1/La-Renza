@@ -14,7 +14,7 @@ namespace La_Renza.BLL.Interfaces
         Task DeleteSize(int id);
         Task<SizeDTO> GetSize(int id);
         Task<IEnumerable<SizeDTO>> GetSizes();
-
+        Task<int?> GetSizeIdByName(string sizeName);
         Task<bool> ExistsSize(int id);
     }
 }
