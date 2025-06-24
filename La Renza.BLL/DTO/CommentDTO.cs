@@ -15,7 +15,7 @@ namespace La_Renza.BLL.DTO
         public ImageDTO? Image { get; set; }
 
         public string Text { get; set; }
-        public int? Rating { get; set; }
+        public decimal? Rating { get; set; }
         public DateTime Date { get; set; }
         public int LikesAmount { get; set; }
     }
