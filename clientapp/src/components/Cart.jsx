@@ -6,23 +6,15 @@ const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
 
 const getCart = () => {
   try {
-    return JSON.parse(localStorage.getItem('cart')) || [];
+    const val = JSON.parse(localStorage.getItem('cart'));
+    return Array.isArray(val) ? val : [];
   } catch {
     return [];
   }
 };
 
-const fetchShopCart = async () => {
-    setLoading(true);
-    try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error('Помилка завантаження моделей');
-        const mockProducts = await res.json();
-    } catch (e) {
-        setAlert({ show: true, type: 'danger', message: e.message });
-    } finally {
-        setLoading(false);
-    }
+const fetchShopCart = () => {
+  return getCart();
 };
 
 const getFavorites = () => {
@@ -38,8 +30,9 @@ const setFavorites = (favorites) => {
 };
 
 const Cart = () => {
-    const [cartItems, setCartItems] = useState([]);
-    const [products, setProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [isCheckout, setIsCheckout] = useState(true);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [formData, setFormData] = useState({
@@ -63,7 +56,9 @@ const Cart = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setCartItems(fetchShopCart());
+    let fetched = fetchShopCart();
+    if (!Array.isArray(fetched)) fetched = [];
+    setCartItems(fetched);
     setFavoritesState(getFavorites());
     const update = () => setCartItems(getCart());
     window.addEventListener('cart-updated', update);
@@ -169,7 +164,7 @@ const Cart = () => {
         setCustom(true);
         setCustomValue(quantity > 9 ? quantity : '');
       } else if (e.target.value === '0') {
-        onChange(0); // удалить
+        onChange(0);  
       } else {
         setCustom(false);
         onChange(Number(e.target.value));

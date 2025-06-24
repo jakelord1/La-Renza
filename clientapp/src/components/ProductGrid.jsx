@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 
 
 import ProductCard from './ProductCard';
-const API_URL = 'https://localhost:7071/api/Account/allModels';
+import UnifiedCartModal from './UnifiedCartModal';
+import { Link } from 'react-router-dom';
 
 const MODELS_API_URL = '/api/Models';
 const PRODUCTS_API_URL = '/api/Products';
@@ -11,6 +12,8 @@ const PRODUCTS_API_URL = '/api/Products';
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const fetchModels = async () => {
     setLoading(true);
@@ -63,13 +66,30 @@ const PRODUCTS_API_URL = '/api/Products';
   const modelsWithProducts = models.map(model => {
     const modelProducts = products.filter(
       product => product.color && product.color.model && product.color.model.id === model.id
-    );
+    ).map(product => ({
+      ...product,
+      price: product.color && product.color.model && product.color.model.price != null ? product.color.model.price : product.price
+    }));
     return { ...model, products: modelProducts };
   });
 
   const filteredModels = modelsWithProducts.filter(model =>
     (activeCategory === 'Усі' || model.categoryId === Number(activeCategory)) && model.products.length > 0
   );
+
+  const handleAddToCart = (product) => {
+    setSelectedProduct(product);
+    setShowCartModal(true);
+  };
+  const handleCloseCartModal = () => {
+    setShowCartModal(false);
+    setSelectedProduct(null);
+  };
+  const handleCheckout = () => {
+    setShowCartModal(false);
+    setSelectedProduct(null);
+    window.location.href = '/cart';
+  };
 
   return (
     <div className="container">
@@ -85,16 +105,25 @@ const PRODUCTS_API_URL = '/api/Products';
           {(products.filter(product => activeCategory === 'Усі' || product.categoryId === Number(activeCategory)).length === 0) ? (
             <div className="col-12 text-center">Немає доступних товарів.</div>
           ) : (
-            products
-              .filter(product => activeCategory === 'Усі' || product.categoryId === Number(activeCategory))
-              .map(product => (
-                <div className="col-6 col-md-4 col-lg-3" key={product.id}>
-                  <ProductCard product={product} />
-                </div>
-              ))
+            filteredModels.map(model => (
+              <div className="col-6 col-md-4 col-lg-3" key={model.id}>
+                <ProductCard 
+  model={model} 
+  products={model.products} 
+  onAddToCart={handleAddToCart} 
+  onCardClick={() => window.location.href = `/product/${model.id}`}
+/>
+              </div>
+            ))
           )}
         </div>
       )}
+      <UnifiedCartModal
+        show={showCartModal}
+        product={selectedProduct}
+        onClose={handleCloseCartModal}
+        onCheckout={handleCheckout}
+      />
     </div>
   );
 
