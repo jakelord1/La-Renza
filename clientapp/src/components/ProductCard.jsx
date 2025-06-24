@@ -2,6 +2,7 @@ import React from 'react';
 import AddToCartModal from './AddToCartModal';
 import SelectSizeModal from './SelectSizeModal';
 import UnifiedCartModal from './UnifiedCartModal';
+import LoginToFavoriteModal from './LoginToFavoriteModal';
 
 const BADGE_COLORS = {
   'НОВИНКА': 'bg-primary text-white',
@@ -9,31 +10,7 @@ const BADGE_COLORS = {
   'ХІТ ПРОДАЖУ': 'bg-warning text-dark',
 };
 
-const API_URL = 'https:localhost:7071/api/Users/Model';
-
-const isFavorite = (product) => {
-  try {
-    const favs = JSON.parse(localStorage.getItem('favorites')) || [];
-    return favs.some((item) => item.id === product.id);
-  } catch (error) { 
-  }
-  return false;
-};
-
-const toggleFavorite = (product) => {
-  let favs = [];
-  try {
-    favs = JSON.parse(localStorage.getItem('favorites')) || [];
-  } catch (error) { 
-  }
-  if (favs.some((item) => item.id === product.id)) {
-    favs = favs.filter((item) => item.id !== product.id);
-  } else {
-    favs.push(product);
-  }
-  localStorage.setItem('favorites', JSON.stringify(favs));
-  window.dispatchEvent(new Event('favorites-updated'));
-};
+const API_URL = 'https://localhost:7071/api/Users/Model';
 
 const getCart = () => {
   try {
@@ -45,7 +22,8 @@ const getCart = () => {
 
 const isInCart = (product) => getCart().some((item) => item.id === product.id);
 
-const ProductCard = ({ model, products }) => {
+const ProductCard = ({ model, products, onAddToCart, onCardClick }) => {
+  if (!model) return null;
   const mainPhoto = (model.photos && model.photos.length > 0 && model.photos[0].path) ? `/images/${model.photos[0].path}` : '';
 
   const badges = model.badges || [model.isNew && 'НОВИНКА'].filter(Boolean);
@@ -54,26 +32,38 @@ const ProductCard = ({ model, products }) => {
 
   const minPrice = products.length ? Math.min(...products.map(p => p.price || 0)) : (model.price || 0);
 
-  const mainProduct = products[0] || {};
+  const [activeColorId, setActiveColorId] = React.useState((model.colors && model.colors[0]?.id) || null);
+  const colorProduct = React.useMemo(() => (
+    products.find(p => p.color && p.color.id === activeColorId) || products[0] || {}
+  ), [products, activeColorId]);
 
-  const [favorite, setFavorite] = React.useState(isFavorite(mainProduct));
-  const [inCart, setInCart] = React.useState(isInCart(mainProduct));
-  const [showModal, setShowModal] = React.useState(false);
-
-  React.useEffect(() => {
-    const update = () => setFavorite(isFavorite(mainProduct));
-    window.addEventListener('favorites-updated', update);
-    return () => window.removeEventListener('favorites-updated', update);
-  }, [mainProduct]);
+  const [liked, setLiked] = React.useState(false);
+  const [showFavoriteModal, setShowFavoriteModal] = React.useState(false);
+  const [inCart, setInCart] = React.useState(isInCart(colorProduct));
 
   React.useEffect(() => {
-    const updateCart = () => setInCart(isInCart(mainProduct));
+    const updateCart = () => setInCart(isInCart(colorProduct));
     window.addEventListener('cart-updated', updateCart);
     return () => window.removeEventListener('cart-updated', updateCart);
-  }, [mainProduct]);
+  }, [colorProduct]);
 
-  const handleCartClick = () => {
-    setShowModal(true);
+  const handleLikeClick = (e) => {
+    e.stopPropagation();
+    setLiked(true);
+    setShowFavoriteModal(true);
+  };
+
+  const handleCloseFavoriteModal = () => {
+    setShowFavoriteModal(false);
+    setLiked(false);
+  };
+
+  const handleLogin = () => {
+    window.location.href = '/login';
+  };
+
+  const handleRegister = () => {
+    window.location.href = '/register';
   };
 
   const handleCloseModal = () => setShowModal(false);
@@ -83,12 +73,18 @@ const ProductCard = ({ model, products }) => {
   };
 
   return (
-    <div className="product-card position-relative d-flex flex-column p-0" style={{background:'#fff', borderRadius: '10px', minWidth: 260, maxWidth: 260, width: 260, height: 420, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', border: 'none', overflow:'hidden', margin:'0 10px 18px 10px'}}>
+    <div 
+      className="product-card position-relative d-flex flex-column p-0" 
+      style={{background:'#fff', borderRadius: '10px', minWidth: 260, maxWidth: 260, width: 260, height: 420, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', border: 'none', overflow:'hidden', margin:'0 10px 18px 10px'}}
+      role="button"
+      tabIndex={0}
+      onClick={onCardClick}
+    >
       <div className="position-relative w-100" style={{flex:'1 1 auto', minHeight:200, height:200, width:'100%'}}>
         <img src={mainPhoto} alt={model.name} className="w-100 h-100 object-fit-cover" style={{display:'block', borderRadius: '0', background:'#f6f6f6', height:'100%', objectFit:'cover'}} />
-        <button className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.96)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={() => toggleFavorite(mainProduct)}>
-          <svg width="22" height="22" fill={favorite ? 'red' : 'none'} stroke={favorite ? 'red' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0l-.54.54-.54-.54a5.5 5.5 0 0 0-7.78 7.78l.54.54L12 21.35l7.78-8.42.54-.54a5.5 5.5 0 0 0 0-7.78z"/>
+        <button className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={e => { e.stopPropagation(); handleLikeClick(e); }}>
+          <svg width="22" height="22" fill={liked ? 'var(--purple)' : 'none'} stroke={liked ? 'var(--purple)' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
           </svg>
         </button>
       </div>
@@ -108,20 +104,25 @@ const ProductCard = ({ model, products }) => {
           {(model.colors || []).map(color => {
             let colorImg = color.image?.path || '';
             if (colorImg.startsWith('/public/')) colorImg = colorImg.replace(/^\/public/, '');
-            colorImg = colorImg ? `/images/${colorImg.replace(/^\//, '')}` : null;
+            colorImg = colorImg ? `/images/${colorImg.replace(/^\, '')}` : null;
+            const isActive = color.id === activeColorId;
             return (
               <span
                 key={color.id}
                 title={color.name}
+                onClick={e => { e.stopPropagation(); setActiveColorId(color.id); }}
                 style={{
                   display: 'inline-block',
                   width: 28,
                   height: 28,
                   borderRadius: '50%',
-                  border: '2px solid #eee',
+                  border: isActive ? '2px solid #333' : '2px solid #eee',
                   overflow: 'hidden',
-                  background: '#f4f4f4',
-                  boxShadow: '0 1px 3px #0001',
+                  background: isActive ? '#eaeaea' : '#f4f4f4',
+                  boxShadow: isActive ? '0 2px 8px #0002' : '0 1px 3px #0001',
+                  cursor: 'pointer',
+                  outline: isActive ? '2px solid #555' : 'none',
+                  transition: 'border 0.15s, box-shadow 0.15s, background 0.15s'
                 }}
               >
                 {colorImg ? (
@@ -134,18 +135,28 @@ const ProductCard = ({ model, products }) => {
           })}
         </div>
       </div>
-      <button className="btn p-0 position-absolute bottom-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={handleCartClick}>
+      <button className="btn p-0 position-absolute bottom-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={e => { e.stopPropagation(); onAddToCart({
+        ...colorProduct,
+        name: model.name,
+        price: colorProduct.price,
+        color: (colorProduct.color && colorProduct.color.name) || (model.colors && model.colors.find(c => c.id === activeColorId)?.name) || '',
+        image: (colorProduct.color && colorProduct.color.image && colorProduct.color.image.path)
+          ? `/images/${colorProduct.color.image.path.replace(/^\/public/, '').replace(/^\, '')}`
+          : (model.photos && model.photos[0]?.path ? `/images/${model.photos[0].path}` : ''),
+        sizes: Array.from(new Set(products.map(p => p.size?.name).filter(Boolean)))
+      }); }}>
         <svg width="22" height="22" fill={inCart ? 'var(--purple)' : 'none'} stroke={inCart ? 'var(--purple)' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
           <circle cx="9" cy="21" r="1"/>
           <circle cx="20" cy="21" r="1"/>
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
       </button>
-      <UnifiedCartModal
-        show={showModal}
-        product={mainProduct}
-        onClose={handleCloseModal}
-        onCheckout={handleCheckout}
+      <LoginToFavoriteModal
+        show={showFavoriteModal}
+        onClose={handleCloseFavoriteModal}
+        productImage={mainPhoto}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
       />
     </div>
   );

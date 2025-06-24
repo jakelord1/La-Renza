@@ -47,11 +47,10 @@ namespace La_Renza.BLL.Services
                 Price = modelDto.Price,
                 Bage = modelDto.Bage,
                 CategoryId = modelDto.CategoryId,
-                Image = _mapper.Map<ICollection<Image>>(photos)
+                Image = _mapper.Map<ICollection<Image>>(modelDto.Photos)
             };
             _db.Models.Update(model);
             await _db.Save();
-
         }
         public async Task DeleteModel(int id)
         {

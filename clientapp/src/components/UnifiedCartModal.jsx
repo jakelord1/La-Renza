@@ -4,11 +4,13 @@ import ReactDOM from 'react-dom';
 const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   const [step, setStep] = React.useState('select'); // 'select' | 'added'
   const [selectedSize, setSelectedSize] = React.useState(null);
+  const [isAdding, setIsAdding] = React.useState(false);
 
   React.useEffect(() => {
     if (show) {
       setStep('select');
       setSelectedSize(null);
+      setIsAdding(false);
     }
   }, [show, product]);
 
@@ -120,11 +122,20 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
 
 
   const handleSelectSize = (size) => {
+    if (step !== 'select' || isAdding) return; // Захист від повторного виклику
+    setIsAdding(true);
     setSelectedSize(size);
 
     let cart = [];
     try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
-    cart.push({ ...product, selectedSize: size });
+    cart.push({
+      ...product,
+      name: product.name || '',
+      image: product.image || (product.images && product.images[0]) || '',
+      color: product.color || '',
+      price: product.price || 0,
+      selectedSize: size
+    });
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cart-updated'));
     setStep('added');
@@ -152,7 +163,7 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
               </div>
             </div>
             {sizes.length === 1 ? (
-              <button style={oneSizeBtnStyle} onClick={() => handleSelectSize(sizes[0])}>{sizes[0]}</button>
+              <button style={oneSizeBtnStyle} onClick={() => handleSelectSize(sizes[0])} disabled={isAdding}>{sizes[0]}</button>
             ) : (
               <div style={sizesRowStyle}>
                 {sizes.map((size, idx) => (
@@ -160,6 +171,7 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
                     key={idx}
                     onClick={() => handleSelectSize(size)}
                     style={sizeBtnStyle}
+                    disabled={isAdding}
                   >
                     {size}
                   </button>
