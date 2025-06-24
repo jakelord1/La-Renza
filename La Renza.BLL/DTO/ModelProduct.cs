@@ -14,7 +14,7 @@ namespace La_Renza.BLL.DTO
         public string? MaterialInfo { get; set; }
         public DateTime StartDate { get; set; }
         public decimal Price { get; set; } // Model.Price
-        public float? Rate { get; set; }
+        public decimal? Rate { get; set; }
         public string ImageUrl { get; set; } // Color.Image.Url
         public List<string> Sizes { get; set; }
         public List<string> Bages { get; set; } // ["НОВИНКА"]
