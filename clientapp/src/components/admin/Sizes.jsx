@@ -14,6 +14,7 @@ const Sizes = () => {
   const [editingSize, setEditingSize] = useState(null);
 
   const [categoryId, setCategoryId] = useState('');
+  const [category, setCategory] = useState(null);
   const [name, setName] = useState('');
 
   const [selectedImage, setSelectedImage] = useState(null);
@@ -50,6 +51,7 @@ const Sizes = () => {
 
   const resetForm = () => {
     setCategoryId('');
+    setCategory(null);
     setName('');
   };
 
@@ -85,6 +87,7 @@ const Sizes = () => {
   const handleEditSize = (size) => {
     setEditingSize(size);
     setCategoryId(size.categoryId ? String(size.categoryId) : '');
+    setCategory(size.category ?? null);
     setName(size.name);
     setShowEditModal(true);
   };
@@ -100,6 +103,7 @@ const Sizes = () => {
       const body = {
         id: editingSize.id,
         categoryId: Number(categoryId),
+        category: category,
         name
       };
       const res = await fetch(API_URL, {

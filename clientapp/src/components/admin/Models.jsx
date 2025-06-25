@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Badge } from 'react-bootstrap';
-import EditModelColorsModal from './EditModelColorsModal';
+// import EditModelColorsModal from './EditModelColorsModal';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Models`;
 
@@ -27,10 +27,6 @@ const Models = () => {
     photos: [],
     colors: []
   });
-
-  const [showColorsModal, setShowColorsModal] = useState(false);
-  const [editingColorsModel, setEditingColorsModel] = useState(null);
-  const [colorsModalLoading, setColorsModalLoading] = useState(false);
 
   const [categories, setCategories] = useState([]);
   const [allColors, setAllColors] = useState([]);
@@ -110,7 +106,6 @@ const Models = () => {
     });
   };
 
-
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
     let processedValue = value;
@@ -124,14 +119,12 @@ const Models = () => {
     }));
   };
 
-
   const handleSizeChange = (idx, val) => {
     setFormData(prev => ({
       ...prev,
       sizes: prev.sizes.map((s, i) => (i === idx ? val : s))
     }));
   };
-
 
   const handleAddSize = () => {
     setFormData(prev => ({
@@ -140,7 +133,6 @@ const Models = () => {
     }));
   };
 
-
   const handleRemoveSize = (idx) => {
     setFormData(prev => ({
       ...prev,
@@ -148,26 +140,73 @@ const Models = () => {
     }));
   };
 
-
   const handlePhotoChange = (idx, val) => {
     setFormData(prev => ({
       ...prev,
-      photos: prev.photos.map((p, i) => (i === idx ? { ...p, path: val } : p))
+      photos: prev.photos.map((p, i) => (i === idx ? val : p))
     }));
   };
-  const handleAddPhoto = () => {
-    setFormData(prev => ({
-      ...prev,
-      photos: [...prev.photos, { path: '' }]
-    }));
+
+  const handleAddPhoto = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    for (const file of files) {
+      const formDataImg = new FormData();
+      formDataImg.append('file', file);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Images/Upload`, {
+          method: 'POST',
+          body: formDataImg,
+          credentials: 'include'
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Не вдалося завантажити фото! Статус: ${res.status}. Відповідь: ${text}`);
+        }
+        let fileName = '';
+        let text = '';
+        try {
+          text = await res.text();
+        } catch {}
+        if (!text) {
+          fileName = file.name;
+        } else {
+          let imgResp = null;
+          try {
+            imgResp = JSON.parse(text);
+          } catch {
+            imgResp = text;
+          }
+          if (typeof imgResp === 'string') fileName = imgResp;
+          else if (imgResp && (imgResp.fileName || imgResp.filename || imgResp.name)) fileName = imgResp.fileName || imgResp.filename || imgResp.name;
+          else if (imgResp && imgResp.path) fileName = imgResp.path;
+        }
+        if (fileName) {
+          setFormData(prev => ({
+            ...prev,
+            photos: [...prev.photos, { path: fileName }]
+          }));
+          continue;
+        }
+        setFormData(prev => ({
+          ...prev,
+          photos: [...prev.photos, { path: file.name }]
+        }));
+      } catch (err) {
+        if (err.message.includes('Статус:')) {
+          setAlert({ show: true, type: 'danger', message: err.message });
+        }
+      }
+    }
+    e.target.value = '';
   };
+
   const handleRemovePhoto = (idx) => {
     setFormData(prev => ({
       ...prev,
       photos: prev.photos.filter((_, i) => i !== idx)
     }));
   };
-
 
   const handleColorToggle = (colorObj) => {
     setFormData(prev => {
@@ -192,7 +231,7 @@ const Models = () => {
     if (!isEdit) {
       photos = photos.map(p => ({ path: p.path }));
     }
-    
+
     let colors = (data.colors && data.colors.length > 0)
       ? data.colors.map(color => {
           if (color.model) {
@@ -229,9 +268,7 @@ const Models = () => {
       setAlert({ show: true, type: 'danger', message: 'Оберіть категорію' });
       return;
     }
-    
 
-    
     setLoading(true);
     try {
       const modelData = prepareModelData(formData);
@@ -240,9 +277,9 @@ const Models = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(modelData)
       });
-      
+
       if (!res.ok) throw new Error('Не вдалося додати модель');
-      
+
       setAlert({ show: true, type: 'success', message: 'Модель успішно додано!' });
       setShowAddModal(false);
       resetForm();
@@ -282,9 +319,7 @@ const Models = () => {
       setAlert({ show: true, type: 'danger', message: 'Оберіть категорію' });
       return;
     }
-    
 
-    
     setLoading(true);
     try {
       const modelData = {
@@ -296,9 +331,9 @@ const Models = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(modelData)
       });
-      
+
       if (!res.ok) throw new Error('Не вдалося оновити модель');
-      
+
       setAlert({ show: true, type: 'success', message: 'Модель успішно оновлено!' });
       setShowEditModal(false);
       setEditingModel(null);
@@ -313,12 +348,12 @@ const Models = () => {
 
   const handleDeleteModel = async (id) => {
     if (!window.confirm('Ви впевнені, що хочете видалити цю модель?')) return;
-    
+
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Не вдалося видалити модель');
-      
+
       setAlert({ show: true, type: 'success', message: 'Модель успішно видалено!' });
       fetchModels();
     } catch (e) {
@@ -328,7 +363,6 @@ const Models = () => {
     }
   };
 
-  
   const renderModal = (isEdit = false) => (
     <Modal show={isEdit ? showEditModal : showAddModal} onHide={() => isEdit ? setShowEditModal(false) : setShowAddModal(false)}>
       <Modal.Header closeButton>
@@ -346,7 +380,7 @@ const Models = () => {
               required
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3">
             <Form.Label>Опис</Form.Label>
             <Form.Control
@@ -357,7 +391,7 @@ const Models = () => {
               onChange={handleInputChange}
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3">
             <Form.Label>Інформація про матеріали</Form.Label>
             <Form.Control
@@ -367,7 +401,7 @@ const Models = () => {
               onChange={handleInputChange}
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3">
             <Form.Label>Дата початку</Form.Label>
             <Form.Control
@@ -377,7 +411,7 @@ const Models = () => {
               onChange={handleInputChange}
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3">
             <Form.Label>Ціна</Form.Label>
             <Form.Control
@@ -390,7 +424,7 @@ const Models = () => {
               placeholder="0.00"
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3">
             <Form.Label>Рейтинг</Form.Label>
             <Form.Control
@@ -404,7 +438,7 @@ const Models = () => {
               placeholder="0.0"
             />
           </Form.Group>
-          
+
           <Form.Group className="mb-3">
             <Form.Label>Бейдж</Form.Label>
             <Form.Control
@@ -454,44 +488,8 @@ const Models = () => {
             <Form.Control
               type="file"
               multiple
-              accept="image"
-              onChange={async (e) => {
-                const files = Array.from(e.target.files);
-                if (!files.length) return;
-                for (const file of files) {
-                  const formDataImg = new FormData();
-                  formDataImg.append('file', file);
-                  try {
-                    const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Images`, {
-                      method: 'POST',
-                      body: formDataImg,
-                      credentials: 'include' 
-                    });
-                    if (!res.ok) {
-                      const text = await res.text();
-                      throw new Error(`Не вдалося завантажити фото! Статус: ${res.status}. Відповідь: ${text}`);
-                    }
-                    let imgResp;
-                    try {
-                      const text = await res.text();
-                      imgResp = text ? JSON.parse(text) : null;
-                    } catch {
-                      imgResp = null;
-                    }
-                    if (imgResp && imgResp.id && imgResp.path) {
-                      setFormData(prev => ({
-                        ...prev,
-                        photos: [...prev.photos, { id: imgResp.id, path: imgResp.path }]
-                      }));
-                      return;
-                    }
-                    throw new Error('Сервер повернув некоректну відповідь (відсутні id/path). Зверніться до адміністратора або спробуйте ще раз.');
-                  } catch (err) {
-                    setAlert({ show: true, type: 'danger', message: err.message });
-                  }
-                }
-                e.target.value = '';
-              }}
+              accept="image/*"
+              onChange={handleAddPhoto}
             />
             <div className="d-flex gap-2 flex-wrap mt-2">
               {formData.photos.filter(p => p.path).map((photo, idx) => (
@@ -501,10 +499,7 @@ const Models = () => {
                     variant="danger"
                     size="sm"
                     style={{position:'absolute', top:0, right:0, padding:'0 6px', fontSize:14, lineHeight:1}}
-                    onClick={() => setFormData(prev => ({
-                      ...prev,
-                      photos: prev.photos.filter((_, i) => i !== idx)
-                    }))}
+                    onClick={() => handleRemovePhoto(idx)}
                   >×</Button>
                 </div>
               ))}
@@ -532,13 +527,13 @@ const Models = () => {
   return (
     <div>
       <h2 className="mb-4 fw-bold" style={{fontSize: '2.1rem'}}>Моделі</h2>
-      
+
       {alert.show && (
         <Alert variant={alert.type} onClose={() => setAlert({...alert, show: false})} dismissible>
           {alert.message}
         </Alert>
       )}
-      
+
       <Card className="shadow rounded-4 border-0 bg-white bg-opacity-100 p-4 mb-4" style={{maxWidth: '100%', margin: '0 auto'}}>
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
           <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі моделі</h4>
@@ -550,7 +545,7 @@ const Models = () => {
             <i className="bi bi-plus-lg" style={{fontSize:18}}></i> Додати
           </Button>
         </div>
-        
+
         {loading && !models.length ? (
           <div className="text-center py-4">
             <Spinner animation="border" role="status" style={{ color: '#6f42c1' }}>
@@ -605,41 +600,33 @@ const Models = () => {
                         ) : '-'}
                       </td>
                       <td>
-  <div className="d-flex gap-2">
-    <Button
-      variant="outline-info"
-      size="sm"
-      onClick={() => { setViewModel(model); setShowViewModal(true); }}
-      title="Детальніше"
-    >
-      <i className="bi bi-eye"></i>
-    </Button>
-    <Button
-      variant="outline-primary"
-      size="sm"
-      onClick={() => handleEditModel(model)}
-      title="Редагувати"
-    >
-      <i className="bi bi-pencil"></i>
-    </Button>
-    <Button
-      variant="outline-warning"
-      size="sm"
-      onClick={() => { setEditingColorsModel(model); setShowColorsModal(true); }}
-      title="Кольори"
-    >
-      <i className="bi bi-palette"></i>
-    </Button>
-    <Button
-      variant="outline-danger"
-      size="sm"
-      onClick={() => handleDeleteModel(model.id)}
-      title="Видалити"
-    >
-      <i className="bi bi-trash"></i>
-    </Button>
-  </div>
-</td>
+                        <div className="d-flex gap-2">
+                          <Button
+                            variant="outline-info"
+                            size="sm"
+                            onClick={() => { setViewModel(model); setShowViewModal(true); }}
+                            title="Детальніше"
+                          >
+                            <i className="bi bi-eye"></i>
+                          </Button>
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleEditModel(model)}
+                            title="Редагувати"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDeleteModel(model.id)}
+                            title="Видалити"
+                          >
+                            <i className="bi bi-trash"></i>
+                          </Button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -648,45 +635,10 @@ const Models = () => {
           </div>
         )}
       </Card>
-      
-      
+
       {renderModal()}
       {renderModal(true)}
-     
-      <EditModelColorsModal
-        show={showColorsModal}
-        onHide={() => { setShowColorsModal(false); setEditingColorsModel(null); }}
-        allColors={allColors}
-        modelColors={editingColorsModel?.colors || []}
-        loading={colorsModalLoading}
-        onSave={async (selectedColors) => {
-          if (!editingColorsModel) return;
-          setColorsModalLoading(true);
-          try {
-            const updatedModel = {
-              ...editingColorsModel,
-              colors: selectedColors
-            };
-            const prepared = prepareModelData(updatedModel, true);
-            console.log('[DEBUG PUT /api/Models]', { ...prepared, id: editingColorsModel.id });
-            const res = await fetch(API_URL, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ...prepared, id: editingColorsModel.id })
-            });
-            if (!res.ok) throw new Error('Не вдалося оновити кольори моделі');
-            setAlert({ show: true, type: 'success', message: 'Кольори моделі успішно оновлено!' });
-            setShowColorsModal(false);
-            setEditingColorsModel(null);
-            fetchModels();
-          } catch (e) {
-            setAlert({ show: true, type: 'danger', message: e.message });
-          } finally {
-            setColorsModalLoading(false);
-          }
-        }}
-      />
-    
+
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Детальна інформація про модель</Modal.Title>

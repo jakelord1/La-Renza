@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Spinner, Alert, Table, Modal, Accordion } from 'react-bootstrap';
+import { Card, Form, Button, Spinner, Alert, Table, Modal, Accordion, Image, InputGroup, FormControl } from 'react-bootstrap';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories`;
 
@@ -20,7 +20,11 @@ const Categories = () => {
   const [name, setName] = useState('');
   const [parentCategoryId, setParentCategoryId] = useState('');
   const [isGlobal, setIsGlobal] = useState(false);
-  const [image, setImage] = useState({ path: '' });
+  const [image, setImage] = useState({ path: '', id: null });
+  const [imageId, setImageId] = useState(null);
+  const [availableImages, setAvailableImages] = useState([]);
+  const [imagePreview, setImagePreview] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -38,13 +42,28 @@ const Categories = () => {
 
   useEffect(() => {
     fetchCategories();
+    // Завантаження списку зображень
+    const fetchAvailableImages = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Images`);
+        if (!res.ok) throw new Error('Помилка завантаження зображень');
+        const data = await res.json();
+        setAvailableImages(data);
+      } catch (e) {
+        setAlert({ show: true, type: 'danger', message: e.message });
+      }
+    };
+    fetchAvailableImages();
   }, []);
 
   const resetForm = () => {
     setName('');
     setParentCategoryId('');
     setIsGlobal(false);
-    setImage({ path: '' });
+    setImage({ path: '', id: null });
+    setImageId(null);
+    setImagePreview('');
+    setSearchQuery('');
   };
 
   const handleAddCategory = async (e) => {
@@ -59,7 +78,8 @@ const Categories = () => {
         name,
         parentCategoryId: isGlobal || !parentCategoryId ? null : Number(parentCategoryId),
         isGlobal,
-        image: { path: image.path || '' },
+        imageId: imageId,
+        image: { id: image.id ?? null, path: imagePreview || '' },
         sizes: [],
         models: []
       };
@@ -86,8 +106,11 @@ const Categories = () => {
     setParentCategoryId(cat.parentCategoryId ? String(cat.parentCategoryId) : '');
     setIsGlobal(cat.isGlobal);
     setImage({
-      path: cat.image?.path || ''
+      path: cat.image?.path || '',
+      id: cat.image?.id ?? null
     });
+    setImageId(cat.imageId ?? null);
+    setImagePreview(cat.image?.path || '');
     setShowEditModal(true);
   };
 
@@ -104,10 +127,12 @@ const Categories = () => {
         name,
         parentCategoryId: isGlobal || !parentCategoryId ? null : Number(parentCategoryId),
         isGlobal,
-        image: { path: image.path || '' },
-        sizes: [],
-        models: []
+        imageId: imageId,
+        image: { id: image.id ?? null, path: imagePreview || '' },
+        sizes: editingCategory.sizes ?? [],
+        models: editingCategory.models ?? []
       };
+
       const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -199,11 +224,9 @@ const Categories = () => {
                           <td>{group.name}</td>
                           <td>Так</td>
                           <td>{group.image?.path ? (
-  <img
-    src={group.image.path}
-    alt="img"
+  <img src={`/images/${group.image.path.replace(/^[/\\]+/, '')}`} alt="img"
     style={{ maxHeight: 40, borderRadius: 5, cursor: 'pointer' }}
-    onClick={() => { setPreviewImagePath(group.image.path); setShowPreview(true); }}
+    onClick={() => { setPreviewImagePath(`/images/${group.image.path.replace(/^[/\\]+/, '')}`); setShowPreview(true); }}
   />
 ) : '—'}</td>
                           <td>
@@ -222,11 +245,9 @@ const Categories = () => {
                             <td>{child.name}</td>
                             <td>Ні</td>
                             <td>{child.image?.path ? (
-  <img
-    src={child.image.path}
-    alt="img"
+  <img src={`/images/${child.image.path.replace(/^[/\\]+/, '')}`} alt="img"
     style={{ maxHeight: 40, borderRadius: 5, cursor: 'pointer' }}
-    onClick={() => { setPreviewImagePath(child.image.path); setShowPreview(true); }}
+    onClick={() => { setPreviewImagePath(`/images/${child.image.path.replace(/^[/\\]+/, '')}`); setShowPreview(true); }}
   />
 ) : '—'}</td>
                             <td>
@@ -272,11 +293,32 @@ const Categories = () => {
               </Form.Select>
             </div>
             <div className="col-12">
-              <label htmlFor="imagePath" className="form-label text-secondary small mb-1">Шлях до зображення</label>
-              <Form.Control type="text" id="imagePath" value={image.path} onChange={e => setImage({ path: e.target.value })} placeholder="/uploads/img.jpg" disabled={loading} className="rounded-3 mb-1" />
-              {image.path && (
-                <div className="mb-2"><img src={image.path} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc' }} /></div>
-              )}
+              <Form.Group controlId="formCategoryImage">
+                <Form.Label>Оберіть зображення</Form.Label>
+                <InputGroup>
+                  <FormControl
+                    placeholder="Пошук зображення..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                  />
+                </InputGroup>
+                <div className="d-flex flex-wrap gap-2 mt-2">
+                  {availableImages.filter(img => img.path.toLowerCase().includes(searchQuery.toLowerCase())).map(img => (
+                    <div key={img.id} style={{ border: imageId === img.id ? '2px solid #6f42c1' : '1px solid #ccc', borderRadius: 6, padding: 2, cursor: 'pointer' }} onClick={() => { setImageId(img.id); setImage({ path: img.path, id: img.id }); setImagePreview(`/images/${img.path.replace(/^[/\\]+/, '')}`); }}>
+                      <Image src={`/images/${img.path.replace(/^[/\\]+/, '')}`} alt="img" style={{ maxHeight: 60, maxWidth: 90, objectFit: 'contain', borderRadius: 4 }} />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 text-center">
+                  {imagePreview && (
+                    <>
+                      <span className="text-muted">Обрано: </span>
+                      <span style={{ fontSize: 12, color: '#888', marginRight: 8 }}>{imagePreview}</span>
+                      <div className="mb-2"><img src={imagePreview} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc', marginTop: 8 }} /></div>
+                    </>
+                  )}
+                </div>
+              </Form.Group>
             </div>
             <div className="col-12 mt-2">
               <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
@@ -311,9 +353,9 @@ const Categories = () => {
             </div>
             <div className="col-12">
               <label htmlFor="edit-imagePath" className="form-label text-secondary small mb-1">Шлях до зображення</label>
-              <Form.Control type="text" id="edit-imagePath" value={image.path} onChange={e => setImage({ path: e.target.value })} placeholder="/uploads/img.jpg" disabled={loading} className="rounded-3 mb-1" />
+              <Form.Control type="text" id="edit-imagePath" value={`/images/${image.path}`} onChange={e => setImage({ path: e.target.value.replace('/images/', '') })} placeholder="/images/img.jpg" disabled={loading} className="rounded-3 mb-1" />
               {image.path && (
-                <div className="mb-2"><img src={image.path} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc' }} /></div>
+                <div className="mb-2"><img src={`/images/${image.path}`} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc' }} /></div>
               )}
             </div>
             <div className="col-12 mt-2">
