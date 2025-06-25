@@ -20,6 +20,7 @@ namespace La_Renza.BLL.Services
 
         public async Task CreateOrder(OrderDTO orderDto)
         {
+            var last = (await Database.Orders.GetAll()).LastOrDefault();
             var order = new DAL.Entities.Order
             {
                 Id = orderDto.Id,
@@ -27,7 +28,7 @@ namespace La_Renza.BLL.Services
                 Status = "New",
                 DeliveryId = orderDto.DeliveryId,
                 CuponsId = orderDto.CuponsId,
-                OrderName = orderDto.OrderName,
+                OrderName = $"Order_{last.Id}",
                 CreatedAt = orderDto.CreatedAt,
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
