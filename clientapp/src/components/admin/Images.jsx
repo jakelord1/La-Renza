@@ -12,7 +12,7 @@ const Images = () => {
   const [editingImage, setEditingImage] = useState(null);
   const [errorImages, setErrorImages] = useState([]);
 
-  const [path, setPath] = useState('');
+  const [file, setFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -37,49 +37,38 @@ const Images = () => {
   }, []);
 
   const resetForm = () => {
-    setPath('');
+    setFile(null);
     setPreviewImage(null);
-  };
-
-  const formatImageUrl = (path) => {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
-      return path;
-    }
-    return path.startsWith('/') ? path : `/${path}`;
   };
 
   const getFullImageUrl = (path) => {
     if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
-      return path;
-    }
-    return path.startsWith('/') ? `${window.location.origin}${path}` : `${window.location.origin}/${path}`;
+    return `/images/${path}`;
   };
 
+
   const handlePreviewImage = (imagePath) => {
-    const formattedPath = formatImageUrl(imagePath);
-    setPreviewImage(formattedPath);
+    setPreviewImage(getFullImageUrl(imagePath));
     setPreviewKey(prev => prev + 1);
     setShowPreview(true);
   };
 
   const handleAddImage = async (e) => {
     e.preventDefault();
-    if (!path) {
-      setAlert({ show: true, type: 'danger', message: 'Введіть шлях до зображення' });
+    if (!file) {
+      setAlert({ show: true, type: 'danger', message: 'Оберіть файл для завантаження' });
       return;
     }
     setLoading(true);
     try {
-      const formattedPath = formatImageUrl(path);
-      const body = { path: formattedPath };
+      const formData = new FormData();
+      formData.append('file', file);
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: formData
       });
       if (!res.ok) throw new Error('Не вдалося додати зображення');
+      const data = await res.json(); 
       setAlert({ show: true, type: 'success', message: 'Зображення додано!' });
       setShowAddModal(false);
       resetForm();
@@ -91,21 +80,22 @@ const Images = () => {
     }
   };
 
-  const handleEditImage = (image) => {
+  const [editPath, setEditPath] = useState('');
+const handleEditImage = (image) => {
     setEditingImage(image);
-    setPath(image.path);
+    setEditPath(image.path);
     setShowEditModal(true);
   };
 
   const handleUpdateImage = async (e) => {
     e.preventDefault();
-    if (!path) {
+    if (!editPath) {
       setAlert({ show: true, type: 'danger', message: 'Введіть шлях до зображення' });
       return;
     }
     setLoading(true);
     try {
-      const body = { id: editingImage.id, path };
+      const body = { id: editingImage.id, path: editPath };
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -184,48 +174,44 @@ const Images = () => {
                       <td>{image.id}</td>
                       <td style={{wordBreak:'break-all', maxWidth:220}}>{image.path}</td>
                       <td>
-                        {image.path ? (
-                          errorImages.includes(image.id) ? (
-                            <span className="text-muted">-</span>
-                          ) : (
-                            <div 
-                              style={{
-                                width: 60, 
-                                height: 60, 
-                                cursor: 'pointer',
-                                overflow: 'hidden',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: 'transparent'
-                              }}
-                              onClick={() => handlePreviewImage(image.path)}
-                            >
-                              <Image
-                                key={`thumb-${image.id}-${previewKey}`}
-                                src={getFullImageUrl(image.path)}
-                                alt="preview"
-                                style={{
-                                  maxWidth: '100%',
-                                  maxHeight: '100%',
-                                  objectFit: 'contain',
-                                  backgroundColor: '#f8f9fa',
-                                  borderRadius: '4px'
-                                }}
-                                onError={e => {
-                                  if (!errorImages.includes(image.id)) {
-                                    setErrorImages(prev => [...prev, image.id]);
-                                    e.target.onerror = null;
-                                    e.target.src = 'https://via.placeholder.com/60x60?text=No+Image';
-                                  }
-                                }}
-                              />
-                            </div>
-                          )
-                        ) : (
-                          <span className="text-muted">-</span>
-                        )}
-                      </td>
+  <div 
+    style={{
+      width: 60, 
+      height: 60, 
+      cursor: image.path ? 'pointer' : 'default',
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'transparent'
+    }}
+    onClick={() => image.path && !errorImages.includes(image.id) && handlePreviewImage(image.path)}
+  >
+    {image.path && !errorImages.includes(image.id) ? (
+      <Image
+        key={`thumb-${image.id}-${previewKey}`}
+        src={getFullImageUrl(image.path)}
+        alt="preview"
+        style={{
+          maxWidth: '100%',
+          maxHeight: '100%',
+          objectFit: 'contain',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '4px'
+        }}
+        onError={e => {
+          if (!errorImages.includes(image.id)) {
+            setErrorImages(prev => [...prev, image.id]);
+            e.target.onerror = null;
+            e.target.src = 'https:via.placeholder.com/60x60?text=No+Image';
+          }
+        }}
+      />
+    ) : (
+      <span className="text-muted">-</span>
+    )}
+  </div>
+</td>
                       <td>
                         <div className="d-flex gap-2">
                           <Button variant="link" size="sm" onClick={() => handleEditImage(image)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
@@ -249,7 +235,7 @@ const Images = () => {
           <Form onSubmit={handleAddImage} className="row g-3">
             <div className="col-12">
               <div className="mb-3 text-center">
-                {path && (
+                {previewImage && (
                   <div style={{
                     minHeight: '200px',
                     display: 'flex',
@@ -261,7 +247,7 @@ const Images = () => {
                     padding: '1rem'
                   }}>
                     <Image 
-                      src={getFullImageUrl(path)} 
+                      src={previewImage} 
                       alt="Попередній перегляд"
                       style={{
                         maxWidth: '100%',
@@ -283,16 +269,22 @@ const Images = () => {
                   </div>
                 )}
               </div>
-              <label htmlFor="path" className="form-label text-secondary small mb-1">URL зображення</label>
+              <label htmlFor="file-upload" className="form-label text-secondary small mb-1">Виберіть файл зображення</label>
               <Form.Control
-                type="text"
-                id="path"
-                value={path}
-                onChange={(e) => {
-                  setPath(e.target.value);
-                  setPreviewImage(e.target.value);
+                type="file"
+                id="file-upload"
+                accept="image"
+                onChange={e => {
+                  const f = e.target.files[0];
+                  setFile(f);
+                  if (f) {
+                    const reader = new FileReader();
+                    reader.onload = ev => setPreviewImage(ev.target.result);
+                    reader.readAsDataURL(f);
+                  } else {
+                    setPreviewImage(null);
+                  }
                 }}
-                placeholder="Введіть URL зображення"
                 className="form-control-lg"
               />
             </div>
@@ -313,7 +305,7 @@ const Images = () => {
           <Form onSubmit={handleUpdateImage} className="row g-3">
             <div className="col-12">
               <label htmlFor="edit-path" className="form-label text-secondary small mb-1">Path</label>
-              <Form.Control type="text" id="edit-path" value={path} onChange={e => setPath(e.target.value)} placeholder="URL або шлях до зображення" disabled={loading} className="rounded-3" />
+              <Form.Control type="text" id="edit-path" value={editPath} onChange={e => setEditPath(e.target.value)} placeholder="URL або шлях до зображення" disabled={loading} className="rounded-3" />
             </div>
             <div className="col-12 mt-2">
               <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>

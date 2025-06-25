@@ -22,9 +22,11 @@ const Products = () => {
   const [colorId, setColorId] = useState('');
   const [sizeId, setSizeId] = useState('');
   const [quantity, setQuantity] = useState('');
-  
+  const [modelId, setModelId] = useState('');
+
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
+  const [models, setModels] = useState([]);
   const [_loadingData, setLoadingData] = useState(false);
 
   const fetchProducts = async () => {
@@ -38,6 +40,17 @@ const Products = () => {
       setAlert({ show: true, type: 'danger', message: e.message });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchModels = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Models`);
+      if (!res.ok) throw new Error('Помилка завантаження моделей');
+      const data = await res.json();
+      setModels(data);
+    } catch (e) {
+      setAlert({ show: true, type: 'danger', message: e.message });
     }
   };
 
@@ -55,6 +68,7 @@ const Products = () => {
         const sizesData = await sizesRes.json();
         setSizes(sizesData);
 
+        await fetchModels();
         await fetchProducts();
       } catch (e) {
         setAlert({ show: true, type: 'danger', message: e.message });
@@ -62,7 +76,6 @@ const Products = () => {
         setLoadingData(false);
       }
     };
-    
     fetchInitialData();
   }, []);
 
@@ -75,16 +88,17 @@ const Products = () => {
     setIsActive(true);
     setColorId('');
     setSizeId('');
+    setModelId('');
     setQuantity('');
   };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
 
-
     const errors = [];
     if (!colorId) errors.push('колір');
     if (!sizeId) errors.push('розмір');
+    if (!modelId) errors.push('модель');
     if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) < 0) errors.push('кількість');
     
     if (errors.length > 0) {
@@ -98,15 +112,59 @@ const Products = () => {
     
     setLoading(true);
     try {
+      const selectedColor = colors.find(c => c.id === parseInt(colorId));
+      const selectedSize = sizes.find(s => s.id === parseInt(sizeId));
+      const selectedModel = models.find(m => m.id === parseInt(modelId));
+
+      const image = selectedColor?.imageId
+        ? { id: selectedColor.imageId, path: selectedColor.image?.path || "" }
+        : null;
+
+      const model = selectedModel
+        ? {
+            id: selectedModel.id,
+            name: selectedModel.name,
+            description: selectedModel.description,
+            materialInfo: selectedModel.materialInfo,
+            startDate: selectedModel.startDate,
+            price: selectedModel.price,
+            rate: selectedModel.rate,
+            bage: selectedModel.bage,
+            categoryId: selectedModel.categoryId,
+            category: typeof selectedModel.category === 'string'
+              ? selectedModel.category
+              : (selectedModel.category?.name || ''),
+            sizes: selectedModel.sizes
+          }
+        : null;
+      console.log('MODEL FOR PAYLOAD:', model);
+
+      const color = selectedColor
+        ? {
+            id: selectedColor.id,
+            name: selectedColor.name,
+            modelId: selectedColor.modelId,
+            imageId: selectedColor.imageId,
+            image,
+            model
+          }
+        : null;
+
+
+      const size = selectedSize
+        ? {
+            id: selectedSize.id,
+            categoryId: selectedSize.categoryId,
+            name: selectedSize.name
+          }
+        : null;
+
       const body = {
-        name: name.trim(),
-        description: description.trim(),
-        price: parseFloat(price),
-        categoryId: parseInt(categoryId),
-        imageUrl: imageUrl.trim(),
-        isActive,
-        colorId: colorId ? parseInt(colorId) : null,
-        sizeId: sizeId ? parseInt(sizeId) : null,
+        colorId: color?.id,
+        sizeId: size?.id,
+        modelId: selectedModel?.id,
+        color,
+        size,
         quantity: quantity ? parseInt(quantity) : 0
       };
       
@@ -136,23 +194,24 @@ const Products = () => {
     setEditingProduct(product);
     setName(product.name);
     setDescription(product.description || '');
-    setPrice(product.price.toString());
-    setCategoryId(product.categoryId.toString());
+    setPrice(product.color?.model?.price !== undefined && product.color?.model?.price !== null ? product.color.model.price.toString() : '');
+    setCategoryId(product.categoryId !== undefined && product.categoryId !== null ? product.categoryId.toString() : '');
     setImageUrl(product.imageUrl || '');
     setIsActive(product.isActive);
-    setColorId(product.colorId ? product.colorId.toString() : '');
-    setSizeId(product.sizeId ? product.sizeId.toString() : '');
-    setQuantity(product.quantity ? product.quantity.toString() : '0');
+    setColorId(product.color?.id ? product.color.id.toString() : '');
+    setSizeId(product.size?.id ? product.size.id.toString() : '');
+    setModelId(product.color?.model?.id ? product.color.model.id.toString() : '');
+    setQuantity(product.quantity !== undefined && product.quantity !== null ? product.quantity.toString() : '');
     setShowEditModal(true);
   };
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
-    
 
     const errors = [];
     if (!colorId) errors.push('колір');
     if (!sizeId) errors.push('розмір');
+    if (!modelId) errors.push('модель');
     if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) < 0) errors.push('кількість');
     
     if (errors.length > 0) {
@@ -166,20 +225,70 @@ const Products = () => {
     
     setLoading(true);
     try {
+      const selectedColor = colors.find(c => c.id === parseInt(colorId));
+      const selectedSize = sizes.find(s => s.id === parseInt(sizeId));
+      const selectedModel = models.find(m => m.id === parseInt(modelId));
+
+      const image = selectedColor?.imageId
+        ? { id: selectedColor.imageId, path: selectedColor.image?.path || "" }
+        : null;
+
+      const model = selectedModel
+        ? {
+            id: selectedModel.id,
+            name: selectedModel.name,
+            description: selectedModel.description,
+            materialInfo: selectedModel.materialInfo,
+            startDate: selectedModel.startDate,
+            price: selectedModel.price,
+            rate: selectedModel.rate,
+            bage: selectedModel.bage,
+            categoryId: selectedModel.categoryId,
+            category: typeof selectedModel.category === 'string'
+              ? selectedModel.category
+              : (selectedModel.category?.name || ''),
+            sizes: selectedModel.sizes
+          }
+        : null;
+      console.log('MODEL FOR PAYLOAD:', model);
+
+      const color = selectedColor
+        ? {
+            id: selectedColor.id,
+            name: selectedColor.name,
+            modelId: selectedColor.modelId,
+            imageId: selectedColor.imageId,
+            image,
+            model
+          }
+        : null;
+
+      const size = selectedSize
+        ? {
+            id: selectedSize.id,
+            categoryId: selectedSize.categoryId,
+            name: selectedSize.name
+          }
+        : null;
+
       const body = {
         id: editingProduct.id,
-        name: name.trim(),
-        description: description.trim(),
-        price: parseFloat(price),
-        categoryId: parseInt(categoryId),
-        imageUrl: imageUrl.trim(),
-        isActive,
-        colorId: colorId ? parseInt(colorId) : null,
-        sizeId: sizeId ? parseInt(sizeId) : null,
+        name: editingProduct.name,
+        description: editingProduct.description,
+        price: editingProduct.price,
+        categoryId: editingProduct.categoryId,
+        imageUrl: editingProduct.imageUrl,
+        isActive: editingProduct.isActive,
+
+        colorId: color?.id,
+        sizeId: size?.id,
+        modelId: selectedModel?.id,
+        color,
+        size,
         quantity: quantity ? parseInt(quantity) : 0
       };
       
-      const res = await fetch(`${API_URL}/${editingProduct.id}`, {
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -367,6 +476,8 @@ const Products = () => {
                     <th>ID</th>
                     <th>Колір</th>
                     <th>Розмір</th>
+                    <th>Модель</th>
+                    <th>Лайки</th>
                     <th>Кількість</th>
                     <th>Дії</th>
                   </tr>
@@ -375,8 +486,10 @@ const Products = () => {
                   {products.map(product => (
                     <tr key={product.id}>
                       <td>{product.id}</td>
-                      <td>{product.colorId ? colors.find(c => c.id === product.colorId)?.name || product.colorId : '-'}</td>
-                      <td>{product.sizeId ? sizes.find(s => s.id === product.sizeId)?.name || product.sizeId : '-'}</td>
+                      <td>{product.color?.name || '-'}</td>
+                      <td>{product.size?.name || '-'}</td>
+                      <td>{product.color?.model?.name || '-'}</td>
+                      <td>{product.usersLikesId ? product.usersLikesId.length : 0}</td>
                       <td>{product.quantity || 0}</td>
                       <td>
                         <div className="d-flex gap-2">
@@ -452,6 +565,23 @@ const Products = () => {
                 </Form.Group>
                 
                 <Form.Group className="mb-3">
+                  <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
+                  <Form.Select 
+                    value={modelId} 
+                    onChange={(e) => setModelId(e.target.value)}
+                    required
+                    className="form-control-lg"
+                  >
+                    <option value="">Виберіть модель</option>
+                    {models.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+                
+                <Form.Group className="mb-3">
                   <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
                   <Form.Control
                     type="number"
@@ -485,56 +615,65 @@ const Products = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleUpdateProduct}>
-            <Row>
-              <Col md={12}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={colorId} 
-                    onChange={(e) => setColorId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">Виберіть колір</option>
-                    {colors.map(color => (
-                      <option key={color.id} value={color.id}>
-                        {color.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={sizeId} 
-                    onChange={(e) => setSizeId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">Виберіть розмір</option>
-                    {sizes.map(size => (
-                      <option key={size.id} value={size.id}>
-                        {size.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            
+            <Form.Group className="mb-3">
+              <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
+              <Form.Select 
+                value={colorId} 
+                onChange={(e) => setColorId(e.target.value)}
+                required
+                className="form-control-lg"
+              >
+                <option value="">Виберіть колір</option>
+                {colors.map(color => (
+                  <option key={color.id} value={color.id}>
+                    {color.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
+              <Form.Select 
+                value={sizeId} 
+                onChange={(e) => setSizeId(e.target.value)}
+                required
+                className="form-control-lg"
+              >
+                <option value="">Виберіть розмір</option>
+                {sizes.map(size => (
+                  <option key={size.id} value={size.id}>
+                    {size.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
+              <Form.Select 
+                value={modelId} 
+                onChange={(e) => setModelId(e.target.value)}
+                required
+                className="form-control-lg"
+              >
+                <option value="">Виберіть модель</option>
+                {models.map(model => (
+                  <option key={model.id} value={model.id}>
+                    {model.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
+              <Form.Control
+                type="number"
+                min="0"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+                className="form-control-lg"
+              />
+            </Form.Group>
             <div className="mt-4">
               <Button 
                 type="submit" 

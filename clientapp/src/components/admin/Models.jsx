@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Spinner, Alert, Table, Modal, Badge } from 'react-bootstrap';
+import EditModelColorsModal from './EditModelColorsModal';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Models`;
 
@@ -23,9 +24,14 @@ const Models = () => {
     bage: '',
     categoryId: '',
     sizes: [''],
-    photos: [{ path: '' }],
-    colors: [{ name: '', image: { path: '' } }]
+    photos: [],
+    colors: []
   });
+
+  const [showColorsModal, setShowColorsModal] = useState(false);
+  const [editingColorsModel, setEditingColorsModel] = useState(null);
+  const [colorsModalLoading, setColorsModalLoading] = useState(false);
+
   const [categories, setCategories] = useState([]);
   const [allColors, setAllColors] = useState([]);
 
@@ -45,7 +51,7 @@ const Models = () => {
 
   useEffect(() => {
     fetchModels();
-    // Завантаження категорій
+
     const fetchCategories = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories`);
@@ -57,7 +63,7 @@ const Models = () => {
       }
     };
     fetchCategories();
-    // Завантаження всіх кольорів
+
     const fetchColors = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Colors`);
@@ -100,9 +106,10 @@ const Models = () => {
       categoryId: '',
       sizes: [''],
       photos: [],
-      colors: [{ name: '', image: { path: '' } }]
+      colors: []
     });
   };
+
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -117,7 +124,7 @@ const Models = () => {
     }));
   };
 
-  // Для зміни розміру за індексом
+
   const handleSizeChange = (idx, val) => {
     setFormData(prev => ({
       ...prev,
@@ -125,7 +132,7 @@ const Models = () => {
     }));
   };
 
-  // Додати новий розмір
+
   const handleAddSize = () => {
     setFormData(prev => ({
       ...prev,
@@ -133,7 +140,7 @@ const Models = () => {
     }));
   };
 
-  // Видалити розмір
+
   const handleRemoveSize = (idx) => {
     setFormData(prev => ({
       ...prev,
@@ -141,7 +148,7 @@ const Models = () => {
     }));
   };
 
-  // ФОТО
+
   const handlePhotoChange = (idx, val) => {
     setFormData(prev => ({
       ...prev,
@@ -161,7 +168,7 @@ const Models = () => {
     }));
   };
 
-  // КОЛЬОРИ (оновлено: вибір із довідника)
+
   const handleColorToggle = (colorObj) => {
     setFormData(prev => {
       const exists = prev.colors.some(c => c.id === colorObj.id);
@@ -174,34 +181,41 @@ const Models = () => {
     });
   };
 
-  const prepareModelData = (data) => {
-    // Find the category name for the current model
+  const prepareModelData = (data, isEdit = false) => {
+
     let categoryName = '';
     if (Array.isArray(categories) && data.categoryId) {
       const catObj = categories.find(c => c.id === Number(data.categoryId));
       if (catObj) categoryName = catObj.name;
     }
+    let photos = data.photos.filter(p => p && p.path && p.path.trim() !== '');
+    if (!isEdit) {
+      photos = photos.map(p => ({ path: p.path }));
+    }
+    
+    let colors = (data.colors && data.colors.length > 0)
+      ? data.colors.map(color => {
+          if (color.model) {
+            return {
+              ...color,
+              model: {
+                ...color.model,
+                category: color.model.category || categoryName
+              }
+            };
+          } else {
+            return color;
+          }
+        })
+      : [];
     return {
       ...data,
       price: data.price === '' ? 0 : parseFloat(data.price),
       rate: data.rate === '' ? 0 : parseFloat(data.rate),
       categoryId: data.categoryId === '' ? null : Number(data.categoryId),
       sizes: data.sizes.filter(s => s && s.trim() !== ''),
-      photos: data.photos.filter(p => p && p.path && p.path.trim() !== ''),
-      colors: data.colors && data.colors.length > 0 ? data.colors.map(color => {
-        if (color.model) {
-          // Ensure category field is present
-          return {
-            ...color,
-            model: {
-              ...color.model,
-              category: color.model.category || categoryName
-            }
-          };
-        } else {
-          return color;
-        }
-      }) : []
+      photos,
+      colors
     };
   };
 
@@ -216,19 +230,8 @@ const Models = () => {
       return;
     }
     
-    if (!formData.photos || formData.photos.filter(p => p.path && p.path.trim() !== '').length === 0) {
-      setAlert({ show: true, type: 'danger', message: 'Додайте хоча б одне фото' });
-      return;
-    }
-    // Кольори не обовʼязкові при створенні моделі
-    // Якщо користувач додав хоча б один колір, то він має бути з картинкою
-    if (formData.colors && formData.colors.length > 0) {
-      const validColors = formData.colors.filter(c => c.name && c.name.trim() !== '' && c.image && c.image.path && c.image.path.trim() !== '');
-      if (validColors.length !== formData.colors.length) {
-        setAlert({ show: true, type: 'danger', message: 'Додайте зображення для кожного вибраного кольору' });
-        return;
-      }
-    }
+
+    
     setLoading(true);
     try {
       const modelData = prepareModelData(formData);
@@ -280,19 +283,8 @@ const Models = () => {
       return;
     }
     
-    if (!formData.photos || formData.photos.filter(p => p.path && p.path.trim() !== '').length === 0) {
-      setAlert({ show: true, type: 'danger', message: 'Додайте хоча б одне фото' });
-      return;
-    }
-    // Кольори не обовʼязкові при створенні моделі
-    // Якщо користувач додав хоча б один колір, то він має бути з картинкою
-    if (formData.colors && formData.colors.length > 0) {
-      const validColors = formData.colors.filter(c => c.name && c.name.trim() !== '' && c.image && c.image.path && c.image.path.trim() !== '');
-      if (validColors.length !== formData.colors.length) {
-        setAlert({ show: true, type: 'danger', message: 'Додайте зображення для кожного вибраного кольору' });
-        return;
-      }
-    }
+
+    
     setLoading(true);
     try {
       const modelData = {
@@ -423,7 +415,6 @@ const Models = () => {
               placeholder="Наприклад: НОВИНКА, АКЦІЯ"
             />
           </Form.Group>
-          {/* Категорія */}
           <Form.Group className="mb-3">
             <Form.Label>Категорія *</Form.Label>
             <Form.Select
@@ -438,7 +429,7 @@ const Models = () => {
               ))}
             </Form.Select>
           </Form.Group>
-          {/* Розміри */}
+
           <Form.Group className="mb-3">
             <Form.Label>Розміри</Form.Label>
             {formData.sizes.map((size, idx) => (
@@ -457,13 +448,13 @@ const Models = () => {
               </div>
             ))}
           </Form.Group>
-          {/* Фото */}
+
           <Form.Group className="mb-3">
             <Form.Label>Фото *</Form.Label>
             <Form.Control
               type="file"
               multiple
-              accept="image/*"
+              accept="image"
               onChange={async (e) => {
                 const files = Array.from(e.target.files);
                 if (!files.length) return;
@@ -471,34 +462,30 @@ const Models = () => {
                   const formDataImg = new FormData();
                   formDataImg.append('file', file);
                   try {
-                    const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Images/Upload`, {
+                    const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Images`, {
                       method: 'POST',
-                      body: formDataImg
+                      body: formDataImg,
+                      credentials: 'include' 
                     });
                     if (!res.ok) {
                       const text = await res.text();
                       throw new Error(`Не вдалося завантажити фото! Статус: ${res.status}. Відповідь: ${text}`);
                     }
-                    // Відповідь порожня, тому шукаємо файл у списку зображень за назвою
-                    const filename = file.name;
-                    const imagesRes = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Images`);
-                    if (!imagesRes.ok) {
-                      throw new Error('Не вдалося отримати список фото після завантаження');
+                    let imgResp;
+                    try {
+                      const text = await res.text();
+                      imgResp = text ? JSON.parse(text) : null;
+                    } catch {
+                      imgResp = null;
                     }
-                    const images = await imagesRes.json();
-                    // Знаходимо останнє фото з такою ж назвою (path закінчується на імʼя файлу)
-                    const found = images.reverse().find(img => img.path && img.path.endsWith(filename));
-                    if (!found) {
-                      // Діагностика: покажемо статус і кількість фото
-                      const debug = `Після завантаження фото не знайдено у списку.\nІмʼя файлу: ${filename}\nВсього фото на сервері: ${images.length}`;
-                      console.log(debug);
-                      setAlert({ show: true, type: 'danger', message: debug });
-                      throw new Error('Фото завантажено (upload), але не знайдено у списку зображень (GET /api/Images). Можливі причини: сервер не зберіг файл, або не оновив список. Спробуйте оновити сторінку або перевірити сервер.');
+                    if (imgResp && imgResp.id && imgResp.path) {
+                      setFormData(prev => ({
+                        ...prev,
+                        photos: [...prev.photos, { id: imgResp.id, path: imgResp.path }]
+                      }));
+                      return;
                     }
-                    setFormData(prev => ({
-                      ...prev,
-                      photos: [...prev.photos, { id: found.id, path: found.path }]
-                    }));
+                    throw new Error('Сервер повернув некоректну відповідь (відсутні id/path). Зверніться до адміністратора або спробуйте ще раз.');
                   } catch (err) {
                     setAlert({ show: true, type: 'danger', message: err.message });
                   }
@@ -509,7 +496,7 @@ const Models = () => {
             <div className="d-flex gap-2 flex-wrap mt-2">
               {formData.photos.filter(p => p.path).map((photo, idx) => (
                 <div key={idx} style={{position:'relative'}}>
-                  <img src={`/images/${photo.path.replace(/^\\|^\//, '')}`} alt="Фото" style={{maxHeight:60, maxWidth:90, borderRadius:6, border:'1px solid #eee'}} />
+                  <img src={`/images/${photo.path.replace(/^[/\\]+/, '')}`} alt="Фото" style={{maxHeight:60, maxWidth:90, borderRadius:6, border:'1px solid #eee'}} />
                   <Button
                     variant="danger"
                     size="sm"
@@ -636,6 +623,14 @@ const Models = () => {
       <i className="bi bi-pencil"></i>
     </Button>
     <Button
+      variant="outline-warning"
+      size="sm"
+      onClick={() => { setEditingColorsModel(model); setShowColorsModal(true); }}
+      title="Кольори"
+    >
+      <i className="bi bi-palette"></i>
+    </Button>
+    <Button
       variant="outline-danger"
       size="sm"
       onClick={() => handleDeleteModel(model.id)}
@@ -657,7 +652,41 @@ const Models = () => {
       
       {renderModal()}
       {renderModal(true)}
-      {/* Модальне вікно перегляду повної інформації */}
+     
+      <EditModelColorsModal
+        show={showColorsModal}
+        onHide={() => { setShowColorsModal(false); setEditingColorsModel(null); }}
+        allColors={allColors}
+        modelColors={editingColorsModel?.colors || []}
+        loading={colorsModalLoading}
+        onSave={async (selectedColors) => {
+          if (!editingColorsModel) return;
+          setColorsModalLoading(true);
+          try {
+            const updatedModel = {
+              ...editingColorsModel,
+              colors: selectedColors
+            };
+            const prepared = prepareModelData(updatedModel, true);
+            console.log('[DEBUG PUT /api/Models]', { ...prepared, id: editingColorsModel.id });
+            const res = await fetch(API_URL, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...prepared, id: editingColorsModel.id })
+            });
+            if (!res.ok) throw new Error('Не вдалося оновити кольори моделі');
+            setAlert({ show: true, type: 'success', message: 'Кольори моделі успішно оновлено!' });
+            setShowColorsModal(false);
+            setEditingColorsModel(null);
+            fetchModels();
+          } catch (e) {
+            setAlert({ show: true, type: 'danger', message: e.message });
+          } finally {
+            setColorsModalLoading(false);
+          }
+        }}
+      />
+    
       <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Детальна інформація про модель</Modal.Title>
@@ -677,8 +706,8 @@ const Models = () => {
               <div><strong>Фото:</strong>
   <div style={{display:'flex', gap: 10, flexWrap:'wrap'}}>
     {(viewModel.photos && viewModel.photos.length > 0) ? viewModel.photos.map(photo => {
-      // Формуємо шлях для відображення /images/{path}, видаляючи зайві слеші
-      let cleanPath = photo.path ? photo.path.replace(/^[/\\]+/, '') : '';
+    
+      let cleanPath = photo.path ? photo.path.replace(/^[/\\]+/, '') : ''; // correct
       let displayUrl = cleanPath ? `/images/${cleanPath}` : '';
       return (
         <div key={photo.id} style={{border:'1px solid #eee', borderRadius:6, padding:2}}>
@@ -696,7 +725,7 @@ const Models = () => {
                       <div><strong>ID:</strong> {color.id}</div>
                       <div><strong>Назва:</strong> {color.name}</div>
                       <div><strong>Зображення:</strong> {color.image ? (() => {
-  let cleanColorPath = color.image.path ? color.image.path.replace(/^[/\\]+/, '') : '';
+  let cleanColorPath = color.image.path ? color.image.path.replace(/^[/\\]+/, '') : ''; // correct
   let colorImgUrl = cleanColorPath ? `/images/${cleanColorPath}` : '';
   return (
     <div>
