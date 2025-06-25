@@ -58,5 +58,42 @@
       13,
       14
     ]
+  },
+  {
+    "id": 6,
+    "name": "MenuSections",
+    "type": "menuSections",
+    "value": [
+      {
+        "key": "all",
+        "label": "\u0412\u0441\u0456",
+        "categories": [
+          14,
+          19,
+          21,
+          20
+        ]
+      },
+      {
+        "key": "woman",
+        "label": "\u0416\u0456\u043D\u043A\u0430",
+        "categories": []
+      },
+      {
+        "key": "home",
+        "label": "\u0414\u0456\u043C",
+        "categories": []
+      },
+      {
+        "key": "man",
+        "label": "\u0427\u043E\u043B\u043E\u0432\u0456\u043A",
+        "categories": []
+      },
+      {
+        "key": "kids",
+        "label": "\u0414\u0456\u0442\u0438",
+        "categories": []
+      }
+    ]
   }
 ]
