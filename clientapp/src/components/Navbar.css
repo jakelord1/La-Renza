@@ -4,6 +4,37 @@
   margin: 0 auto 10px auto;
   padding: 0 12px;
 }
+
+/* Смещение логотипа к левому краю при размере экрана 500px и меньше */
+@media (max-width: 500px) {
+  .navbar-mobile-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    padding: 10px 0 !important;
+  }
+  .navbar-logo-mobile {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    position: static !important;
+    left: auto !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 38px;
+  }
+  .navbar-mobile-icons {
+    margin-left: auto !important;
+  }
+  .navbar-brand {
+    position: static !important;
+    left: auto !important;
+    transform: none !important;
+    margin-left: 0 !important;
+  }
+}
+
 @media (max-width: 991.98px) {
   .navbar-mobile-row {
     flex-direction: column !important;
@@ -27,5 +58,53 @@
     justify-content: flex-end !important;
     gap: 8px !important;
     padding-right: 2px !important;
+  }
+}
+
+@media (max-width: 850px) {
+  .navbar-mobile-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
+    padding: 10px 0 !important;
+    width: 100%;
+  }
+  .navbar-logo-mobile {
+    margin-left: 0 !important;
+    margin-right: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 38px;
+    flex-shrink: 0;
+  }
+  .navbar-mobile-searchbar {
+    flex-grow: 1 !important;
+    margin: 0 8px !important;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+  .navbar-mobile-searchbar .form-control {
+    font-size: 1rem;
+    padding: 6px 8px 6px 35px;
+    border-radius: 6px;
+    background: #fff;
+    min-width: 0;
+  }
+  .navbar-mobile-icons {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-left: 8px !important;
+    flex-shrink: 0;
+  }
+  .navbar-mobile-icons .nav-link {
+    padding: 0 4px !important;
+    font-size: 1.1rem !important;
+  }
+  .navbar-mobile-icons i {
+    font-size: 1.3rem !important;
   }
 }

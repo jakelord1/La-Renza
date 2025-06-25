@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 
 
@@ -117,7 +116,7 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
             <div className="col-12 text-center">Немає доступних товарів.</div>
           ) : (
             filteredModels.map(model => (
-              <div className="col-6 col-md-4 col-lg-3" key={model.id}>
+              <div className="col-6 col-sm-6 col-md-4 col-lg-3 col-xl-2" key={model.id}>
                 <ProductCard 
   model={model} 
   products={model.products} 

@@ -45,12 +45,12 @@ const CategoryTabs = ({ active, setActive }) => {
 
   return (
     <div className="container mb-3">
-      <div className="d-flex justify-content-center flex-wrap gap-2">
+      <div className="d-flex justify-content-center flex-wrap gap-2" style={{overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
         {tabs.map(tab => (
           <button
             key={tab.id}
             type="button"
-            className={`category-tab-btn-admin${active === tab.id ? ' active' : ''}`}
+            className={`category-tab-btn-admin${active === tab.id ? ' active' : ''} flex-shrink-0`}
             onClick={(e) => handleClick(tab.id, e)}
             onMouseDown={(e) => e.preventDefault()}
             style={{
@@ -59,14 +59,15 @@ const CategoryTabs = ({ active, setActive }) => {
               border: '1.5px solid #6f42c1',
               borderRadius: 8,
               fontWeight: 600,
-              fontSize: 16,
-              minWidth: 90,
+              fontSize: 'clamp(14px, 2.5vw, 16px)',
+              minWidth: 'max-content',
               minHeight: 38,
               boxShadow: active === tab.id ? '0 2px 8px #a259e633' : 'none',
               transition: 'all 0.2s',
               outline: 'none',
-              padding: '7px 20px',
-              marginBottom: 2
+              padding: '7px 16px',
+              marginBottom: 2,
+              whiteSpace: 'nowrap'
             }}
           >
             {tab.name}

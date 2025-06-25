@@ -147,3 +147,88 @@ input:active, textarea:active, select:active {
   box-shadow: none !important;
   border-color: #dee2e6 !important;
 }
+
+/* Адаптивные стили для главной страницы */
+@media (max-width: 575.98px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  
+  .product-card {
+    margin-bottom: 16px !important;
+  }
+  
+  .category-tab-btn-admin {
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+    min-height: 36px !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .product-card {
+    min-height: 380px !important;
+  }
+  
+  .category-tab-btn-admin {
+    font-size: 14px !important;
+    padding: 6px 14px !important;
+  }
+}
+
+/* Скрытие скроллбара для webkit браузеров */
+.d-flex.overflow-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* Улучшение отображения карточек товаров */
+.product-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+  .col-6 {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  
+  .row.g-3 {
+    --bs-gutter-x: 0.75rem;
+  }
+}
+
+.category-list-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 18px;
+  justify-content: center;
+}
+
+@media (max-width: 1400px) {
+  .category-list-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px 8px;
+    justify-items: center;
+    overflow-x: unset;
+    flex-wrap: unset;
+  }
+}
+@media (max-width: 900px) {
+  .category-list-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 500px) {
+  .category-list-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
