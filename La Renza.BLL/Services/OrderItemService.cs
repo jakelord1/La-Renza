@@ -73,10 +73,7 @@ namespace La_Renza.BLL.Services
    
         public async Task<IEnumerable<OrderItemDTO>> GetOrderItems()
         {
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<OrderItem, OrderItemDTO>()
-            .ForMember("Product", opt => opt.MapFrom(c => c.Product.Id)));
-            var mapper = new Mapper(config);
-            return mapper.Map<IEnumerable<OrderItem>, IEnumerable<OrderItemDTO>>(await Database.OrderItems.GetAll());
+            return _mapper.Map<IEnumerable<OrderItemDTO>>(await Database.OrderItems.GetAll());
         }
 
         public async Task<bool> ExistsOrderItem(int id)

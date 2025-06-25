@@ -23,7 +23,6 @@ namespace La_Renza.BLL.Services
         {
             var deliveryMethod = new DeliveryMethod
             {
-                Id = deliveryMethodDto.Id,
                 Name = deliveryMethodDto.Name,
                 DeliveryPrice = deliveryMethodDto.DeliveryPrice
 

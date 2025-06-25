@@ -20,6 +20,8 @@ namespace La_Renza.DAL.Repositories
         {
             return await db.Product
              .Include(p => p.Color)
+                .ThenInclude(c => c.Image)
+             .Include(p => p.Color)
                 .ThenInclude(c => c.Model)
                     .ThenInclude(m => m.Category)
                        .ThenInclude(cat => cat.SizeOptions)
@@ -32,7 +34,16 @@ namespace La_Renza.DAL.Repositories
 
         public async Task<Product> Get(int id)
         {
-            Product? product = await db.Product.Include(p => p.Color).Include(p => p.Size).Where(p => p.Id == id).FirstOrDefaultAsync();
+            Product? product = await db.Product
+             .Include(p => p.Color)
+                 .ThenInclude(c => c.Image)
+             .Include(p => p.Color)
+                .ThenInclude(c => c.Model)
+            .ThenInclude(m => m.Category)
+            .Include(p => p.Size)
+            .Include(p => p.Comments)
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == id);
             return product!;
         }
 

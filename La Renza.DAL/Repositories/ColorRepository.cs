@@ -19,6 +19,7 @@ namespace La_Renza.DAL.Repositories
         {
             return await db.Color
                   .Include(c => c.Model)
+                   .ThenInclude(m => m.Category)
                   .Include(c => c.Image)
                   .ToListAsync();
         }
@@ -26,7 +27,8 @@ namespace La_Renza.DAL.Repositories
         public async Task<Color> Get(int id)
         {
             var colors = await db.Color
-                .Include(c => c.Model)
+                 .Include(c => c.Model)
+                     .ThenInclude(m => m.Category)
                 .Where(a => a.Id == id).ToListAsync();
             Color? color = colors?.FirstOrDefault();
             return color!;

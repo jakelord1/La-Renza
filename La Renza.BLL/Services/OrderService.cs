@@ -4,8 +4,6 @@ using La_Renza.DAL.Interfaces;
 using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
-using Mysqlx.Crud;
-using La_Renza.DAL.Entities;
 
 namespace La_Renza.BLL.Services
 {
@@ -26,7 +24,7 @@ namespace La_Renza.BLL.Services
             {
                 Id = orderDto.Id,
                 UserId = orderDto.UserId,
-                Status = orderDto.Status,
+                Status = "New",
                 DeliveryId = orderDto.DeliveryId,
                 CuponsId = orderDto.CuponsId,
                 OrderName = orderDto.OrderName,
@@ -34,7 +32,8 @@ namespace La_Renza.BLL.Services
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
                 DeliveryMethodId = orderDto.DeliveryMethodId,
-                Phonenumber = orderDto.Phonenumber
+                Phonenumber = orderDto.Phonenumber,
+                OrderItems = _mapper.Map<ICollection<OrderItem>>(orderDto.orderItems)
             };
             await Database.Orders.Create(order);
             await Database.Save();
@@ -54,8 +53,8 @@ namespace La_Renza.BLL.Services
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
                 DeliveryMethodId = orderDto.DeliveryMethodId,
-                Phonenumber = orderDto.Phonenumber
-
+                Phonenumber = orderDto.Phonenumber,
+                OrderItems = _mapper.Map<ICollection<OrderItem>>(orderDto.orderItems)
             };
             Database.Orders.Update(order);
             await Database.Save();
@@ -84,7 +83,8 @@ namespace La_Renza.BLL.Services
                 CompletedAt = order.CompletedAt,
                 PaymentMethod = order.PaymentMethod,
                 DeliveryMethodId = order.DeliveryMethodId,
-                Phonenumber = order.Phonenumber
+                Phonenumber = order.Phonenumber,
+                orderItems = _mapper.Map<List<OrderItemDTO>>(order.OrderItems)
             };
         }
 
@@ -93,14 +93,13 @@ namespace La_Renza.BLL.Services
             var orders = await Database.Orders.GetAll();
             var userOrders = orders.Where(o => o.UserId == userId);
 
-
-            return _mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(userOrders);
+            return _mapper.Map<IEnumerable<OrderDTO>>(userOrders);
         }
 
         public async Task<IEnumerable<OrderDTO>> GetOrders()
         {
-            return _mapper.Map<IEnumerable<DAL.Entities.Order>, IEnumerable<OrderDTO>>(await Database.Orders.GetAll());
-
+            var orders = await Database.Orders.GetAll();
+            return _mapper.Map<IEnumerable<OrderDTO>>(orders);
         }
 
 
