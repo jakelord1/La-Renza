@@ -85,7 +85,12 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Color, ColorProductDTO>()
                 .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image))
                 .ReverseMap();
-
+            CreateMap<Order, OrderDTO>()
+                .ForMember(dest => dest.orderItems, opt => opt.MapFrom(src => src.OrderItems.ToList()))
+                .ReverseMap();
+            CreateMap<OrderItem, OrderItemDTO>()
+                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
+                .ReverseMap();
 
         }
     }
