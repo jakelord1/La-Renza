@@ -281,7 +281,7 @@ const RegisterForm = () => {
                                         </div>
                                     </div>
 
-                                    <button type="submit" className="btn btn-purple w-100 mb-3">
+                                    <button type="submit" className="btn btn-purple w-100 mb-3 text-white">
                                         Зареєструватися
                                     </button>
 

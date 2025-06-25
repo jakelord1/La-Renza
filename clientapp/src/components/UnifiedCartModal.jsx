@@ -13,27 +13,38 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
     return '/images/no-image.jpg';
   };
 
-  const [step, setStep] = React.useState('select'); // 'select' | 'added'
+  const [step, setStep] = React.useState('select'); 
   const [selectedSize, setSelectedSize] = React.useState(null);
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const addToCart = async (modelId, sizeName, quantity) => {
+  const addToCart = async (colorId, sizeId, quantity) => {
+    let isLoggedIn = false;
     try {
-      const response = await fetch('https://localhost:7071/api/Account/addToCartByModel', {
+      const profile = JSON.parse(localStorage.getItem('profile')) || null;
+      if (profile && profile.email) isLoggedIn = true;
+    } catch {}
+    if (!isLoggedIn) {
+      return true;
+    }
+    try {
+      const response = await fetch('/api/Account/addToCartByColor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ modelId, sizeName, quantity }),
+        body: JSON.stringify({ colorId, sizeId, quantity }),
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to add to cart');
+        let data = {};
+        try { data = await response.json(); } catch {}
+        throw new Error(data.message || 'Не вдалося додати в кошик');
       }
+      return true;
     } catch (error) {
       alert(error.message);
+      return false;
     }
   };
 
@@ -153,23 +164,27 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   };
 
   const handleSelectSize = async (size) => {
-    if (step !== 'select' || isAdding) return; // Захист від повторного виклику
+    if (step !== 'select' || isAdding) return; 
     setIsAdding(true);
     setSelectedSize(size);
-    console.log('Selected size:', size);
-
-    const modelId = product.modelId;
-    if (!modelId) {
-      console.warn('modelId is missing in product:', product);
-      alert('Внутрішня помилка: відсутній modelId');
+    let colorId = product.colorId || (product.color && product.color.id);
+    let sizeId = null;
+    if (Array.isArray(product.sizes)) {
+      const found = product.sizes.find(
+        s => (typeof s === 'object' ? s.name === size : s === size)
+      );
+      sizeId = typeof found === 'object' ? found.id : product.sizeId;
+    } else {
+      sizeId = product.sizeId;
+    }
+    const quantity = 1;
+    if (!colorId || !sizeId) {
+      alert('Не вдалося визначити колір або розмір для додавання в кошик');
       setIsAdding(false);
       return;
     }
-    const sizeName = size;
-    const quantity = 1;
-
-    try {
-      await addToCart(modelId, sizeName, quantity);
+    const ok = await addToCart(colorId, sizeId, quantity);
+    if (ok) {
       let cart = [];
       try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
       cart.push({
@@ -183,9 +198,8 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
       localStorage.setItem('cart', JSON.stringify(cart));
       window.dispatchEvent(new Event('cart-updated'));
       setStep('added');
-    } catch (error) {
-      alert('Не вдалося додати товар в корзину');
     }
+    setIsAdding(false);
   };
 
   return ReactDOM.createPortal(

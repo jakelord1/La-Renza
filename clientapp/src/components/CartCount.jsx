@@ -1,25 +1,49 @@
 import React, { useState, useEffect } from 'react';
 
-const getCart = () => {
-  try {
-    return JSON.parse(localStorage.getItem('cart')) || [];
-  } catch {
-    return [];
-  }
-};
-
-const getTotalCount = () => {
-  const cart = getCart();
-  return cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-};
+const API_URL = import.meta.env.VITE_BACKEND_API_LINK;
 
 const CartCount = () => {
-  const [count, setCount] = useState(getTotalCount());
+  const [count, setCount] = useState(0);
+
+  const fetchCount = async () => {
+    let isLoggedIn = false;
+    try {
+      const res = await fetch(`${API_URL}/api/Account/accountProfile`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        isLoggedIn = !!data && !!data.email;
+      }
+    } catch {}
+    if (isLoggedIn) {
+      try {
+        const res = await fetch(`${API_URL}/api/Account/accountShoppingCarts`, { credentials: 'include' });
+        if (!res.ok) {
+          setCount(0);
+          return;
+        }
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setCount(data.reduce((sum, item) => sum + (item.quantity || 1), 0));
+        } else {
+          setCount(0);
+        }
+      } catch {
+        setCount(0);
+      }
+    } else {
+      try {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        setCount(cart.reduce((sum, item) => sum + (item.quantity || 1), 0));
+      } catch {
+        setCount(0);
+      }
+    }
+  };
 
   useEffect(() => {
-    const update = () => setCount(getTotalCount());
-    window.addEventListener('cart-updated', update);
-    return () => window.removeEventListener('cart-updated', update);
+    fetchCount();
+    window.addEventListener('cart-updated', fetchCount);
+    return () => window.removeEventListener('cart-updated', fetchCount);
   }, []);
 
   if (count === 0) return null;
