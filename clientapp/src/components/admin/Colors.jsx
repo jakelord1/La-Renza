@@ -166,6 +166,7 @@ const Colors = () => {
         materialInfo: modelObj.materialInfo,
         startDate: modelObj.startDate,
         price: modelObj.price,
+        photos: [],
         rate: modelObj.rate,
         bage: modelObj.bage,
         categoryId: modelObj.categoryId,
@@ -237,6 +238,7 @@ const Colors = () => {
         price: modelObj.price,
         rate: modelObj.rate,
         bage: modelObj.bage,
+        photos: [],
         categoryId: modelObj.categoryId,
         category: typeof modelObj.category === 'string' ? modelObj.category : (modelObj.category?.name || ''),
         sizes: Array.isArray(modelObj.sizes) ? modelObj.sizes : []
