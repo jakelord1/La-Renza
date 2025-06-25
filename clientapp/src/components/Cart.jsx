@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Loader from './common/Loader';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountShoppingCarts`;
 const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
@@ -587,6 +588,17 @@ const [selectedAddress, setSelectedAddress] = useState('');
       font-weight: 500;
     }
   `;
+
+  if (cartLoading) {
+    return (
+      <section className="cart-page py-5">
+        <style>{customStyles}</style>
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 300 }}>
+          <Loader message="Завантаження кошика..." />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="cart-page py-5">
