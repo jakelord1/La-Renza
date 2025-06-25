@@ -16,8 +16,8 @@ namespace La_Renza.BLL.DTO
         public decimal Price { get; set; } // Model.Price
         public decimal? Rate { get; set; }
         public string ImageUrl { get; set; } // Color.Image.Url
-        public List<string> Sizes { get; set; }
-        public List<string> Bages { get; set; } // ["НОВИНКА"]
+        public ICollection<string> Sizes { get; set; }
+        public ICollection<string> Bages { get; set; } // ["НОВИНКА"]
         public int CategoryId { get; set; }
     }
 

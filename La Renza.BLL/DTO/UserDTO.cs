@@ -16,11 +16,11 @@ namespace La_Renza.BLL.DTO
         public bool NewsOn { get; set; }
         public int LaRenzaPoints { get; set; }
 
-        public List<AddressDTO>? Addresses { get; set; }
-        public List<InvoiceInfoDTO>? Invoices { get; set; }
-        public List<CouponDTO>? Cupons { get; set; }
-        public List<ProductDTO>? FavoriteProducts { get; set; }
-        public List<ShopingCartDTO>? ShoppingCarts { get; set; }
+        public ICollection<AddressDTO>? Addresses { get; set; }
+        public ICollection<InvoiceInfoDTO>? Invoices { get; set; }
+        public ICollection<CouponDTO>? Cupons { get; set; }
+        public ICollection<ProductDTO>? FavoriteProducts { get; set; }
+        public ICollection<ShopingCartDTO>? ShoppingCarts { get; set; }
     }
 
 }

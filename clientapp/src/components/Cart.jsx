@@ -4,14 +4,30 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountShoppingCarts`;
 const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
 
-const getCart = () => {
-  try {
-    const val = JSON.parse(localStorage.getItem('cart'));
-    return Array.isArray(val) ? val : [];
+const getCart = async () => {
+    try {
+        setLoading(true);
+        const authRes = await fetch('/api/Account/accountProfile', { credentials: 'include' });
+        setIsAuthenticated(authRes.ok);
+        if (!authRes.ok) {
+            const val = JSON.parse(localStorage.getItem('cart'));
+            return Array.isArray(val) ? val : [];
+            setLoading(false);
+            return;
+        }
+        else {
+            const res = await fetch(`${API_URL}`, { credentials: 'include' });
+            if (res.ok) {
+                const val = await res.json();
+                setLoading(false);
+                return;
+            }
+        }
   } catch {
     return [];
   }
 };
+
 
 const fetchShopCart = () => {
   return getCart();
@@ -31,7 +47,7 @@ const setFavorites = (favorites) => {
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
-  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   const [isCheckout, setIsCheckout] = useState(true);
   const [orderPlaced, setOrderPlaced] = useState(false);

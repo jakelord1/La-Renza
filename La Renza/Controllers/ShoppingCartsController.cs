@@ -35,6 +35,7 @@ namespace La_Renza.Controllers
             }
             return new ObjectResult(shopingCart);
         }
+
         [HttpGet("CurrentUser")]
         public async Task<ActionResult<IEnumerable<ShopingCartDTO>>> GetCurrentUserShopingCart()
         {

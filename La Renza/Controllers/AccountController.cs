@@ -568,18 +568,18 @@ namespace La_Renza.Controllers
             return Ok(shoppingCarts);
         }
         // POST: api/Account/addToCartByModel
-        [HttpPost("addToCartByModel")]
-        public async Task<IActionResult> AddToCartByModel([FromBody] AddCartByModel dto)
+        [HttpPost("addToCartByColor")]
+        public async Task<IActionResult> AddToCartByModel([FromBody] AddCartByColor dto)
         {
             var user = await GetCurrentUser();
             if (user == null)
                 return Unauthorized(new { message = "User not logged in." });
-            int? sizeId = await _sizeService.GetSizeIdByName(dto.SizeName);
+            SizeDTO? sizeId = await _sizeService.GetSize(dto.SizeId);
             if (sizeId == null)
-                return BadRequest(new { message = $"Розмір '{dto.SizeName}' не знайдений." });
+                return BadRequest(new { message = $"Розмір '{dto.SizeId}' не знайдений." });
 
 
-            var result = await _accountService.AddProductToCartByModelAndSize(user.Email, dto.ModelId, sizeId.Value, dto.Quantity);
+            var result = await _accountService.AddProductToCartByColorAndSize(user.Email, dto.ColorId, dto.SizeId, dto.Quantity);
             if (!result.Success)
                 return BadRequest(new { message = result.ErrorMessage });
 
