@@ -60,8 +60,13 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
         if (!productsRes.ok) throw new Error('Помилка завантаження продуктів');
         const productsData = await productsRes.json();
 
+        const enrichedProducts = productsData.map(p => ({
+          ...p,
+          categoryId: p.color?.model?.categoryId ?? null
+        }));
+
         setModels(modelsData);
-        setProducts(productsData);
+        setProducts(enrichedProducts);
       } catch (e) {
         setAlert({ show: true, type: 'danger', message: e.message });
       } finally {

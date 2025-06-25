@@ -78,6 +78,7 @@ const Users = () => {
   const [newsOn, setNewsOn] = useState(false);
   const [laRenzaPoints, setLaRenzaPoints] = useState('');
   const [favoriteProducts, setFavoriteProducts] = useState([]);
+  const [password, setPassword] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
@@ -102,8 +103,8 @@ const Users = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !phoneNumber || !fullName || !surName || !birthDate) {
-      setAlert({ show: true, type: 'danger', message: "Будь ласка, заповніть всі обов'язкові поля" });
+    if (!email || !phoneNumber || !fullName || !surName || !birthDate || !password) {
+      setAlert({ show: true, type: 'danger', message: "Будь ласка, заповніть всі обов'язкові поля, включно з паролем" });
       return;
     }
     setLoading(true);
@@ -122,6 +123,7 @@ const Users = () => {
         addresses: [],
         invoices: [],
         shoppingCarts: [],
+        password: password,
       };
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -282,6 +284,7 @@ const Users = () => {
     setNewsOn(false);
     setLaRenzaPoints('');
     setFavoriteProducts([]);
+    setPassword('');
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -357,6 +360,7 @@ const Users = () => {
                 <Table hover className="align-middle">
                   <thead>
                     <tr>
+                      <th>ID</th>
                       <th>E-mail</th>
                       <th>Телефон</th>
                       <th>Ім'я</th>
@@ -373,6 +377,7 @@ const Users = () => {
                   <tbody>
                     {currentItems.map(user => (
                       <tr key={user.id}>
+                        <td>{user.id}</td>
                         <td>{user.email}</td>
                         <td>{user.phoneNumber}</td>
                         <td>{user.fullName}</td>
@@ -468,6 +473,17 @@ const Users = () => {
             <div className="col-12">
               <label htmlFor="laRenzaPoints" className="form-label text-secondary small mb-1">Поінти</label>
               <Form.Control type="text" id="laRenzaPoints" value={laRenzaPoints} onChange={e => setLaRenzaPoints(e.target.value)} placeholder="Поінти" />
+            </div>
+            <div className="col-12">
+              <label htmlFor="password" className="form-label text-secondary small mb-1">Пароль</label>
+              <Form.Control
+                type="password"
+                id="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Пароль"
+                required
+              />
             </div>
             <div className="col-12">
               <label htmlFor="favoriteProducts" className="form-label text-secondary small mb-1">Улюблені товари (ID через кому)</label>

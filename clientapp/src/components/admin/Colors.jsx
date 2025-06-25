@@ -23,11 +23,12 @@ const Colors = () => {
   const [formData, setFormData] = useState({
     name: '',
     modelId: '',
-    selectedImageIds: [],
-    imagePreviews: []
+    imageId: '',
+    imagePreview: ''
   });
+  const [allModels, setAllModels] = useState([]);
   
-  const [previewLoading, setPreviewLoading] = useState(false);
+  
 
   
   useEffect(() => {
@@ -41,7 +42,18 @@ const Colors = () => {
         console.error('Error fetching images:', e);
       }
     };
+    const fetchAllModels = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Models`);
+        if (!res.ok) throw new Error('Помилка завантаження моделей');
+        const data = await res.json();
+        setAllModels(data);
+      } catch (e) {
+        console.error('Error fetching models:', e);
+      }
+    };
     fetchAvailableImages();
+    fetchAllModels();
   }, []);
 
   
@@ -98,13 +110,21 @@ const Colors = () => {
       [name]: value
     }));
   };
-  
+
+  const handleImageSelect = (img) => {
+    setFormData(prev => ({
+      ...prev,
+      imageId: img.id,
+      imagePreview: img.path
+    }));
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
       modelId: '',
-      selectedImageIds: [],
-      imagePreviews: []
+      imageId: '',
+      imagePreview: ''
     });
     setSearchQuery('');
     setImagePage(1);
@@ -124,50 +144,43 @@ const Colors = () => {
       reader.readAsDataURL(file);
     }
   };
-  
-  const toggleImageSelection = (imageId, imagePath) => {
-    setFormData(prev => {
-      const isSelected = prev.selectedImageIds.includes(imageId);
-      return {
-        ...prev,
-        selectedImageIds: isSelected 
-          ? prev.selectedImageIds.filter(id => id !== imageId)
-          : [...prev.selectedImageIds, imageId],
-        imagePreviews: isSelected
-          ? prev.imagePreviews.filter(p => p !== imagePath)
-          : [...prev.imagePreviews, imagePath]
-      };
-    });
-  };
 
   const handleAddColor = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.modelId || formData.selectedImageIds.length === 0) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля та оберіть хоча б одне зображення' });
+    if (!formData.name || !formData.modelId || !formData.imageId) {
+      setAlert({ show: true, type: 'danger', message: 'Введіть назву, оберіть модель і зображення для кольору!' });
       return;
     }
-    
     setLoading(true);
-    
-    
-    const selectedImages = availableImages.filter(img => 
-      formData.selectedImageIds.includes(img.id)
-    );
-    
-    
-    const photos = selectedImages.map((img, index) => ({
-      id: index,
-      path: img.path
-    }));
-    
-    const requestBody = {
-      name: formData.name,
-      modelId: Number(formData.modelId),
-      imageId: Number(formData.selectedImageIds[0]), // Use first selected image as the main one
-      photos: photos
-    };
-    
     try {
+      const modelObj = allModels.find(m => String(m.id) === String(formData.modelId));
+      const imageObj = availableImages.find(img => String(img.id) === String(formData.imageId));
+      if (!modelObj || !imageObj) {
+        setAlert({ show: true, type: 'danger', message: 'Модель або зображення не знайдено!' });
+        setLoading(false);
+        return;
+      }
+      const modelForRequest = {
+        name: modelObj.name,
+        description: modelObj.description,
+        materialInfo: modelObj.materialInfo,
+        startDate: modelObj.startDate,
+        price: modelObj.price,
+        rate: modelObj.rate,
+        bage: modelObj.bage,
+        categoryId: modelObj.categoryId,
+        category: typeof modelObj.category === 'string' ? modelObj.category : (modelObj.category?.name || ''),
+        sizes: Array.isArray(modelObj.sizes) ? modelObj.sizes : []
+      };
+
+      const requestBody = {
+        name: formData.name,
+        modelId: Number(formData.modelId),
+        imageId: Number(formData.imageId),
+        image: { path: imageObj.path },
+        model: modelForRequest
+      };
+
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -175,12 +188,10 @@ const Colors = () => {
         },
         body: JSON.stringify(requestBody)
       });
-      
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || 'Не вдалося додати колір');
       }
-      
       setAlert({ show: true, type: 'success', message: 'Колір успішно додано!' });
       setShowAddModal(false);
       resetForm();
@@ -191,51 +202,66 @@ const Colors = () => {
       setLoading(false);
     }
   };
-  
+
   const handleEditColor = (color) => {
     setEditingColor(color);
     setFormData({
       name: color.name || '',
       modelId: color.modelId || '',
-      selectedImageIds: color.photos?.map(p => p.id) || [],
-      imagePreviews: color.photos?.map(p => p.path) || []
+      imageId: color.imageId || '',
+      imagePreview: color.image?.path || ''
     });
     setShowEditModal(true);
   };
-  
+
   const handleUpdateColor = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.modelId) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, заповніть всі обов\'язкові поля' });
+    if (!formData.name || !formData.modelId || !formData.imageId) {
+      setAlert({ show: true, type: 'danger', message: 'Введіть назву, оберіть модель і зображення для кольору!' });
       return;
     }
-    // Якщо не вибрано нове зображення, залишаємо старий imageId
-    let imageIdToSend = formData.selectedImageId;
-    if (!imageIdToSend && editingColor && editingColor.imageId) {
-      imageIdToSend = editingColor.imageId;
-    }
-    const requestBody = {
-      id: Number(editingColor.id),
-      name: formData.name,
-      modelId: Number(formData.modelId),
-      imageId: imageIdToSend ? Number(imageIdToSend) : null,
-      photos: []
-    };
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/${editingColor.id}`, {
+      const modelObj = allModels.find(m => String(m.id) === String(formData.modelId));
+      const imageObj = availableImages.find(img => String(img.id) === String(formData.imageId));
+      if (!modelObj || !imageObj) {
+        setAlert({ show: true, type: 'danger', message: 'Модель або зображення не знайдено!' });
+        setLoading(false);
+        return;
+      }
+      const modelForRequest = {
+        name: modelObj.name,
+        description: modelObj.description,
+        materialInfo: modelObj.materialInfo,
+        startDate: modelObj.startDate,
+        price: modelObj.price,
+        rate: modelObj.rate,
+        bage: modelObj.bage,
+        categoryId: modelObj.categoryId,
+        category: typeof modelObj.category === 'string' ? modelObj.category : (modelObj.category?.name || ''),
+        sizes: Array.isArray(modelObj.sizes) ? modelObj.sizes : []
+      };
+
+      const requestBody = {
+        id: editingColor.id,
+        name: formData.name,
+        modelId: Number(formData.modelId),
+        imageId: Number(formData.imageId),
+        image: { path: imageObj.path },
+        model: modelForRequest
+      };
+
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody)
       });
-      
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || 'Не вдалося оновити колір');
       }
-      
       setAlert({ show: true, type: 'success', message: 'Колір успішно оновлено!' });
       setShowEditModal(false);
       setEditingColor(null);
@@ -248,7 +274,6 @@ const Colors = () => {
     }
   };
 
-  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = colors.slice(indexOfFirstItem, indexOfLastItem);
@@ -363,29 +388,22 @@ const Colors = () => {
                         </td>
                         <td>{color.modelId}</td>
                         <td>
-  <div className="d-flex gap-1" style={{maxWidth: '150px', flexWrap: 'wrap'}}>
-    {Array.isArray(color.photos) && color.photos.length > 0 ? (
-      color.photos.map((p, idx) => (
-        p && p.path ? (
-          <img
-            key={idx}
-            src={p.path}
-            alt={`Фото ${idx + 1}`}
-            style={{
-              width: '30px',
-              height: '30px',
-              objectFit: 'cover',
-              borderRadius: '4px',
-              border: '1px solid #dee2e6'
-            }}
-          />
-        ) : null
-      ))
-    ) : (
-      <span className="text-muted">Немає</span>
-    )}
-  </div>
-</td>
+                          <div className="d-flex gap-1" style={{maxWidth: '150px', flexWrap: 'wrap'}}>
+                            {color.image && (
+                              <img
+                                src={color.image.path}
+                                alt="Фото кольору"
+                                style={{
+                                  width: '30px',
+                                  height: '30px',
+                                  objectFit: 'cover',
+                                  borderRadius: '4px',
+                                  border: '1px solid #dee2e6'
+                                }}
+                              />
+                            )}
+                          </div>
+                        </td>
                         <td>
                           <div className="d-flex gap-2">
                             <Button 
@@ -427,7 +445,7 @@ const Colors = () => {
         <Modal.Body>
           <Form onSubmit={handleAddColor} className="row g-3">
             <div className="col-12">
-              <Form.Group controlId="formName">
+              <Form.Group controlId="formAddName">
                 <Form.Label>Назва кольору</Form.Label>
                 <Form.Control 
                   type="text" 
@@ -440,183 +458,47 @@ const Colors = () => {
                 />
               </Form.Group>
             </div>
-            
             <div className="col-12">
-              <Form.Group controlId="formModelId">
-                <Form.Label>ID моделі</Form.Label>
-                <Form.Control 
-                  type="number" 
+              <Form.Group controlId="formAddModelId">
+                <Form.Label>Оберіть модель <span className="text-danger">*</span></Form.Label>
+                <Form.Select
                   name="modelId"
                   value={formData.modelId}
                   onChange={handleInputChange}
-                  placeholder="Введіть ID моделі"
                   className="form-control-lg"
                   required
-                />
+                >
+                  <option value="">Оберіть модель...</option>
+                  {allModels.map(m => (
+                    <option key={m.id} value={m.id}>{m.name} (ID: {m.id})</option>
+                  ))}
+                </Form.Select>
               </Form.Group>
             </div>
-            
             <div className="col-12">
-              <Form.Group controlId="formImage">
-                <Form.Label>Зображення кольору</Form.Label>
-                <div className="mb-3">
-                  <InputGroup>
-                    <FormControl
-                      type="text"
-                      placeholder="Пошук зображення..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="me-2"
-                    />
-                    <Button variant="outline-secondary" onClick={() => setSearchQuery('')}>
-                      <i className="bi bi-x-lg"></i>
-                    </Button>
-                  </InputGroup>
-                  <div className="mt-2">
-                    <div className="d-flex flex-wrap gap-2">
-                      {currentImages.map((img) => (
-                        <div key={img.id} 
-                          className="position-relative"
-                          style={{
-                            width: '80px',
-                            height: '80px',
-                            cursor: 'pointer',
-                            border: formData.selectedImageIds.includes(img.id) ? '2px solid #6f42c1' : '1px solid #dee2e6',
-                            borderRadius: '8px',
-                            overflow: 'hidden'
-                          }}
-                          onClick={() => toggleImageSelection(img.id, img.path)}
-                        >
-                          <img 
-                            src={img.path}
-                            alt={img.path}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
-                          />
-                          {formData.selectedImageIds.includes(img.id) && (
-                            <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-50">
-                              <i className="bi bi-check-lg text-success" style={{ fontSize: '24px' }}></i>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+              <Form.Group controlId="formAddImage">
+                <Form.Label>Оберіть зображення</Form.Label>
+                <InputGroup>
+                  <FormControl
+                    placeholder="Пошук зображення..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                  />
+                </InputGroup>
+                <div className="d-flex flex-wrap gap-2 mt-2">
+                  {currentImages.map(img => (
+                    <div key={img.id} style={{ border: formData.imageId == img.id ? '2px solid #6f42c1' : '1px solid #ccc', borderRadius: 6, padding: 2, cursor: 'pointer' }} onClick={() => handleImageSelect(img)}>
+                      <Image src={`/images/${img.path.replace(/^[/\\]+/, '')}`} alt="img" style={{ maxHeight: 60, maxWidth: 90, objectFit: 'contain', borderRadius: 4 }} />
                     </div>
-                    {filteredImages.length > 0 && (
-                      <div className="mt-3">
-                        <Pagination className="justify-content-center">
-                          <Pagination.First 
-                            onClick={() => setImagePage(1)}
-                            disabled={imagePage === 1}
-                          />
-                          <Pagination.Prev 
-                            onClick={() => setImagePage(Math.max(1, imagePage - 1))}
-                            disabled={imagePage === 1}
-                          />
-                          {Array.from({ length: Math.min(5, imageTotalPages) }, (_, i) => i + 1).map((number) => (
-                            <Pagination.Item 
-                              key={number} 
-                              active={number === imagePage}
-                              onClick={() => setImagePage(number)}
-                            >
-                              {number}
-                            </Pagination.Item>
-                          ))}
-                          {imageTotalPages > 5 && (
-                            <>
-                              <Pagination.Ellipsis />
-                              <Pagination.Item 
-                                active={imageTotalPages === imagePage}
-                                onClick={() => setImagePage(imageTotalPages)}
-                              >
-                                {imageTotalPages}
-                              </Pagination.Item>
-                            </>
-                          )}
-                          <Pagination.Next 
-                            onClick={() => setImagePage(Math.min(imageTotalPages, imagePage + 1))}
-                            disabled={imagePage === imageTotalPages}
-                          />
-                          <Pagination.Last 
-                            onClick={() => setImagePage(imageTotalPages)}
-                            disabled={imagePage === imageTotalPages}
-                          />
-                        </Pagination>
-                      </div>
-                    )}
-                    {filteredImages.length > 0 && (
-                      <div className="text-center mt-2">
-                        <Button 
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() => {
-                            setSearchQuery('');
-                            setImagePage(1);
-                            setFormData(prev => ({
-                              ...prev,
-                              selectedImageIds: [],
-                              imagePreviews: []
-                            }));
-                          }}
-                        >
-                          Скинути вибір
-                        </Button>
-                      </div>
-                    )}
-                    {filteredImages.length === 0 && (
-                      <div className="text-center text-muted mt-3">
-                        {searchQuery ? 'Немає зображень, що відповідають вашому запиту' : 'Немає зображень'}
-                      </div>
-                    )}
-                    
-                    {/* Show selected images preview */}
-                    {formData.selectedImageIds.length > 0 && (
-                      <div className="mt-3">
-                        <h6 className="mb-2">Вибрані зображення ({formData.selectedImageIds.length}):</h6>
-                        <div className="d-flex flex-wrap gap-2">
-                          {formData.imagePreviews.map((preview, index) => (
-                            <div key={index} className="position-relative">
-                              <img 
-                                src={preview} 
-                                alt={`Обране зображення ${index + 1}`}
-                                style={{
-                                  width: '60px',
-                                  height: '60px',
-                                  objectFit: 'cover',
-                                  borderRadius: '4px',
-                                  border: '1px solid #dee2e6'
-                                }}
-                              />
-                              <button 
-                                type="button"
-                                className="btn-close position-absolute top-0 end-0"
-                                style={{
-                                  transform: 'translate(30%, -30%)',
-                                  backgroundColor: 'white',
-                                  borderRadius: '50%',
-                                  width: '20px',
-                                  height: '20px',
-                                  fontSize: '10px',
-                                  padding: '0',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const imgId = formData.selectedImageIds[index];
-                                  const imgPath = formData.imagePreviews[index];
-                                  toggleImageSelection(imgId, imgPath);
-                                }}
-                              ></button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  ))}
+                </div>
+                <div className="mt-2 text-center">
+                  {formData.imagePreview && (
+                    <>
+                      <span className="text-muted">Обрано: </span>
+                      <span style={{ fontSize: 12, color: '#888', marginRight: 8 }}>{formData.imagePreview}</span>
+                    </>
+                  )}
                 </div>
               </Form.Group>
             </div>
@@ -656,58 +538,48 @@ const Colors = () => {
                 />
               </Form.Group>
             </div>
-            
             <div className="col-12">
               <Form.Group controlId="formEditModelId">
-                <Form.Label>ID моделі</Form.Label>
-                <Form.Control 
-                  type="number" 
+                <Form.Label>Оберіть модель <span className="text-danger">*</span></Form.Label>
+                <Form.Select
                   name="modelId"
                   value={formData.modelId}
                   onChange={handleInputChange}
-                  placeholder="Введіть ID моделі"
                   className="form-control-lg"
                   required
-                />
+                >
+                  <option value="">Оберіть модель...</option>
+                  {allModels.map(m => (
+                    <option key={m.id} value={m.id}>{m.name} (ID: {m.id})</option>
+                  ))}
+                </Form.Select>
               </Form.Group>
             </div>
-            
             <div className="col-12">
               <Form.Group controlId="formEditImage">
-                <Form.Label>Зображення кольору</Form.Label>
-                <div className="mb-3">
-                  <Form.Control 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="form-control-lg"
+                <Form.Label>Оберіть зображення</Form.Label>
+                <InputGroup>
+                  <FormControl
+                    placeholder="Пошук зображення..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
+                </InputGroup>
+                <div className="d-flex flex-wrap gap-2 mt-2">
+                  {currentImages.map(img => (
+                    <div key={img.id} style={{ border: formData.imageId == img.id ? '2px solid #6f42c1' : '1px solid #ccc', borderRadius: 6, padding: 2, cursor: 'pointer' }} onClick={() => handleImageSelect(img)}>
+                      <Image src={`/images/${img.path.replace(/^[/\\]+/, '')}`} alt="img" style={{ maxHeight: 60, maxWidth: 90, objectFit: 'contain', borderRadius: 4 }} />
+                    </div>
+                  ))}
                 </div>
-                {(formData.imagePreview || (editingColor && editingColor.imageUrl)) && (
-                  <div className="mt-2 text-center">
-                    <Image 
-                      src={formData.imagePreview || editingColor.imageUrl} 
-                      alt="Поточне зображення" 
-                      style={{ 
-                        maxWidth: '100%', 
-                        maxHeight: '200px',
-                        borderRadius: '8px',
-                        border: '1px solid #dee2e6'
-                      }}
-                      onLoadStart={() => setPreviewLoading(true)}
-                      onLoad={() => setPreviewLoading(false)}
-                      onError={(e) => {
-                        setPreviewLoading(false);
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                    {previewLoading && (
-                      <div className="text-center py-3">
-                        <Spinner animation="border" size="sm" variant="secondary" />
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="mt-2 text-center">
+                  {formData.imagePreview && (
+                    <>
+                      <span className="text-muted">Обрано: </span>
+                      <span style={{ fontSize: 12, color: '#888', marginRight: 8 }}>{formData.imagePreview}</span>
+                    </>
+                  )}
+                </div>
               </Form.Group>
             </div>
             

@@ -18,10 +18,18 @@ const CategoryTabs = ({ active, setActive }) => {
           .then(allCats => {
             categories = Array.isArray(allCats) ? allCats : [];
  
-            const orderedTabs = tabsIds
-              .map(id => categories.find(cat => cat.id === id))
-              .filter(Boolean);
-            setTabs([{ id: 'Усі', name: 'Усі' }, ...orderedTabs.map(cat => ({ id: cat.id, name: cat.name }))]);
+            let orderedTabs = [];
+            if (tabsIds.length > 0) {
+              orderedTabs = tabsIds
+                .map(id => categories.find(cat => cat.id === id))
+                .filter(Boolean);
+            } else {
+              orderedTabs = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+            }
+            setTabs([
+              { id: 'Усі', name: 'Усі' },
+              ...orderedTabs.map(cat => ({ id: cat.id, name: cat.name }))
+            ]);
           });
       })
       .catch(() => setTabs(['Усі']));
