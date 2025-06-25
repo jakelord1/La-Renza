@@ -58,5 +58,160 @@
       13,
       14
     ]
+  },
+  {
+    "id": 6,
+    "name": "MenuSections",
+    "type": "menuSections",
+    "value": [
+      {
+        "key": "all",
+        "label": "\u0412\u0441\u0456",
+        "categories": [
+          14,
+          19,
+          21,
+          20
+        ]
+      },
+      {
+        "key": "woman",
+        "label": "\u0416\u0456\u043D\u043A\u0430",
+        "categories": []
+      },
+      {
+        "key": "home",
+        "label": "\u0414\u0456\u043C",
+        "categories": []
+      },
+      {
+        "key": "man",
+        "label": "\u0427\u043E\u043B\u043E\u0432\u0456\u043A",
+        "categories": []
+      },
+      {
+        "key": "kids",
+        "label": "\u0414\u0456\u0442\u0438",
+        "categories": []
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "\u0420\u043E\u0437\u0434\u0456\u043B\u0438 \u043C\u0435\u043D\u044E",
+    "type": "navbar",
+    "value": [
+      {
+        "navbarName": "\u0412\u0421\u0406",
+        "tabName": "\u0412\u0421\u0406",
+        "groups": [
+          {
+            "groupName": "\u0422\u0435\u0441\u0442\u043E\u0432\u0430",
+            "categories": [
+              "19",
+              "14"
+            ]
+          }
+        ],
+        "sideTabs": [
+          {
+            "tabName": "\u041D\u043E\u0432\u0438\u043D\u043A\u0438 \u0441\u0435\u0437\u043E\u043D\u0443",
+            "icon": "bi bi-star",
+            "groups": [
+              {
+                "groupName": "\u0422\u0435\u0441\u0442\u043E\u0432\u0430 \u0432\u043A\u043B\u0430\u0434\u043A\u0430",
+                "categories": [
+                  "14",
+                  "19"
+                ]
+              },
+              {
+                "groupName": "\u0414\u0440\u0443\u0433\u0430 \u0442\u0435\u0441\u0442\u043E\u0432\u0430",
+                "categories": [
+                  "20",
+                  "21"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "navbarName": "\u0416\u0406\u041D\u041A\u0410",
+        "tabName": "\u0416\u0406\u041D\u041A\u0410",
+        "groups": [
+          {
+            "groupName": "\u0422\u0435\u0441\u0442\u043E\u0432\u0430",
+            "categories": [
+              "28"
+            ]
+          },
+          {
+            "groupName": "\u0414\u0440\u0443\u0433\u0430 \u0442\u0435\u0441\u0442\u043E\u0432\u0430",
+            "categories": [
+              "32"
+            ]
+          }
+        ],
+        "sideTabs": [
+          {
+            "tabName": "\u041E\u0434\u044F\u0433",
+            "icon": "bi bi-bag",
+            "groups": []
+          }
+        ]
+      },
+      {
+        "navbarName": "\u0414\u0406\u041C",
+        "tabName": "\u0414\u0406\u041C",
+        "groups": [],
+        "sideTabs": [
+          {
+            "tabName": "\u0414\u0456\u043C \u0434\u0456\u043C \u0434\u0456\u043C",
+            "icon": "bi bi-bag",
+            "groups": [
+              {
+                "groupName": "\u0414\u0456\u043C \u0434\u0456\u043C \u0434\u0456\u043C",
+                "categories": [
+                  "46",
+                  "47"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "navbarName": "\u0414\u0418\u0422\u0418\u041D\u0410",
+        "tabName": "\u0414\u0418\u0422\u0418\u041D\u0410",
+        "groups": [],
+        "sideTabs": [
+          {
+            "tabName": "\u0414\u043B\u044F \u0434\u0438\u0442\u0438\u043D\u0438",
+            "icon": "bi bi-bag",
+            "groups": [
+              {
+                "groupName": "\u0414\u0438\u0442\u0438\u043D\u0441\u0442\u0432\u043E",
+                "categories": [
+                  "45",
+                  "46"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "navbarName": "\u0427\u041E\u041B\u041E\u0412\u0406\u041A",
+        "tabName": "\u0427\u041E\u041B\u041E\u0412\u0406\u041A",
+        "groups": [],
+        "sideTabs": []
+      },
+      {
+        "navbarName": "\u0410\u041A\u0421\u0415\u0421\u0423\u0410\u0420\u0418",
+        "tabName": "\u0410\u041A\u0421\u0415\u0421\u0423\u0410\u0420\u0418",
+        "groups": []
+      }
+    ]
   }
 ]

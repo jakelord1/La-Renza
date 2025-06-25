@@ -24,6 +24,20 @@ const saveConfigItem = async (item) => {
 };
 
 const Configurator = () => {
+  const [navbar, setNavbar] = useState([
+    {
+      navbarName: 'ВСІ',
+      sideTabs: [
+        {
+          tabName: 'ВСІ',
+          icon: '',
+          groups: []
+        }
+      ]
+    }
+  ]);
+  const [navbarId, setNavbarId] = useState(null);
+
   const [carousel, setCarousel] = useState([{ path: '', link: '' }]);
   const [carouselId, setCarouselId] = useState(null);
   const [promoArray, setPromoArray] = useState([{ title: '', link: '', active: false }]);
@@ -47,8 +61,9 @@ const Configurator = () => {
       getConfigItem('Банери'),
       getConfigItem('PromoBanner'),
       getConfigItem('Категорії'),
-      getConfigItem('Категорії для табів')
-    ]).then(([banners, promoItem, cats, tabsCats]) => {
+      getConfigItem('Категорії для табів'),
+      getConfigItem('Розділи меню')
+    ]).then(([banners, promoItem, cats, tabsCats, navbarConfig]) => {
       if (banners) {
         setCarousel(Array.isArray(banners.value) ? banners.value.map(x => ({ path: x.path || '', link: x.link || '' })) : [{ path: '', link: '' }]);
         setCarouselId(banners.id);
@@ -67,6 +82,10 @@ const Configurator = () => {
       if (tabsCats) {
         setCategoryTabsIds(Array.isArray(tabsCats.value) ? tabsCats.value : []);
         setCategoryTabsIdsId(tabsCats.id);
+      }
+      if (navbarConfig && Array.isArray(navbarConfig.value)) {
+        setNavbar(navbarConfig.value);
+        setNavbarId(navbarConfig.id);
       }
       setLoading(false);
     }).catch(e => {
@@ -388,8 +407,205 @@ const Configurator = () => {
           </Button>
         </Card.Body>
       </Card>
+      <Card className="mb-4">
+        <Card.Header>Розділи меню (Navbar)</Card.Header>
+        <Card.Body>
+          <div className="mb-3 text-muted">
+            <b>Пояснення:</b> Для кожної секції можна додати кілька вкладок зліва (sideTabs), для кожної вкладки — групи та категорії.
+            <ul>
+              <li><b>Назва в Navbar</b> — як буде відображатися у верхньому меню</li>
+              <li><b>Вкладки зліва</b> — вкладки у випадаючому меню, для кожної можна задати іконку, групи та категорії</li>
+              <li><b>Групи у вкладці</b> — підзаголовки та категорії для кожної вкладки</li>
+            </ul>
+          </div>
+          <div>
+            {navbar.map((section, sIdx) => (
+              <div key={sIdx} className="mb-4 p-2 border rounded bg-light">
+                <Row className="align-items-center mb-2">
+                  <Col md={4}>
+                    <InputGroup className="mb-2">
+                      <InputGroup.Text>Назва в Navbar</InputGroup.Text>
+                      <Form.Control
+                        type="text"
+                        value={section.navbarName}
+                        onChange={e => {
+                          const updated = [...navbar];
+                          updated[sIdx].navbarName = e.target.value;
+                          setNavbar(updated);
+                        }}
+                        placeholder="Напр. ЖІНКА"
+                      />
+                    </InputGroup>
+                  </Col>
+                  <Col md={8}>
+                    <strong>Вкладки зліва (sideTabs)</strong>
+                    {section.sideTabs && section.sideTabs.map((tab, tIdx) => (
+                      <div key={tIdx} className="mb-3 p-2 border rounded bg-white">
+                        <Row>
+                          <Col md={5}>
+                            <Form.Group>
+                              <Form.Label>Назва вкладки (tabName)</Form.Label>
+                              <Form.Control
+                                type="text"
+                                value={tab.tabName}
+                                onChange={e => {
+                                  const updated = [...navbar];
+                                  updated[sIdx].sideTabs[tIdx].tabName = e.target.value;
+                                  setNavbar(updated);
+                                }}
+                                placeholder="Наприклад: Одяг"
+                              />
+                            </Form.Group>
+                          </Col>
+                          <Col md={5}>
+                            <Form.Group>
+                              <Form.Label>Іконка (клас Bootstrap або URL)</Form.Label>
+                              <Form.Control
+                                type="text"
+                                value={tab.icon}
+                                onChange={e => {
+                                  const updated = [...navbar];
+                                  updated[sIdx].sideTabs[tIdx].icon = e.target.value;
+                                  setNavbar(updated);
+                                }}
+                                placeholder="bi bi-bag або https://..."
+                              />
+                            </Form.Group>
+                          </Col>
+                          <Col md={2} className="text-end">
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => {
+                                const updated = [...navbar];
+                                updated[sIdx].sideTabs.splice(tIdx, 1);
+                                setNavbar(updated);
+                              }}
+                            >Видалити вкладку</Button>
+                          </Col>
+                        </Row>
+                        <div className="mt-2">
+                          <strong>Групи (підзаголовки)</strong>
+                          {tab.groups && tab.groups.map((group, gIdx) => (
+                            <div key={gIdx} className="mb-2 p-2 border rounded bg-light">
+                              <Form.Group>
+                                <Form.Label>Назва групи (підзаголовок)</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  value={group.groupName}
+                                  onChange={e => {
+                                    const updated = [...navbar];
+                                    updated[sIdx].sideTabs[tIdx].groups[gIdx].groupName = e.target.value;
+                                    setNavbar(updated);
+                                  }}
+                                  placeholder="Наприклад: Топ категорії"
+                                />
+                              </Form.Group>
+                              <Form.Group className="mt-2">
+                                <Form.Label>Категорії</Form.Label>
+                                <Form.Select
+  multiple
+  value={group.categories}
+  onChange={e => {
+    const options = Array.from(e.target.selectedOptions).map(opt => opt.value);
+    const updated = [...navbar];
+    updated[sIdx].sideTabs[tIdx].groups[gIdx].categories = options;
+    setNavbar(updated);
+  }}
+>
+  <optgroup label="Глобальні категорії">
+    {allCategories.filter(cat => cat.isGlobal).map(cat => (
+      <option key={cat.id || cat._id} value={cat.id || cat._id}>
+        {cat.name}
+      </option>
+    ))}
+  </optgroup>
+  <optgroup label="Підкатегорії">
+    {allCategories.filter(cat => !cat.isGlobal).map(cat => {
+      const parent = allCategories.find(p => p.id === cat.parentCategoryId);
+      return (
+        <option key={cat.id || cat._id} value={cat.id || cat._id}>
+          {cat.name}{parent ? ` — ${parent.name}` : ''}
+        </option>
+      );
+    })}
+  </optgroup>
+</Form.Select>
+                              </Form.Group>
+                              <div className="mt-2">
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  onClick={() => {
+                                    const updated = [...navbar];
+                                    updated[sIdx].sideTabs[tIdx].groups.splice(gIdx, 1);
+                                    setNavbar(updated);
+                                  }}
+                                >Видалити групу</Button>
+                              </div>
+                            </div>
+                          ))}
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => {
+                              const updated = [...navbar];
+                              updated[sIdx].sideTabs[tIdx].groups.push({ groupName: '', categories: [] });
+                              setNavbar(updated);
+                            }}
+                          >Додати групу</Button>
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        const updated = [...navbar];
+                        updated[sIdx].sideTabs = updated[sIdx].sideTabs || [];
+                        updated[sIdx].sideTabs.push({ tabName: '', icon: '', groups: [] });
+                        setNavbar(updated);
+                      }}
+                    >Додати вкладку</Button>
+                  </Col>
+                  <Col md={12} className="text-end mt-2">
+                    <Button
+                      variant="danger"
+                      onClick={() => {
+                        setNavbar(navbar.filter((_, i) => i !== sIdx));
+                      }}
+                      disabled={navbar.length <= 1}
+                    >Видалити секцію</Button>
+                  </Col>
+                </Row>
+              </div>
+            ))}
+            <Button
+              variant="secondary"
+              onClick={() => setNavbar([...navbar, { navbarName: '', sideTabs: [{ tabName: '', icon: '', groups: [] }] }])}
+              className="me-2"
+            >Додати секцію</Button>
+            <Button
+              variant="primary"
+              onClick={async () => {
+                setSuccess(null); setError(null);
+                const payload = {
+                  name: 'Розділи меню',
+                  type: 'navbar',
+                  value: navbar
+                };
+                if (navbarId) payload.id = navbarId;
+                const ok = await saveConfigItem(payload);
+                setSuccess(ok ? 'Розділи меню збережено' : null);
+                setError(ok ? null : 'Помилка збереження');
+              }}
+            >Зберегти розділи</Button>
+          </div>
+        </Card.Body>
+      </Card>
     </div>
   );
-};
+}
 
 export default Configurator;

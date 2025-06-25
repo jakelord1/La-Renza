@@ -2,33 +2,40 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
+  const getProductImage = (product) => {
+    if (!product) return '/images/no-image.jpg';
+    if (product.image && typeof product.image === 'string' && product.image.trim()) {
+      return product.image;
+    }
+    if (Array.isArray(product.images) && product.images.length > 0 && typeof product.images[0] === 'string' && product.images[0].trim()) {
+      return product.images[0];
+    }
+    return '/images/no-image.jpg';
+  };
+
   const [step, setStep] = React.useState('select'); // 'select' | 'added'
   const [selectedSize, setSelectedSize] = React.useState(null);
   const [isAdding, setIsAdding] = React.useState(false);
 
   const addToCart = async (modelId, sizeName, quantity) => {
-  try {
-    const response = await fetch('https://localhost:7071/api/Account/addToCartByModel', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ modelId, sizeName, quantity }),
-    });
+    try {
+      const response = await fetch('https://localhost:7071/api/Account/addToCartByModel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ modelId, sizeName, quantity }),
+      });
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to add to cart');
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to add to cart');
+      }
+    } catch (error) {
+      alert(error.message);
     }
-
-    alert('Товар додано в корзину');
-  
-  } catch (error) {
-    alert(error.message);
-  }
-};
-
+  };
 
   React.useEffect(() => {
     if (show) {
@@ -40,8 +47,8 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
 
   if (!product) return null;
   const sizes = product.sizes && Array.isArray(product.sizes)
-  ? product.sizes
-  : (typeof product.sizes === 'string' ? product.sizes.split(',').map(s => s.trim()) : ['ОДИН РОЗМІР']);
+    ? product.sizes
+    : (typeof product.sizes === 'string' ? product.sizes.split(',').map(s => s.trim()) : ['ОДИН РОЗМІР']);
 
   const images = product.images && product.images.length > 0
     ? product.images
@@ -145,55 +152,60 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
     marginTop: 24,
   };
 
-
   const handleSelectSize = async (size) => {
     if (step !== 'select' || isAdding) return; // Захист від повторного виклику
     setIsAdding(true);
     setSelectedSize(size);
-   console.log('Selected size:', size);
+    console.log('Selected size:', size);
 
-    // setStep('added');
-  const modelId = product.modelId || product.id; 
-  const sizeName = size;
-  const quantity = 1;
+    const modelId = product.modelId;
+    if (!modelId) {
+      console.warn('modelId is missing in product:', product);
+      alert('Внутрішня помилка: відсутній modelId');
+      setIsAdding(false);
+      return;
+    }
+    const sizeName = size;
+    const quantity = 1;
 
-  try {
-    await addToCart(modelId, sizeName, quantity);
-    let cart = [];
-    try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
-    cart.push({
-      ...product,
-      name: product.name || '',
-      image: product.image || (product.images && product.images[0]) || '',
-      color: product.color || '',
-      price: product.price || 0,
-      selectedSize: size
-    });
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new Event('cart-updated'));
-    setStep('added');
-  } catch (error) {
+    try {
+      await addToCart(modelId, sizeName, quantity);
+      let cart = [];
+      try { cart = JSON.parse(localStorage.getItem('cart')) || []; } catch (e) { cart = []; }
+      cart.push({
+        ...product,
+        name: product.name || '',
+        image: product.image || (product.images && product.images[0]) || '',
+        color: product.color || '',
+        price: product.price || 0,
+        selectedSize: size
+      });
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new Event('cart-updated'));
+      setStep('added');
+    } catch (error) {
       alert('Не вдалося додати товар в корзину');
-  }
+    }
   };
 
   return ReactDOM.createPortal(
     <div style={overlayStyle}>
       <div style={modalStyle}>
-        <button onClick={onClose} style={{position:'absolute',top:18,right:18,background:'none',border:'none',fontSize:28,cursor:'pointer',lineHeight:1, color:'#222'}} aria-label="Закрити">×</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'none', border: 'none', fontSize: 28, cursor: 'pointer', lineHeight: 1, color: '#222' }} aria-label="Закрити">×</button>
         {step === 'select' ? (
           <>
-            <div style={{fontWeight:600,fontSize:'1.3rem',marginBottom:24}}>Оберіть розмір</div>
+            <div style={{ fontWeight: 600, fontSize: '1.3rem', marginBottom: 24 }}>Оберіть розмір</div>
             <div style={rowStyle}>
               <div style={imagesBlockStyle}>
-                {images.map((img, i) => (
-                  <img key={i} src={img} alt={product.name} style={{width:images.length > 1 ? 90 : 120, height:images.length > 1 ? 90 : 120, objectFit:'cover', borderRadius:8, background:'#f6f6f6'}} />
+                <img src={getProductImage(product)} alt={product.name} style={{ width: images.length > 1 ? 90 : 120, height: images.length > 1 ? 90 : 120, objectFit: 'cover', borderRadius: 8, background: '#f6f6f6' }} />
+                {images.length > 1 && images.slice(1).map((img, i) => (
+                  <img key={i} src={img} alt={product.name} style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8, background: '#f6f6f6' }} />
                 ))}
               </div>
               <div style={infoBlockStyle}>
-                <div style={{fontWeight:500,fontSize:'1.1rem',marginBottom:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{product.name}</div>
-                <div style={{color:'#666',fontSize:'1rem',marginBottom:2}}>{product.price} UAH</div>
-                <button style={{background:'none',border:'none',color:'var(--purple)',fontWeight:600,fontSize:'1rem',cursor:'pointer',padding:0,textAlign:'left',margin:'0 0 0 0'}}>
+                <div style={{ fontWeight: 500, fontSize: '1.1rem', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.name}</div>
+                <div style={{ color: '#666', fontSize: '1rem', marginBottom: 2 }}>{product.price} UAH</div>
+                <button style={{ background: 'none', border: 'none', color: 'var(--purple)', fontWeight: 600, fontSize: '1rem', cursor: 'pointer', padding: 0, textAlign: 'left', margin: '0 0 0 0' }}>
                   ОСОБЛИВОСТІ &gt;
                 </button>
               </div>
@@ -217,20 +229,20 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
           </>
         ) : (
           <>
-            <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:24}}>
-              <div style={{width:32,height:32,background:'#f6f6f6',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4caf50" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2l4-4"/></svg>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+              <div style={{ width: 32, height: 32, background: '#f6f6f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4caf50" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2l4-4" /></svg>
               </div>
-              <div style={{fontWeight:600,fontSize:'1.2rem'}}>Продукт додано в кошик</div>
+              <div style={{ fontWeight: 600, fontSize: '1.2rem' }}>Продукт додано в кошик</div>
             </div>
-            <div style={{display:'flex',alignItems:'flex-start',gap:18,marginBottom:24}}>
-              <div style={{width:100,height:100,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <img src={product.image} alt={product.name} style={{maxWidth:'100%',maxHeight:'100%',borderRadius:8,objectFit:'cover',background:'#f6f6f6'}} />
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, marginBottom: 24 }}>
+              <div style={{ width: 100, height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={getProductImage(product)} alt={product.name} style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 8, objectFit: 'cover', background: '#f6f6f6' }} />
               </div>
-              <div style={{textAlign:'left',fontSize:'1.05rem'}}>
-                <div style={{fontWeight:500,marginBottom:4}}>{product.name}</div>
-                {product.color && <div style={{color:'#666',fontSize:'1rem'}}>колір: {product.color}</div>}
-                {selectedSize && <div style={{color:'#666',fontSize:'1rem'}}>розмір: {selectedSize}</div>}
+              <div style={{ textAlign: 'left', fontSize: '1.05rem' }}>
+                <div style={{ fontWeight: 500, marginBottom: 4 }}>{product.name}</div>
+                {product.color && <div style={{ color: '#666', fontSize: '1rem' }}>колір: {product.color}</div>}
+                {selectedSize && <div style={{ color: '#666', fontSize: '1rem' }}>розмір: {selectedSize}</div>}
               </div>
             </div>
             <button onClick={onCheckout} style={{width:'100%',background:'var(--purple)',color:'#fff',fontWeight:600,fontSize:'1.1rem',border:'none',borderRadius:4,padding:'12px 0',marginBottom:16,cursor:'pointer'}}>ПОПЕРЕДНІЙ ПЕРЕГЛЯД КОШИКА</button>
