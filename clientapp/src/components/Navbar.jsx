@@ -6,7 +6,6 @@ import AuthenticatedPopover from './AuthenticatedPopover';
 import CartCount from './CartCount';
 import FavoritesCount from './FavoritesCount';
 import NavbarDropdownSection from './NavbarDropdownSection';
-import data from '../data/dropdownSectionsData.json';
 
 
 
@@ -42,88 +41,137 @@ const recommendedProducts = [
   }
 ];
 
-const categories = [
-  { label: 'ВСІ', query: 'all' },
-  { label: 'ЖІНКА', query: 'woman' },
-  { label: 'ДІМ', query: 'home' },
-  { label: 'ДИТИНА', query: 'child' },
-  { label: 'ЧОЛОВІК', query: 'man' },
-  { label: 'АКСЕСУАРИ', query: 'accessories' },
-];
+// categories теперь будут динамически формуватися з menuSections
 
-const NavbarDropdown = ({ section, onMouseLeave }) => {
-  const category = data[section] || data['all'];
-  const subcategories = category.subcategories || [];
-  const [activeSub, setActiveSub] = useState(0);
-
-  useEffect(() => {
-    setActiveSub(0);
-  }, [section]);
-
-  return (
-    <div
-      className="navbar-dropdown-ua"
-      onMouseLeave={onMouseLeave}
-      style={{
-        position: 'absolute',
-        right: 0,
-        top: '100%',
-        background: '#fff',
-        zIndex: 1001,
-        boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
-        padding: 0,
-        borderBottom: '1px solid #eee',
-        minHeight: 440,
-        height: 480,
-        width: '100vw',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        paddingTop: 1,
-      }}
-    >
-      <div style={{
-        maxWidth: 1080,
-        margin: '0 auto',
-        display: 'flex',
-        flexDirection: 'row',
-        width: '100%',
-        background: '#fff',
-        fontSize: 13,
-        minHeight: 440,
-        height: 480,
-      }}>
-        <div style={{ width: 240, background: '#fafbfc', borderRight: '1px solid #eee', padding: '22px 0', height: '100%' }}>
-          {subcategories.map((sub, idx) => (
-            <div
-              key={sub.label}
-              onMouseEnter={() => setActiveSub(idx)}
-              style={{
-                display: 'flex', alignItems: 'center', padding: '8px 18px', cursor: 'pointer', fontWeight: 500, fontSize: 14,
-                background: idx === activeSub ? '#f5f5f5' : 'transparent',
-                transition: 'background .18s',
-              }}
-            >
-              <span style={{ marginRight: 12 }}>
-                <i className={sub.icon}></i>
-              </span>
-              <span>{sub.label}</span>
-              <span style={{ marginLeft: 'auto', fontSize: 18, color: '#bbb' }}><i className="bi bi-chevron-right" /></span>
-            </div>
-          ))}
-        </div>
-        <NavbarDropdownSection section={section} activeSub={activeSub} />
-      </div>
-    </div>
-  );
-};
 
 const Navbar = () => {
+  const location = useLocation();
+  const [menuSections, setMenuSections] = useState([]);
+  const [allCategories, setAllCategories] = useState([]); // для назв категорій у вкладках
+
+  useEffect(() => {
+    // Завантажити всі категорії (для назв у підгрупах)
+    fetch('/api/Categories')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setAllCategories(Array.isArray(data) ? data : []));
+
+    // Завантажити розділи меню
+    fetch('/api/Configurator')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        const menuConfig = data.find(item => item.name === 'Розділи меню');
+        setMenuSections(Array.isArray(menuConfig?.value) ? menuConfig.value : []);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/accountProfile`, { credentials: 'include' })
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Unauthorized');
+      })
+      .then(data => {
+        if (data && data.email) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      })
+      .catch(() => setIsAuthenticated(false));
+  }, [location]);
+
+  useEffect(() => {
+    const handleClickOutside = e => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSearch(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Динамічний масив для верхнього меню
+  const categories = menuSections.map((section, idx) => ({
+    label: section.navbarName || `Вкладка ${idx+1}`,
+    query: section.navbarName ? section.navbarName.toLowerCase() : `tab${idx+1}`,
+    sideTabs: Array.isArray(section.sideTabs) && section.sideTabs.length > 0 ? section.sideTabs : [{ tabName: section.tabName || '', icon: section.icon || '', groups: section.groups || [] }]
+  }));
+
+  const NavbarDropdown = ({ section, onMouseLeave }) => {
+    // section тут — це query (унікальний ключ)
+    // Знаходимо відповідний розділ у categories
+    const category = categories.find(cat => cat.query === section) || categories[0];
+    const sideTabs = Array.isArray(category.sideTabs) && category.sideTabs.length > 0 ? category.sideTabs : [{ tabName: '', icon: '', groups: [] }];
+    const [activeSub, setActiveSub] = useState(0);
+
+    useEffect(() => {
+      setActiveSub(0);
+    }, [section]);
+
+    return (
+      <div
+        className="navbar-dropdown-ua"
+        onMouseLeave={onMouseLeave}
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: '100%',
+          background: '#fff',
+          zIndex: 1001,
+          boxShadow: '0 4px 24px rgba(0,0,0,0.07)',
+          padding: 0,
+          borderBottom: '1px solid #eee',
+          minHeight: 440,
+          height: 480,
+          width: '100vw',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          paddingTop: 1,
+        }}
+      >
+        <div style={{
+          maxWidth: 1080,
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'row',
+          width: '100%',
+          background: '#fff',
+          fontSize: 13,
+          minHeight: 440,
+          height: 480,
+        }}>
+          <div style={{ width: 240, background: '#fafbfc', borderRight: '1px solid #eee', padding: '22px 0', height: '100%' }}>
+            {sideTabs.map((tab, idx) => (
+              <div
+                key={tab.tabName || idx}
+                onMouseEnter={() => setActiveSub(idx)}
+                style={{
+                  display: 'flex', alignItems: 'center', padding: '8px 18px', cursor: 'pointer', fontWeight: 500, fontSize: 14,
+                  background: idx === activeSub ? '#f5f5f5' : 'transparent',
+                  transition: 'background .18s',
+                }}
+              >
+                <span style={{ marginRight: 12 }}>
+                  {tab.icon && tab.icon.startsWith('bi') ? <i className={tab.icon} /> : tab.icon ? <img src={tab.icon} alt="icon" style={{ width: 18, height: 18, objectFit: 'contain' }} /> : null}
+                </span>
+                <span>{tab.tabName || `Вкладка ${idx+1}`}</span>
+                <span style={{ marginLeft: 'auto', fontSize: 18, color: '#bbb' }}><i className="bi bi-chevron-right" /></span>
+              </div>
+            ))}
+          </div>
+          <NavbarDropdownSection section={section} activeSub={activeSub} menuSections={menuSections} allCategories={allCategories} />
+        </div>
+      </div>
+    );
+  };
+
   const [showSearch, setShowSearch] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const searchRef = useRef(null);
   const popoverTimeout = useRef();
-  const location = useLocation();
 
   const handleToggleSearch = e => {
     e.preventDefault();

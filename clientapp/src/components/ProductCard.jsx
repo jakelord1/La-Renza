@@ -162,12 +162,11 @@ React.useEffect(() => { setLiked(!!propIsFavorite); }, [propIsFavorite]);
       </div>
       <button className="btn p-0 position-absolute bottom-0 end-0 m-2 shadow-sm" style={{background:'rgba(255,255,255,0.97)', borderRadius:'50%', width:36, height:36, display:'flex',alignItems:'center',justifyContent:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.08)'}} onClick={e => { e.stopPropagation(); onAddToCart({
         ...colorProduct,
+        modelId: model.id,
         name: model.name,
         price: colorProduct.price,
         color: (colorProduct.color && colorProduct.color.name) || (model.colors && model.colors.find(c => c.id === activeColorId)?.name) || '',
-        image: (colorProduct.color && colorProduct.color.image && colorProduct.color.image.path)
-          ? `/images/${colorProduct.color.image.path.replace(/^\/public/, '').replace(/^\//, '')}`
-          : (model.photos && model.photos[0]?.path ? `/images/${model.photos[0].path}` : ''),
+        image: (model.photos && model.photos[0]?.path ? `/images/${model.photos[0].path}` : ''),
         sizes: Array.from(new Set(products.map(p => p.size?.name).filter(Boolean)))
       }); }}>
         <svg width="22" height="22" fill={inCart ? 'var(--purple)' : 'none'} stroke={inCart ? 'var(--purple)' : '#222'} strokeWidth="2" viewBox="0 0 24 24">
