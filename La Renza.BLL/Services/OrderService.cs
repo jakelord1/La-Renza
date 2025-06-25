@@ -53,8 +53,8 @@ namespace La_Renza.BLL.Services
                 CompletedAt = orderDto.CompletedAt,
                 PaymentMethod = orderDto.PaymentMethod,
                 DeliveryMethodId = orderDto.DeliveryMethodId,
-                Phonenumber = orderDto.Phonenumber
-
+                Phonenumber = orderDto.Phonenumber,
+                OrderItems = _mapper.Map<ICollection<OrderItem>>(orderDto.orderItems)
             };
             Database.Orders.Update(order);
             await Database.Save();
@@ -83,7 +83,8 @@ namespace La_Renza.BLL.Services
                 CompletedAt = order.CompletedAt,
                 PaymentMethod = order.PaymentMethod,
                 DeliveryMethodId = order.DeliveryMethodId,
-                Phonenumber = order.Phonenumber
+                Phonenumber = order.Phonenumber,
+                orderItems = _mapper.Map<List<OrderItemDTO>>(order.OrderItems)
             };
         }
 
