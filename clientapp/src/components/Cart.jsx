@@ -4,34 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountShoppingCarts`;
 const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
 
-const getCart = async () => {
-    try {
-        setLoading(true);
-        const authRes = await fetch('/api/Account/accountProfile', { credentials: 'include' });
-        setIsAuthenticated(authRes.ok);
-        if (!authRes.ok) {
-            const val = JSON.parse(localStorage.getItem('cart'));
-            return Array.isArray(val) ? val : [];
-            setLoading(false);
-            return;
-        }
-        else {
-            const res = await fetch(`${API_URL}`, { credentials: 'include' });
-            if (res.ok) {
-                const val = await res.json();
-                setLoading(false);
-                return;
-            }
-        }
-  } catch {
-    return [];
-  }
-};
-
-
-const fetchShopCart = () => {
-  return getCart();
-};
 
 const getFavorites = () => {
   try {
@@ -46,11 +18,88 @@ const setFavorites = (favorites) => {
 };
 
 const Cart = () => {
+  // --- Єдина корзина ---
   const [cartItems, setCartItems] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+  const [cartLoading, setCartLoading] = useState(true);
+  const [cartError, setCartError] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const location = useLocation();
+  useEffect(() => {
+    setCartLoading(true);
+    setCartError(null);
+    fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountProfile`, { credentials: 'include' })
+      .then(res => {
+        if (res.status === 401 || !res.ok) {
+          setIsLoggedIn(false);
+          const val = JSON.parse(localStorage.getItem('cart'));
+          setCartItems(Array.isArray(val) ? val : []);
+          setCartLoading(false);
+          return;
+        }
+        setIsLoggedIn(true);
+
+        fetch('/api/Account/accountShoppingCarts', { credentials: 'include' })
+          .then(cartsRes => {
+            if (!cartsRes.ok) throw new Error('Не вдалося отримати серверну корзину');
+            return cartsRes.json();
+          })
+          .then(async (carts) => {
+            if (!Array.isArray(carts) || carts.length === 0) {
+              setCartItems([]);
+              setCartLoading(false);
+              return;
+            }
+
+            const products = await Promise.all(
+              carts.map(async (item) => {
+                try {
+                  const prodRes = await fetch(`/api/Products/${item.productId}`);
+                  if (!prodRes.ok) return null;
+                  const prod = await prodRes.json();
+                  return {
+                    id: item.id,
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    name: prod.color?.model?.name || '',
+                    color: prod.color?.name || '',
+                    image: prod.color?.model?.photos?.[0]?.path ? `/images/${prod.color.model.photos[0].path}` : '',
+                    price: prod.color?.model?.price || 0,
+                    size: prod.size?.name || '',
+                  };
+                } catch {
+                  return null;
+                }
+              })
+            );
+            setCartItems(products.filter(Boolean));
+            setCartLoading(false);
+          })
+          .catch(e => {
+            setCartError(e.message || 'Помилка при завантаженні серверної корзини');
+            setCartLoading(false);
+          });
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+        const val = JSON.parse(localStorage.getItem('cart'));
+        setCartItems(Array.isArray(val) ? val : []);
+        setCartLoading(false);
+      });
+
+    const update = () => {
+      if (!isLoggedIn) {
+        const val = JSON.parse(localStorage.getItem('cart'));
+        setCartItems(Array.isArray(val) ? val : []);
+      }
+    };
+    window.addEventListener('cart-updated', update);
+    return () => window.removeEventListener('cart-updated', update);
+  }, [location, isLoggedIn]);
   const [isCheckout, setIsCheckout] = useState(true);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrderName, setPlacedOrderName] = useState('');
+  const [placedOrderItems, setPlacedOrderItems] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -63,8 +112,7 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoDiscount, setPromoDiscount] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-const [addresses, setAddresses] = useState([]);
+  const [addresses, setAddresses] = useState([]);
 const [addressLoading, setAddressLoading] = useState(false);
 const [addressError, setAddressError] = useState(null);
 const [selectedAddress, setSelectedAddress] = useState('');
@@ -72,18 +120,6 @@ const [selectedAddress, setSelectedAddress] = useState('');
   
   const navigate = useNavigate();
 
-  useEffect(() => {
-    let fetched = fetchShopCart();
-    if (!Array.isArray(fetched)) fetched = [];
-    setCartItems(fetched);
-    setFavoritesState(getFavorites());
-    const update = () => setCartItems(getCart());
-    window.addEventListener('cart-updated', update);
-    return () => window.removeEventListener('cart-updated', update);
-  }, []);
-
-  // Визначаємо залогіненого користувача як у Navbar.jsx
-  const location = useLocation();
   useEffect(() => {
     fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountProfile`, { credentials: 'include' })
       .then(res => {
@@ -98,7 +134,6 @@ const [selectedAddress, setSelectedAddress] = useState('');
       .catch(() => setIsLoggedIn(false));
   }, [location]);
 
-  // Якщо залогінений — фетчимо адреси
   useEffect(() => {
     if (!isLoggedIn) {
       setAddresses([]);
@@ -141,33 +176,58 @@ const [selectedAddress, setSelectedAddress] = useState('');
   ];
 
   const changeQuantity = (id, value) => {
-    if (value === 0) {
-      removeItem(id);
-    } else {
-      let newQuantity = value;
-      if (typeof value === 'string') {
-        newQuantity = parseInt(value, 10);
-        if (isNaN(newQuantity)) newQuantity = 1;
-      }
-      newQuantity = Math.max(1, Math.min(1000, newQuantity));
-      const updated = getCart().map(item => {
-        if (item.id === id) {
-          return { ...item, quantity: newQuantity };
+    if (!isLoggedIn) {
+      if (value === 0) {
+        removeItem(id);
+      } else {
+        let newQuantity = value;
+        if (typeof value === 'string') {
+          newQuantity = parseInt(value, 10);
+          if (isNaN(newQuantity)) newQuantity = 1;
         }
-        return item;
-      });
-      localStorage.setItem('cart', JSON.stringify(updated));
-      window.dispatchEvent(new Event('cart-updated'));
+        newQuantity = Math.max(1, Math.min(1000, newQuantity));
+        const updated = cartItems.map(item => {
+          if (item.id === id) {
+            return { ...item, quantity: newQuantity };
+          }
+          return item;
+        });
+        localStorage.setItem('cart', JSON.stringify(updated));
+        setCartItems(updated);
+        window.dispatchEvent(new Event('cart-updated'));
+      }
+    } else {
+      // TODO: API PATCH/PUT для зміни кількості товару у серверній корзині
+      // Після успіху рефетчити корзину
     }
   };
 
-  const addToFavorites = (product) => {
+  const addToFavorites = async (product) => {
     let favs = getFavorites();
     if (!favs.find(item => item.id === product.id)) {
       favs.push(product);
       setFavorites(favs);
       setFavoritesState(favs);
-      removeItem(product.id);
+      if (!isLoggedIn) {
+        removeItem(product.id);
+      } else {
+        // Додаємо в обране через API як у ProductCard.jsx
+        try {
+          const res = await fetch(`/api/Account/accountModels/${product.modelId || product.productId || product.id}`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (res.ok) {
+            // Успіх — видаляємо з корзини
+            removeItem(product.id, product.productId, product.modelId);
+          } else {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || 'Помилка при додаванні в обране');
+          }
+        } catch (e) {
+          alert('Помилка при додаванні в обране');
+        }
+      }
     }
   };
 
@@ -178,10 +238,31 @@ const [selectedAddress, setSelectedAddress] = useState('');
   const deliveryCost = selectedDelivery ? Number(deliveryOptions.find(opt => opt.id === selectedDelivery)?.deliveryPrice ?? 0) : 0;
   
 
-  const removeItem = (id) => {
-    const updated = getCart().filter(item => item.id !== id);
-    localStorage.setItem('cart', JSON.stringify(updated));
-    window.dispatchEvent(new Event('cart-updated'));
+  const removeItem = async (id, productId, modelId) => {
+    if (!isLoggedIn) {
+      const updated = cartItems.filter(item => item.id !== id);
+      localStorage.setItem('cart', JSON.stringify(updated));
+      setCartItems(updated);
+      window.dispatchEvent(new Event('cart-updated'));
+    } else {
+      try {
+        // Видалення з серверної корзини
+        const res = await fetch(`/api/Account/removeFromCartByProduct/${productId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        if (res.ok) {
+          // Оновити корзину після видалення
+          // refetchCart();
+          setCartItems(items => items.filter(item => item.productId !== productId));
+        } else {
+          const err = await res.json().catch(() => ({}));
+          alert(err.message || 'Помилка при видаленні з корзини');
+        }
+      } catch (e) {
+        alert('Помилка при видаленні з корзини');
+      }
+    }
   };
 
   const handleCheckout = () => setIsCheckout(true);
@@ -254,56 +335,34 @@ const [selectedAddress, setSelectedAddress] = useState('');
         };
       });
 
-      const User = {
-        Id: profile.id,
-        Email: profile.email,
-        PhoneNumber: profile.phoneNumber,
-        FullName: profile.fullName,
-        SurName: profile.surName,
-        BirthDate: profile.birthDate,
-        Gender: profile.gender,
-        Password: profile.password,
-        NewsOn: profile.newsOn,
-        LaRenzaPoints: profile.laRenzaPoints
-      };
-      const Delivery = addressObj ? {
-        Id: addressObj.id,
-        UserId: addressObj.userId,
-        SecondName: addressObj.secondName,
-        FullName: addressObj.fullName,
-        Street: addressObj.street,
-        City: addressObj.city,
-        HouseNum: addressObj.houseNum,
-        PostIndex: addressObj.postIndex,
-        AdditionalInfo: addressObj.additionalInfo,
-        PhoneNumber: addressObj.phoneNumber
-      } : null;
-      const Cupons = appliedCoupon ? {
-        Id: appliedCoupon.id,
-        Name: appliedCoupon.name,
-        Description: appliedCoupon.description,
-        Price: appliedCoupon.price,
-        Users: appliedCoupon.users || []
-      } : null;
-
-      // 9. Order-об'єкт з PascalCase-ключами
+      //--- мінімальний order ---
       const order = {
-        Id: 0,
-        UserId: profile.id,
-        Status: 'Ready',
-        DeliveryId: addressObj ? Number(addressObj.id) : null,
-        CuponsId: appliedCoupon ? appliedCoupon.id : null,
-        OrderName: profile.fullName ? `Order_${profile.id}` : (profile.email || ''),
-        CreatedAt: dateStr,
-        CompletedAt: dateStr,
-        PaymentMethod: paymentMethodInt,
-        DeliveryMethodId: Number(selectedDelivery),
-        Phonenumber: profile.phoneNumber || '',
-        OrderItems: orderItems,
-        User,
-        Delivery,
-        Cupons,
-        Dm: null
+        id: 0,
+        userId: profile.id || 0,
+        status: 'New',
+        deliveryId: addressObj ? Number(addressObj.id) : 0,
+        cuponsId: appliedCoupon ? appliedCoupon.id : undefined,
+        orderName: profile.fullName ? `Order_${profile.id}` : (profile.email || ''),
+        createdAt: now,
+        completedAt: now,
+        paymentMethod: paymentMethodInt,
+        deliveryMethodId: Number(selectedDelivery) || 0,
+        phonenumber: formData.phone || profile.phoneNumber || '',
+        orderItems: orderItems.map(item => ({
+          id: 0,
+          orderId: 0,
+          productId: item.ProductId || item.productId || 0,
+          quantity: item.Quantity || item.quantity || 0,
+          price: item.Price || item.price || 0
+        })),
+        user: {
+          id: profile.id,
+          email: profile.email,
+          phoneNumber: profile.phoneNumber,
+          fullName: profile.fullName,
+          surName: profile.surName,
+          password: profile.password
+        }
       };
 
       const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/addOrder`, {
@@ -321,7 +380,20 @@ const [selectedAddress, setSelectedAddress] = useState('');
       setCartItems([]);
       setIsCheckout(false);
       setOrderPlaced(true);
-      alert('Замовлення успішно оформлено!');
+      // Після оформлення — отримати orderName для останнього замовлення
+      try {
+        const ordersRes = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountOrders`, { credentials: 'include' });
+        if (ordersRes.ok) {
+          const orders = await ordersRes.json();
+          if (Array.isArray(orders) && orders.length > 0) {
+            // Беремо останнє замовлення (можливо, сортувати по даті)
+            const lastOrder = orders[orders.length - 1];
+            setPlacedOrderName(lastOrder.orderName);
+            setPlacedOrderItems(lastOrder.orderItems || []);
+          }
+        }
+      } catch {}
+
     } catch (error) {
       alert(error.message || 'Помилка оформлення замовлення');
     }
@@ -520,6 +592,9 @@ const [selectedAddress, setSelectedAddress] = useState('');
     <section className="cart-page py-5">
       <style>{customStyles}</style>
       <div className="container">
+        {cartError ? (
+          <div className="alert alert-danger">{cartError}</div>
+        ) : null}
         <h2 className="text-center mb-4 text-purple fw-bold">Корзина</h2>
         {orderPlaced && (
           <div className="card bg-white rounded-4 p-4 shadow-sm text-center mx-auto" style={{ maxWidth: '600px' }}>
@@ -527,10 +602,24 @@ const [selectedAddress, setSelectedAddress] = useState('');
               <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '4rem' }}></i>
             </div>
             <h3 className="text-success mb-3">Дякуємо за ваше замовлення!</h3>
-            <p className="mb-3">Ваше замовлення успішно оформлено. Ми надіслали підтвердження на вашу електронну пошту.</p>
             <div className="bg-light rounded-3 p-3 mb-3">
-              <p className="mb-2">Номер замовлення: <strong>#{Math.floor(Math.random() * 1000000)}</strong></p>
-              <p className="mb-0">Очікувана дата доставки: <strong>{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</strong></p>
+              <p className="mb-2">Назва замовлення: <strong>{placedOrderName || '—'}</strong></p>
+              <div>
+                <span className="fw-bold">Товари у замовленні:</span>
+                <ul className="list-unstyled mt-2 mb-0">
+                  {placedOrderItems.length > 0 ? (
+                    placedOrderItems.map((item, idx) => (
+                      <li key={idx} className="mb-1">
+                        <span>{item.productName || item.name || 'Товар'} — </span>
+                        <span>Кількість: {item.quantity || item.Quantity}</span>
+                        <span className="ms-2">Ціна: {item.price || item.Price} UAH</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li>—</li>
+                  )}
+                </ul>
+              </div>
             </div>
             <div className="d-flex justify-content-center gap-3">
               <button className="btn btn-outline-primary" onClick={() => navigate('/')}>Повернутися до магазину</button>
@@ -562,14 +651,16 @@ const [selectedAddress, setSelectedAddress] = useState('');
                             />
                           </div>
                         </div>
-                        <button className="btn btn-outline-danger btn-sm me-2" onClick={() => removeItem(product.id)}>Видалити</button>
-                        <button
-                          className={`btn btn-sm ${isFavorite(product.id) ? 'btn-fav-filled' : 'btn-fav-outline'}`}
-                          onClick={() => addToFavorites(product)}
-                          disabled={isFavorite(product.id)}
-                        >
-                          {isFavorite(product.id) ? 'В обраному' : 'В обране'}
-                        </button>
+                        <button className="btn btn-outline-danger btn-sm me-2" onClick={() => removeItem(product.id, product.productId, product.modelId)}>Видалити</button>
+                        {isLoggedIn && (
+                          <button
+                            className={`btn btn-sm ${isFavorite(product.id) ? 'btn-fav-filled' : 'btn-fav-outline'}`}
+                            onClick={() => addToFavorites(product)}
+                            disabled={isFavorite(product.id)}
+                          >
+                            {isFavorite(product.id) ? 'В обраному' : 'В обране'}
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -763,7 +854,7 @@ const [selectedAddress, setSelectedAddress] = useState('');
                         type="submit" 
                         className="btn text-white px-4 py-2" 
                         style={{background: 'var(--purple)'}} 
-                        disabled={!selectedDelivery || !selectedPayment}
+                        disabled={!selectedDelivery || !selectedPayment || !isLoggedIn}
                       >
                         Підтвердити замовлення
                       </button>

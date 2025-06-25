@@ -82,16 +82,16 @@ button:focus-visible {
 }
 
 .btn-purple {
-  background: #6f42c1;
-  color: #fff;
-  border: 1px solid #6f42c1;
+  background-color: var(--purple, #6f42c1) !important;
+  color: #fff !important;
+  border: 1px solid var(--purple, #6f42c1);
   transition: background 0.3s, color 0.3s, border 0.3s;
   border-radius: 8px;
 }
 .btn-purple:hover, .btn-purple:focus {
-  background: #fff;
-  color: #6f42c1;
-  border: 1px solid #6f42c1;
+  background: var(--purple-dark, #59359c);
+  color: #fff !important;
+  border: 1px solid var(--purple-dark, #59359c);
 }
 
 /* Кастомный чекбокс для footer-privacy */

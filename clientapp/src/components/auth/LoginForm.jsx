@@ -25,6 +25,9 @@ const LoginForm = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    if (alert.show && alert.type === 'danger') {
+      setAlert({ show: false, type: '', message: '' });
+    }
   };
 
     const validateForm = () => {
@@ -82,11 +85,7 @@ const LoginForm = () => {
 
     return (
         <>
-            {alert.show && (
-                <Alert variant={alert.type} onClose={() => setAlert({ ...alert, show: false })} dismissible>
-                    {alert.message}
-                </Alert>
-            )}
+            
     <section className="auth-page bg-light py-5">
       <div className="container">
         <div className="row justify-content-center">
@@ -133,9 +132,14 @@ const LoginForm = () => {
                     </label>
                   </div>
                 </div>
+                {alert.show && alert.type === 'danger' && (
+                  <div className="text-danger text-center mb-3" style={{fontWeight:500}}>
+                    Invalid login or password.
+                  </div>
+                )}
                 
-                <button type="submit" className="btn btn-purple w-100 mb-3">
-                  Войти
+                <button type="submit" className="btn btn-purple w-100 mb-3 text-white">
+                  Увійти
                 </button>
                 
                 <div className="text-center mb-3">

@@ -58,6 +58,7 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.User))
                 .ReverseMap();
             CreateMap<Model, ModelBase>()
+                .ForMember(dest => dest.Photos, opt => opt.MapFrom(src => src.Image))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
                 .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.Category.SizeOptions.Select(s => s.Name)))
 

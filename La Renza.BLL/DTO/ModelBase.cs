@@ -18,6 +18,7 @@ namespace La_Renza.BLL.DTO
         public decimal? Rate { get; set; }
         public string? Bage { get; set; }
         public int CategoryId { get; set; }
+        public ICollection<ImageDTO> Photos { get; set; }
         public string Category { get; set; }
         public List<string> Sizes { get; set; }
     }

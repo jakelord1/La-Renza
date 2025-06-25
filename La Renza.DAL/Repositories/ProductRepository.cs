@@ -39,6 +39,9 @@ namespace La_Renza.DAL.Repositories
                  .ThenInclude(c => c.Image)
              .Include(p => p.Color)
                 .ThenInclude(c => c.Model)
+             .ThenInclude(c => c.Image)
+               .Include(p => p.Color)
+                .ThenInclude(c => c.Model)
             .ThenInclude(m => m.Category)
             .Include(p => p.Size)
             .Include(p => p.Comments)
@@ -205,6 +208,7 @@ namespace La_Renza.DAL.Repositories
             return await db.Product
                 .Include(p => p.Color)
                 .ThenInclude(c => c.Model)
+                .ThenInclude(c => c.Image)
                 .Include(p => p.Size)
                 .FirstOrDefaultAsync(p => p.ColorId == colorId && p.SizeId == sizeId);
         }
