@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
 
-const getFavorites = () => {
-  try {
-    return JSON.parse(localStorage.getItem('favorites')) || [];
-  } catch {
-    return [];
-  }
-};
+const API_URL = import.meta.env.VITE_BACKEND_API_LINK;
 
 const FavoritesCount = () => {
-  const [count, setCount] = useState(getFavorites().length);
+  const [count, setCount] = useState(0);
+
+  const fetchCount = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/Account/accountModels`, { credentials: 'include' });
+      if (!res.ok) {
+        setCount(0);
+        return;
+      }
+      const data = await res.json();
+      setCount(Array.isArray(data) ? data.length : 0);
+    } catch {
+      setCount(0);
+    }
+  };
 
   useEffect(() => {
-    const update = () => setCount(getFavorites().length);
-    window.addEventListener('favorites-updated', update);
-    return () => window.removeEventListener('favorites-updated', update);
+    fetchCount();
+    window.addEventListener('favorites-updated', fetchCount);
+    return () => window.removeEventListener('favorites-updated', fetchCount);
   }, []);
 
   if (count === 0) return null;

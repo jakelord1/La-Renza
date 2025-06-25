@@ -174,72 +174,132 @@ const [selectedAddress, setSelectedAddress] = useState('');
     if (!selectedDelivery || !selectedPayment || !selectedAddress) return;
 
     try {
-      // 1. Отримати профіль користувача
       const profileRes = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountProfile`, { credentials: 'include' });
       if (!profileRes.ok) throw new Error('Не вдалося отримати профіль користувача');
       const profile = await profileRes.json();
 
-      // 2. Знайти адресу
       const addressObj = addresses.find(a => a.id === selectedAddress);
-      if (!addressObj) throw new Error('Адресу не знайдено');
 
-      // 3. Зібрати orderItems
-      const orderItems = cartItems.map(item => ({
-        productId: item.id,
-        quantity: item.quantity,
-        price: Number(item.price) || 0
-      }));
+      let appliedCoupon = null;
+      if (promoApplied && promoCode) {
+        if (window.coupons && Array.isArray(window.coupons)) {
+          appliedCoupon = window.coupons.find(c => c.code === promoCode) || null;
+        }
+      }
 
-      // 4. Зібрати orderData
-      // Формуємо дату у форматі YYYY-MM-DDTHH:mm:ss
+      const paymentMap = { card: 1, gpay: 2, apay: 3, cash: 0 };
+      const paymentMethodInt = paymentMap[selectedPayment] ?? 0;
+
       const now = new Date();
-      const pad = n => n.toString().padStart(2, '0');
-      const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const dateStr = now.toISOString().slice(0, 19);
 
-      // TODO: отримати об'єкт купона якщо застосовано
-      const appliedCoupon = promoApplied && window.appliedCouponObj ? window.appliedCouponObj : null;
+      const productPromises = cartItems.map(item =>
+        fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Products/${item.id}`)
+          .then(res => {
+            if (!res.ok) throw new Error('Не вдалося отримати продукт з id ' + item.id);
+            return res.json();
+          })
+      );
+      const fullProducts = await Promise.all(productPromises);
 
-      const orderData = {
+      const orderItems = cartItems.map((item, idx) => {
+        const fullProduct = fullProducts[idx];
+        let size = null;
+        if (fullProduct.size) {
+          size = { ...fullProduct.size };
+        } else if (item.size && typeof item.size === 'object') {
+          size = {
+            Id: item.size.id ?? null,
+            CategoryId: item.size.categoryId ?? null,
+            Name: item.size.name ?? '',
+          };
+        }
+        let color = null;
+        if (fullProduct.color) {
+          color = { ...fullProduct.color };
+        } else if (item.color && typeof item.color === 'object') {
+          color = { ...item.color };
+        }
+        return {
+          Id: 0,
+          OrderId: null,
+          ProductId: item.id,
+          Quantity: item.quantity,
+          Price: Number(item.price) || 0,
+          Product: {
+            Id: fullProduct.id ?? item.id ?? null,
+            ColorId: fullProduct.colorId ?? item.colorId ?? null,
+            SizeId: fullProduct.sizeId ?? item.sizeId ?? null,
+            Quantity: item.quantity ?? fullProduct.quantity ?? null,
+            Size: size,
+            Color: color,
+            UsersLikesId: fullProduct.usersLikesId || item.usersLikesId || null
+          }
+        };
+      });
+
+      const User = {
+        Id: profile.id,
+        Email: profile.email,
+        PhoneNumber: profile.phoneNumber,
+        FullName: profile.fullName,
+        SurName: profile.surName,
+        BirthDate: profile.birthDate,
+        Gender: profile.gender,
+        Password: profile.password,
+        NewsOn: profile.newsOn,
+        LaRenzaPoints: profile.laRenzaPoints
+      };
+      const Delivery = addressObj ? {
+        Id: addressObj.id,
+        UserId: addressObj.userId,
+        SecondName: addressObj.secondName,
+        FullName: addressObj.fullName,
+        Street: addressObj.street,
+        City: addressObj.city,
+        HouseNum: addressObj.houseNum,
+        PostIndex: addressObj.postIndex,
+        AdditionalInfo: addressObj.additionalInfo,
+        PhoneNumber: addressObj.phoneNumber
+      } : null;
+      const Cupons = appliedCoupon ? {
+        Id: appliedCoupon.id,
+        Name: appliedCoupon.name,
+        Description: appliedCoupon.description,
+        Price: appliedCoupon.price,
+        Users: appliedCoupon.users || []
+      } : null;
+
+      // 9. Order-об'єкт з PascalCase-ключами
+      const order = {
+        Id: 0,
         UserId: profile.id,
-        Status: 'processing',
-        DeliveryId: Number(addressObj.id),
+        Status: 'Ready',
+        DeliveryId: addressObj ? Number(addressObj.id) : null,
         CuponsId: appliedCoupon ? appliedCoupon.id : null,
-        OrderName: profile.fullName || profile.email || '',
+        OrderName: profile.fullName ? `Order_${profile.id}` : (profile.email || ''),
         CreatedAt: dateStr,
-        CompletedAt: null,
-        PaymentMethod: Number(selectedPayment),
+        CompletedAt: dateStr,
+        PaymentMethod: paymentMethodInt,
         DeliveryMethodId: Number(selectedDelivery),
         Phonenumber: profile.phoneNumber || '',
-        orderItems: orderItems,
-        User: {
-          Id: profile.id,
-          Email: profile.email,
-          PhoneNumber: profile.phoneNumber || '',
-          FullName: profile.fullName || '',
-          SurName: profile.surName || '',
-          BirthDate: profile.birthDate || '',
-          Gender: typeof profile.gender !== 'undefined' ? profile.gender : null,
-          Password: '',
-          NewsOn: typeof profile.newsOn !== 'undefined' ? profile.newsOn : false,
-          LaRenzaPoints: typeof profile.laRenzaPoints !== 'undefined' ? profile.laRenzaPoints : 0
-        },
-        delivery: addressObj,
-        cupons: appliedCoupon || null,
-        dm: null
+        OrderItems: orderItems,
+        User,
+        Delivery,
+        Cupons,
+        Dm: null
       };
 
-      // 5. Відправити POST
       const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/addOrder`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ orderDto: orderData })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || 'Помилка при оформленні замовлення');
       }
-      // 6. Очищення корзини і повідомлення
       localStorage.removeItem('cart');
       window.dispatchEvent(new Event('cart-updated'));
       setCartItems([]);

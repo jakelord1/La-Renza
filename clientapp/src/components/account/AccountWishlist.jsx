@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Alert from 'react-bootstrap/Alert';
 import { useNavigate } from 'react-router-dom';
+import ProductCard from '../ProductCard';
 
 const API_URL = 'https://localhost:7071/api/Account';
 
@@ -16,21 +17,7 @@ const AccountWishlist = () => {
   const navigate = useNavigate();
  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  const handleRemoveFromWishlist = (modelId) => {
-  fetch(`${API_URL}/accountModels/${modelId}`, {
-    method: 'DELETE',
-    credentials: 'include'
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to remove product from wishlist');
-    }
-     setWishlist(prev => prev.filter(item => item.id !== modelId));
-  })
-  .catch(error => {
-    console.error('Error deleting favorite product:', error);
-  });
-};
+
   useEffect(() => {
     fetch(`${API_URL}/accountModels`, {
       credentials: 'include' 
@@ -95,92 +82,19 @@ if (loading) {
 
       <div className="d-flex flex-wrap" style={{margin: '0 -10px'}}>
         {wishlist.map((item) => (
-          <div key={item.id} className="product-card position-relative d-flex flex-column p-0" 
-            style={{
-              background:'#fff', 
-              borderRadius: '10px', 
-              minWidth: 260, 
-              maxWidth: 260, 
-              width: 260, 
-              height: 420, 
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)', 
-              border: 'none', 
-              overflow:'hidden', 
-              margin:'0 10px 18px 10px'
-            }}
-          >
-            <div className="position-relative w-100" style={{flex:'1 1 auto', minHeight:200, height:200, width:'100%'}}>
-              <img 
-                src={item.imageUrl} 
-                alt={item.name} 
-                className="w-100 h-100 object-fit-cover" 
-                style={{
-                  display:'block', 
-                  borderRadius: '0', 
-                  background:'#f6f6f6', 
-                  height:'100%', 
-                  objectFit:'cover'
-                }} 
-              />
-              <button 
-                onClick={() => handleRemoveFromWishlist(item.id)}
-                className="btn p-0 position-absolute top-0 end-0 m-2 shadow-sm" 
-                style={{
-                  background:'rgba(255,255,255,0.96)', 
-                  borderRadius:'50%', 
-                  width:36, 
-                  height:36, 
-                  display:'flex',
-                  alignItems:'center',
-                  justifyContent:'center', 
-                  boxShadow:'0 2px 6px rgba(0,0,0,0.08)'
-                }}
-              >
-                <svg width="22" height="22" fill="red" stroke="red" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0l-.54.54-.54-.54a5.5 5.5 0 0 0-7.78 7.78l.54.54L12 21.35l7.78-8.42.54-.54a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-              </button>
-            </div>
-
-            <div className="px-3 pt-3 pb-2 d-flex flex-column gap-1 flex-grow-1 w-100" style={{fontSize:'0.98rem', background:'#fff'}}>
-              <div className="text-secondary small lh-1 mb-1" style={{minHeight:18}}>{item.sizes}</div>
-              <div className="fw-normal text-truncate mb-1" title={item.name} style={{fontSize:'1rem',lineHeight:'1.2'}}>{item.name}</div>
-              <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
-                <span className="fw-bold" style={{fontSize:'1.08rem',color:'var(--purple)'}}>{item.price} UAH</span>
-              </div>
-
-              <div className="d-flex gap-1 flex-wrap mt-1">
-             {(Array.isArray(item.badges) ? item.badges : []).map((b, i) => b && (
-             <span key={i} className={`badge px-2 py-1 small fw-semibold ${BADGE_COLORS[b]||'bg-light text-dark'}`} style={{fontSize:'0.72rem',borderRadius:3,letterSpacing:0.2}}>{b}</span>
-              ))}
-
-              </div>
-            </div>
-
-            <button 
-              className="btn p-0 position-absolute bottom-0 end-0 m-2 shadow-sm" 
-              style={{
-                background:'rgba(255,255,255,0.97)', 
-                borderRadius:'50%', 
-                width:36, 
-                height:36, 
-                display:'flex',
-                alignItems:'center',
-                justifyContent:'center', 
-                boxShadow:'0 2px 6px rgba(0,0,0,0.08)'
-              }}
-            >
-              <svg width="22" height="22" fill="none" stroke="#222" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="9" cy="21" r="1"/>
-                <circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-            </button>
+          <div key={item.id} className="catalog-grid-item position-relative" style={{margin:'0 10px 18px 10px'}}>
+            <ProductCard
+              model={item}
+              sizes={item.sizes || item.size || item.Sizes || []}
+              isAuthenticated={true}
+              isFavorite={true}
+              onFavoriteChange={() => window.dispatchEvent(new Event('favorites-updated'))}
+              onCardClick={() => window.location.href = `/product/${item.id}`}
+            />
           </div>
         ))}
       </div>
 
-      {/* Empty State */}
       {wishlist.length === 0 && (
         <div className="text-center py-5">
           <div className="mb-4">
