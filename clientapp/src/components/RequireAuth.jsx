@@ -11,6 +11,8 @@ function useAuthCheck() {
   return isAuthenticated;
 }
 
+export { useAuthCheck };
+
 export function RequireAuth({ children }) {
   const isAuthenticated = useAuthCheck();
   const location = useLocation();

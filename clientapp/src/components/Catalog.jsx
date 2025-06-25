@@ -55,19 +55,48 @@ const initialFilters = {
 const Catalog = () => {
   const [models, setModels] = React.useState([]);
   const [products, setProducts] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
+  const [colors, setColors] = React.useState([]);
+  const [sizes, setSizes] = React.useState([]);
+  const [filters, setFilters] = React.useState(initialFilters);
   const [loading, setLoading] = React.useState(false);
   const [alert, setAlert] = React.useState({ show: false, type: '', message: '' });
+
+
+  const sidebarColors = colors.map(color => ({
+    value: color.id,
+    label: color.name,
+    imagePath: color.image?.path || null
+  }));
+  const sidebarSizes = sizes.map(size => ({
+    value: size.id,
+    label: size.name
+  }));
 
   React.useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
+
         const modelsRes = await fetch('/api/Models');
         if (!modelsRes.ok) throw new Error('Помилка завантаження моделей');
         const modelsData = await modelsRes.json();
+
         const productsRes = await fetch('/api/Products');
         if (!productsRes.ok) throw new Error('Помилка завантаження продуктів');
         const productsData = await productsRes.json();
+
+        const categoriesRes = await fetch('/api/Categories');
+        if (!categoriesRes.ok) throw new Error('Помилка завантаження категорій');
+        const categoriesData = await categoriesRes.json();
+
+        const colorsRes = await fetch('/api/Colors');
+        if (!colorsRes.ok) throw new Error('Помилка завантаження кольорів');
+        const colorsData = await colorsRes.json();
+
+        const sizesRes = await fetch('/api/Sizes');
+        if (!sizesRes.ok) throw new Error('Помилка завантаження розмірів');
+        const sizesData = await sizesRes.json();
 
         const enrichedProducts = productsData.map(p => ({
           ...p,
@@ -76,6 +105,9 @@ const Catalog = () => {
 
         setModels(modelsData);
         setProducts(enrichedProducts);
+        setCategories(categoriesData);
+        setColors(colorsData);
+        setSizes(sizesData);
       } catch (e) {
         setAlert({ show: true, type: 'danger', message: e.message });
       } finally {
@@ -85,8 +117,6 @@ const Catalog = () => {
     fetchData();
   }, []);
 
-
-  // Категорії та фільтри ігноруємо, як у ProductGrid
   const modelsWithProducts = models.map(model => {
     const modelProducts = products.filter(
       product => product.color && product.color.model && product.color.model.id === model.id
@@ -102,19 +132,18 @@ const Catalog = () => {
   return (
     <div className="catalog-page container-fluid py-4">
       <div className="row gx-4">
-        {/* Sidebar */}
+ 
         <div className="col-12 col-md-4 col-lg-3 mb-4 mb-md-0" style={{ minWidth: 240, maxWidth: 320 }}>
           <CatalogSidebar
-            filters={{}}
-            setFilters={() => {}}
-            categories={[]}
-            sizes={[]}
-            colors={[]}
+            filters={filters}
+            setFilters={setFilters}
+            categories={buildCategoryTree(categories)}
+            sizes={sidebarSizes}
+            colors={sidebarColors}
             brands={[]}
-            onReset={() => {}}
+            onReset={() => setFilters(initialFilters)}
           />
         </div>
-        {/* Products */}
         <div className="col-12 col-md-8 col-lg-9">
           <h1 className="h4 fw-bold mb-3">Каталог</h1>
           {alert.show && (
@@ -134,7 +163,6 @@ const Catalog = () => {
                     <ProductCard 
                       model={model} 
                       products={model.products} 
-                      // Додаткові пропси можна додати за потреби
                     />
                   </div>
                 ))

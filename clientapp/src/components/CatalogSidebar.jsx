@@ -57,30 +57,48 @@ const CatalogSidebar = ({
       <div className="mb-4">
         <div className="fw-semibold mb-2">Колір</div>
         <div className="d-flex flex-wrap gap-2">
-          {colors.map(color => (
-            <div
-              key={color.value}
-              title={color.label}
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                background: color.hex,
-                border: filters.colors.includes(color.value) ? '2px solid var(--purple)' : '2px solid #eee',
-                cursor: 'pointer',
-                outline: 'none',
-                boxShadow: filters.colors.includes(color.value) ? '0 0 0 2px #e5d1fa' : 'none'
-              }}
-              onClick={() => setFilters(f => ({
-                ...f,
-                colors: f.colors.includes(color.value)
-                  ? f.colors.filter(v => v !== color.value)
-                  : [...f.colors, color.value]
-              }))}
-              tabIndex={0}
-              role="button"
-            />
-          ))}
+          {colors.map(color => {
+            const selected = filters.colors.includes(color.value);
+            return (
+              <div
+                key={color.value}
+                title={color.label}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  border: selected ? '2px solid var(--purple)' : '2px solid #eee',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  boxShadow: selected ? '0 0 0 2px #e5d1fa' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#fff',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+                onClick={() => setFilters(f => ({
+                  ...f,
+                  colors: f.colors.includes(color.value)
+                    ? f.colors.filter(v => v !== color.value)
+                    : [...f.colors, color.value]
+                }))}
+                tabIndex={0}
+                role="button"
+              >
+                {color.imagePath ? (
+                  <img
+                    src={"/images/" + color.imagePath}
+                    alt={color.label}
+                    style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+                  />
+                ) : (
+                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#eee', display: 'block' }} />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
