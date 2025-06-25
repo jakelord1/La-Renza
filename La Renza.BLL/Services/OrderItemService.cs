@@ -71,9 +71,9 @@ namespace La_Renza.BLL.Services
         }
 
    
-        public async Task<IEnumerable<OrderItemDTO>> GetOrderItems()
+        public async Task<ICollection<OrderItemDTO>> GetOrderItems()
         {
-            return _mapper.Map<IEnumerable<OrderItemDTO>>(await Database.OrderItems.GetAll());
+            return _mapper.Map<ICollection<OrderItemDTO>>(await Database.OrderItems.GetAll());
         }
 
         public async Task<bool> ExistsOrderItem(int id)

@@ -143,13 +143,13 @@ namespace La_Renza.BLL.Services
 
             return (true, null);
         }
-        public async Task<(bool Success, string? ErrorMessage)> AddProductToCartByModelAndSize(string userEmail, int modelId, int sizeId, int quantity)
+        public async Task<(bool Success, string? ErrorMessage)> AddProductToCartByColorAndSize(string userEmail, int colorId, int sizeId, int quantity)
         {
             var user = await Database.Users.Get(userEmail);
             if (user == null)
                 return (false, "User not found.");
 
-            var product = await Database.Products.GetByModelAndSize(modelId, sizeId);
+            var product = await Database.Products.GetByColorAndSize(colorId, sizeId);
             if (product == null)
                 return (false, "Product not found with the selected model and size.");
 

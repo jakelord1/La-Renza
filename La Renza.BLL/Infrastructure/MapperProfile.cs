@@ -36,7 +36,7 @@ namespace La_Renza.BLL.Infrastructure
             CreateMap<Product, ProductDTO>()
                 .ForMember(dest => dest.Color, opt => opt.MapFrom(src => src.Color))
                 .ForMember(dest => dest.Size, opt => opt.MapFrom(src => src.Size))
-                .ForMember(dest => dest.UsersLikesId, opt => opt.MapFrom(src => src.User.Select(u => u.Id).ToList()))
+                .ForMember(dest => dest.UsersLikesId, opt => opt.MapFrom(src => src.User.Select(u => u.Id)))
                 .ReverseMap();
             CreateMap<Image, ImageDTO>()
                 .ReverseMap();
@@ -49,10 +49,10 @@ namespace La_Renza.BLL.Infrastructure
                 //.ForMember(dest => dest.Product, opt => opt.MapFrom(c => c.Product))
                 .ReverseMap();
             CreateMap<User, UserDTO>()
-                .ForMember(dest => dest.Addresses, opt => opt.MapFrom(c => c.Addresses.ToList()))
-                .ForMember(dest => dest.Invoices, opt => opt.MapFrom(c => c.Invoices.ToList()))
-                .ForMember(dest => dest.Cupons, opt => opt.MapFrom(c => c.Cupon.ToList()))
-                .ForMember(dest => dest.ShoppingCarts, opt => opt.MapFrom(c => c.ShoppingCarts.ToList()))
+                .ForMember(dest => dest.Addresses, opt => opt.MapFrom(c => c.Addresses))
+                .ForMember(dest => dest.Invoices, opt => opt.MapFrom(c => c.Invoices))
+                .ForMember(dest => dest.Cupons, opt => opt.MapFrom(c => c.Cupon))
+                .ForMember(dest => dest.ShoppingCarts, opt => opt.MapFrom(c => c.ShoppingCarts))
                 .ReverseMap();
             CreateMap<Coupon, CouponDTO>()
                 .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.User))
@@ -86,10 +86,9 @@ namespace La_Renza.BLL.Infrastructure
                 .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Image))
                 .ReverseMap();
             CreateMap<Order, OrderDTO>()
-                .ForMember(dest => dest.orderItems, opt => opt.MapFrom(src => src.OrderItems.ToList()))
+                .ForMember(dest => dest.orderItems, opt => opt.MapFrom(src => src.OrderItems))
                 .ReverseMap();
             CreateMap<OrderItem, OrderItemDTO>()
-                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product))
                 .ReverseMap();
 
         }

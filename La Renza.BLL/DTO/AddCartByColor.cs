@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace La_Renza.BLL.DTO
 {
-    public class AddCartByModel
+    public class AddCartByColor
     {
-        public int ModelId { get; set; }
-        public string SizeName { get; set; }
+        public int ColorId { get; set; }
+        public int SizeId { get; set; }
         public int Quantity { get; set; }
     }
 }

@@ -8,8 +8,8 @@ namespace La_Renza.BLL.Interfaces
         Task UpdateOrder(OrderDTO orderDto);
         Task DeleteOrder(int id);
         Task<OrderDTO> GetOrder(int id);
-        Task<IEnumerable<OrderDTO>> GetOrders();
-        Task<IEnumerable<OrderDTO>> GetOrdersByUserId(int userId);
+        Task<ICollection<OrderDTO>> GetOrders();
+        Task<ICollection<OrderDTO>> GetOrdersByUserId(int userId);
         Task<bool> ExistsOrder(int id);
     }
 }

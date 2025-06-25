@@ -84,22 +84,22 @@ namespace La_Renza.BLL.Services
                 PaymentMethod = order.PaymentMethod,
                 DeliveryMethodId = order.DeliveryMethodId,
                 Phonenumber = order.Phonenumber,
-                orderItems = _mapper.Map<List<OrderItemDTO>>(order.OrderItems)
+                orderItems = _mapper.Map<ICollection<OrderItemDTO>>(order.OrderItems)
             };
         }
 
-        public async Task<IEnumerable<OrderDTO>> GetOrdersByUserId(int userId)
+        public async Task<ICollection<OrderDTO>> GetOrdersByUserId(int userId)
         {
             var orders = await Database.Orders.GetAll();
             var userOrders = orders.Where(o => o.UserId == userId);
 
-            return _mapper.Map<IEnumerable<OrderDTO>>(userOrders);
+            return _mapper.Map<ICollection<OrderDTO>>(userOrders);
         }
 
-        public async Task<IEnumerable<OrderDTO>> GetOrders()
+        public async Task<ICollection<OrderDTO>> GetOrders()
         {
             var orders = await Database.Orders.GetAll();
-            return _mapper.Map<IEnumerable<OrderDTO>>(orders);
+            return _mapper.Map<ICollection<OrderDTO>>(orders);
         }
 
 

@@ -9,6 +9,6 @@ namespace La_Renza.BLL.DTO
         public string Name { get; set; }
         public string Description { get; set; }
         public int Price { get; set; }
-        public List<UserBase>? Users { get; set; }
+        public ICollection<UserBase>? Users { get; set; }
     }
 }

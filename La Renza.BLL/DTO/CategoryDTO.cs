@@ -16,8 +16,8 @@ namespace La_Renza.BLL.DTO
         public int? ImageId { get; set; }
         public bool IsGlobal { get; set; }
         public ImageDTO Image { get; set; }
-        public List<SizeBase> Sizes { get; set; }
-        public List<ModelBase> Models { get; set; }
+        public ICollection<SizeBase> Sizes { get; set; }
+        public ICollection<ModelBase> Models { get; set; }
 
     }
 }
