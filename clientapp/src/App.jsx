@@ -84,6 +84,7 @@ function App() {
 } />
                   <Route path="/forgot-password" element={<ForgotPasswordForm />} />
                   <Route path="/catalog" element={<Catalog />} />
+<Route path="/catalog/category/:categoryId" element={<Catalog />} />
                   <Route path="/account/*" element={
   <RequireAuth>
     <Account />

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CategoryList = ({ onCategoryClick }) => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   useEffect(() => {
  
@@ -30,7 +32,10 @@ const CategoryList = ({ onCategoryClick }) => {
     <div className="container py-4">
       <div className="d-flex flex-nowrap overflow-auto gap-3 justify-content-center">
         {categories.map((cat, idx) => (
-          <div key={cat.id || idx} className="text-center" style={{ minWidth: 90, cursor: 'pointer' }} onClick={() => onCategoryClick && onCategoryClick(cat)}>
+          <div key={cat.id || idx} className="text-center" style={{ minWidth: 90, cursor: 'pointer' }} onClick={() => {
+              navigate(`/catalog/category/${cat.id}`);
+              if (onCategoryClick) onCategoryClick(cat);
+            }}>
             <img
               src={cat.image?.path ? `/images/${cat.image.path}` : '/images/no-image.jpg'}
               alt={cat.name}

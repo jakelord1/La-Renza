@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React from 'react';
 
 function buildCategoryTree(list) {
   const map = {};
@@ -20,28 +20,13 @@ import Breadcrumbs from './Breadcrumbs';
 import CatalogSidebar from './CatalogSidebar';
 import CatalogControls from './CatalogControls';
 import ProductCard from './ProductCard';
+import Loader from './common/Loader';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const PRODUCTS_API_URL = '/api/Products';
 
-
-
-// Далі весь код працює тільки зі стейтом products, який завантажується з API
-
 const SIZES_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Sizes`;
 const COLORS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Colors`;
-
-const BRAND_OPTIONS = [
-  { value: 'brand1', label: 'Brand1' },
-  { value: 'brand2', label: 'Brand2' },
-  { value: 'brand3', label: 'Brand3' },
-];
-
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'Новинки' },
-  { value: 'oldest', label: 'Старі' },
-  { value: 'price_low', label: 'Від дешевих до дорогих' },
-  { value: 'price_high', label: 'Від дорогих до дешевих' },
-];
 
 const initialFilters = {
   categories: [],
@@ -49,19 +34,26 @@ const initialFilters = {
   priceMax: '',
   colors: [],
   sizes: [],
-  brands: [],
 };
 
 const Catalog = () => {
+  const { categoryId } = useParams();
+  const navigate = useNavigate();
   const [models, setModels] = React.useState([]);
   const [products, setProducts] = React.useState([]);
   const [categories, setCategories] = React.useState([]);
   const [colors, setColors] = React.useState([]);
   const [sizes, setSizes] = React.useState([]);
   const [filters, setFilters] = React.useState(initialFilters);
+
+  // Устанавливаем фильтр по категории из URL если есть
+  React.useEffect(() => {
+    if (categoryId) {
+      setFilters(prev => ({ ...prev, categories: [Number(categoryId)] }));
+    }
+  }, [categoryId]);
   const [loading, setLoading] = React.useState(false);
   const [alert, setAlert] = React.useState({ show: false, type: '', message: '' });
-
 
   const sidebarColors = colors.map(color => ({
     value: color.id,
@@ -73,11 +65,38 @@ const Catalog = () => {
     label: size.name
   }));
 
+  const modelsWithProducts = React.useMemo(() => {
+    const min = filters.priceMin ? parseFloat(filters.priceMin) : null;
+    const max = filters.priceMax ? parseFloat(filters.priceMax) : null;
+    return models
+      .filter(model => {
+        if (min !== null && model.price < min) return false;
+        if (max !== null && model.price > max) return false;
+        return true;
+      })
+      .map(model => {
+        const modelProducts = products.filter(product => {
+          const productModelId = product.color?.model?.id || product.color?.modelId;
+          if (!productModelId) return false;
+          if (productModelId !== model.id) return false;
+          if (filters.categories.length && !filters.categories.includes(model.categoryId)) return false;
+          if (filters.colors.length && !filters.colors.includes(product.color.id)) return false;
+          if (filters.sizes.length && !filters.sizes.includes(product.size?.id ?? product.sizeId)) return false;
+          return true;
+        })
+        .map(product => ({ ...product, price: model.price }));
+        return { ...model, products: modelProducts, minPrice: model.price };
+      });
+  }, [models, products, filters]);
+
+  const filteredModels = React.useMemo(() => {
+    return modelsWithProducts.filter(model => model.products.length > 0);
+  }, [modelsWithProducts]);
+
   React.useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-
         const modelsRes = await fetch('/api/Models');
         if (!modelsRes.ok) throw new Error('Помилка завантаження моделей');
         const modelsData = await modelsRes.json();
@@ -117,22 +136,9 @@ const Catalog = () => {
     fetchData();
   }, []);
 
-  const modelsWithProducts = models.map(model => {
-    const modelProducts = products.filter(
-      product => product.color && product.color.model && product.color.model.id === model.id
-    ).map(product => ({
-      ...product,
-      price: product.color && product.color.model && product.color.model.price != null ? product.color.model.price : product.price
-    }));
-    return { ...model, products: modelProducts };
-  });
-
-  const filteredModels = modelsWithProducts.filter(model => model.products.length > 0);
-
   return (
     <div className="catalog-page container-fluid py-4">
       <div className="row gx-4">
- 
         <div className="col-12 col-md-4 col-lg-3 mb-4 mb-md-0" style={{ minWidth: 240, maxWidth: 320 }}>
           <CatalogSidebar
             filters={filters}
@@ -152,7 +158,9 @@ const Catalog = () => {
             </div>
           )}
           {loading ? (
-            <div className="text-center my-4">Завантаження...</div>
+            <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 200 }}>
+              <Loader message="Завантаження каталогу..." />
+            </div>
           ) : (
             <div className="row g-3 g-md-4">
               {filteredModels.length === 0 ? (
@@ -160,9 +168,10 @@ const Catalog = () => {
               ) : (
                 filteredModels.map(model => (
                   <div className="col-6 col-md-4 col-lg-3" key={model.id}>
-                    <ProductCard 
-                      model={model} 
-                      products={model.products} 
+                    <ProductCard
+                      model={model}
+                      products={model.products}
+                      onCardClick={() => navigate(`/product/${model.id}`)}
                     />
                   </div>
                 ))

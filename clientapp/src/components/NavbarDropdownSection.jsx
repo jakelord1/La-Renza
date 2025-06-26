@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const NavbarDropdownSection = ({ section, activeSub, menuSections, allCategories }) => {
+  const navigate = useNavigate();
   const menuSection = menuSections.find(sec => (sec.navbarName || '').toLowerCase() === section) || menuSections[0];
   const sideTabs = menuSection?.sideTabs || [];
   const activeTab = sideTabs[activeSub] || sideTabs[0];
@@ -15,7 +17,11 @@ const NavbarDropdownSection = ({ section, activeSub, menuSections, allCategories
             {group.categories.map(catId => {
               const cat = allCategories.find(c => String(c.id) === String(catId) || String(c._id) === String(catId));
               return (
-                <div key={catId} style={{ textAlign: 'center' }}>
+                <div key={catId} style={{ textAlign: 'center', cursor: cat ? 'pointer' : 'default' }}
+                  onClick={() => cat && navigate(`/catalog/category/${cat.id}`)}
+                  tabIndex={cat ? 0 : -1}
+                  role="button"
+                >
                   <div style={{
                     width: 64, height: 64, borderRadius: '50%', background: '#f8f8f8',
                     margin: '0 auto 12px auto', display: 'flex', alignItems: 'center', justifyContent: 'center',

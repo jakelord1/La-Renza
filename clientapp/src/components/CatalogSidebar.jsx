@@ -1,6 +1,7 @@
 import React from 'react';
 import { Form, Button, Collapse } from 'react-bootstrap';
 import CategoryTree from './CategoryTree';
+import { useNavigate } from 'react-router-dom';
 
 const CatalogSidebar = ({
   filters,
@@ -10,6 +11,7 @@ const CatalogSidebar = ({
   colors,
   onReset
 }) => {
+  const navigate = useNavigate();
   return (
     <aside className="catalog-sidebar pe-2" style={{minWidth: 240, maxWidth: 320}}>
       <h5 className="fw-bold mb-3">Фільтри</h5>
@@ -19,13 +21,16 @@ const CatalogSidebar = ({
         <CategoryTree
           categories={categories}
           selected={filters.categories}
-          onSelect={catId => setFilters(f => ({ ...f, categories: [catId] }))}
+          onSelect={catId => navigate(`/catalog/category/${catId}`)}
         />
         <button
           type="button"
           className="btn btn-outline-secondary btn-sm mt-2"
           style={{width: '100%'}}
-          onClick={() => setFilters(f => ({ ...f, categories: [] }))}
+          onClick={() => {
+            navigate('/catalog');
+            setFilters(f => ({ ...f, categories: [] }));
+          }}
         >
           Скинути категорію
         </button>
