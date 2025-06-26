@@ -48,6 +48,7 @@ const Navbar = () => {
   const location = useLocation();
   const [menuSections, setMenuSections] = useState([]);
   const [allCategories, setAllCategories] = useState([]); // для назв категорій у вкладках
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 850);
 
   useEffect(() => {
     // Завантажити всі категорії (для назв у підгрупах)
@@ -234,6 +235,12 @@ const Navbar = () => {
     }
   }, [isCategoryHovered, isDropdownHovered]);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 850);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div className="larenza-font">
       <nav
@@ -241,132 +248,176 @@ const Navbar = () => {
         style={{ boxShadow: 'none', zIndex: 1002, position: 'relative', borderBottom: '1px solid #e5e5e5' }}
       >
         <div className="container" style={{ maxWidth: 1080, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-          <div className="navbar-mobile-row" style={{ display: 'flex', alignItems: 'center', padding: '13px 0', width: '100%', position: 'relative' }}>
-            <div style={{ flex: 1 }}></div>
-            <Link className="navbar-brand" to="/" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
-              <img src="/images/larenza-logo.png" alt="La'Renza" height="18" />
-            </Link>
-            {/* Desktop search (in row with icons) */}
-            <div className="d-none d-lg-block" style={{ minWidth: 260, margin: '0 auto', flex: '0 1 320px' }}>
-              <div className="position-relative" ref={searchRef}>
-                <form className="search position-relative" style={{ width: '100%' }} onSubmit={handleToggleSearch}>
-                  <i
-                    className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
-                    style={{ fontSize: '1rem', cursor: 'pointer' }}
-                    onClick={handleToggleSearch}
-                  />
-                  <input
-                    type="search"
-                    name="title"
-                    className="form-control border-0 border-bottom"
-                    placeholder="Пошук"
-                    aria-label="Search"
-                    style={{ paddingLeft: '35px' }}
-                    onFocus={() => setShowSearch(true)}
-                    readOnly
-                  />
+          {isMobile ? (
+            // Мобильная разметка
+            <div className="navbar-mobile-row">
+              <button className="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style={{border: '1px solid #ddd', borderRadius: 6, background: '#fff', width: 44, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 8}}>
+                <span className="navbar-toggler-icon"></span>
+              </button>
+              <Link className="navbar-brand navbar-logo-mobile" to="/">
+                <img src="/images/larenza-logo.png" alt="La'Renza" height="18" />
+              </Link>
+              <div className="navbar-mobile-searchbar flex-grow-1">
+                <form className="search position-relative w-100" onSubmit={handleToggleSearch} style={{margin:0}}>
+                  <i className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2" style={{ fontSize: '1rem', cursor: 'pointer' }} onClick={handleToggleSearch} />
+                  <input type="search" name="title" className="form-control border-0 border-bottom" placeholder="Пошук" aria-label="Search" style={{ paddingLeft: '35px', width: '100%' }} onFocus={() => setShowSearch(true)} readOnly />
                 </form>
               </div>
-            </div>
-            <div className="d-flex align-items-center navbar-mobile-icons" style={{ marginLeft: 'auto', gap: '18px' }}>
-              <Link to="/favorites" className="nav-link px-2 text-warning position-relative">
-                <i className="bi bi-heart fs-5" style={{color:'#000'}}></i>
-                <FavoritesCount />
-              </Link>
-              <div
-                className="position-relative"
-                onMouseEnter={() => {
-                  clearTimeout(popoverTimeout.current);
-                  setShowPopover(true);
-                }}
-                onMouseLeave={() => {
-                  popoverTimeout.current = setTimeout(() => setShowPopover(false), 120);
-                }}
-                style={{display: 'flex', alignItems: 'center'}}
-              >
-                <button
-                  className="btn btn-link nav-link px-2 text-dark"
-                  type="button"
-                  style={{outline: 'none', boxShadow: 'none'}}
-                  tabIndex={0}
-                >
-                  <i className="bi bi-person fs-5" style={{ color: '#000' }} />
-                </button>
-                {showPopover && (
-                  isAuthenticated ? (
-                    <AuthenticatedPopover onClose={() => setShowPopover(false)} />
-                  ) : (
-                    <AccountPopover
-                      onLogin={() => window.location.href = '/login'}
-                      onRegister={() => window.location.href = '/register'}
-                    />
-                  )
-                )}
-              </div>
-              <Link to="/cart" className="nav-link px-2 position-relative text-success">
-                <i className="bi bi-bag fs-5" style={{color:'#000'}}></i>
-                <CartCount />
-              </Link>
-            </div>
-          </div>
-          {/* Mobile menu row: гамбургер + пошук на одній лінії */}
-          <div className="d-flex d-lg-none align-items-center flex-row w-100" style={{gap: '8px', padding: '0 8px 10px 8px'}}>
-            <button className="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style={{border: '1px solid #ddd', borderRadius: 6, background: '#fff', width: 44, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="navbar-mobile-search flex-grow-1">
-              <div className="position-relative" ref={searchRef}>
-                <form className="search position-relative" style={{ width: '100%' }} onSubmit={handleToggleSearch}>
-                  <i
-                    className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
-                    style={{ fontSize: '1rem', cursor: 'pointer' }}
-                    onClick={handleToggleSearch}
-                  />
-                  <input
-                    type="search"
-                    name="title"
-                    className="form-control border-0 border-bottom"
-                    placeholder="Пошук"
-                    aria-label="Search"
-                    style={{ paddingLeft: '35px' }}
-                    onFocus={() => setShowSearch(true)}
-                    readOnly
-                  />
-                </form>
+              <div className="d-flex align-items-center navbar-mobile-icons" style={{gap:'12px', marginLeft:'12px'}}>
+                <Link to="/favorites" className="nav-link px-2 text-warning position-relative">
+                  <i className="bi bi-heart fs-5" style={{color:'#000'}}></i>
+                  <FavoritesCount />
+                </Link>
+                <div className="position-relative">
+                  <button className="btn btn-link nav-link px-2 text-dark" type="button" style={{outline: 'none', boxShadow: 'none'}} tabIndex={0}>
+                    <i className="bi bi-person fs-5" style={{ color: '#000' }} />
+                  </button>
+                  {showPopover && (
+                    isAuthenticated ? (
+                      <AuthenticatedPopover onClose={() => setShowPopover(false)} />
+                    ) : (
+                      <AccountPopover
+                        onLogin={() => window.location.href = '/login'}
+                        onRegister={() => window.location.href = '/register'}
+                      />
+                    )
+                  )}
+                </div>
+                <Link to="/cart" className="nav-link px-2 position-relative text-success">
+                  <i className="bi bi-bag fs-5" style={{color:'#000'}}></i>
+                  <CartCount />
+                </Link>
               </div>
             </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
-            {/* Гамбургер на десктопі видалено, він є лише у мобільному flex-row */}
-            <div className="collapse navbar-collapse" id="navbarNav" style={{ flex: 1 }}>
-              <ul className="navbar-nav mx-auto" style={{ position: 'relative' }}>
-                {categories.map((cat) => (
-                  <li
-                    className="nav-item"
-                    key={cat.label}
-                    onMouseEnter={() => handleCategoryEnter(cat.query)}
-                    onMouseLeave={handleCategoryLeave}
-                    style={{ position: 'relative' }}
-                  >
-                    <Link
-                      className={"nav-link px-3 text-dark fw-bold"}
-                      to={`/catalog?category=${cat.query}`}
-                      style={{
-                        fontSize: 15,
-                        background: (activeCategory === cat.query || hoveredNav === cat.query) ? '#f5f5f5' : 'transparent',
-                        borderRadius: 3,
-                        fontWeight: 700,
-                        transition: 'background .12s',
-                      }}
+          ) : (
+            // Старая десктопная разметка
+            <>
+              <div className="navbar-mobile-row" style={{ display: 'flex', alignItems: 'center', padding: '13px 0', width: '100%', position: 'relative' }}>
+                <div style={{ flex: 1 }}></div>
+                <Link className="navbar-brand" to="/" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', zIndex: 1 }}>
+                  <img src="/images/larenza-logo.png" alt="La'Renza" height="18" />
+                </Link>
+                {/* Desktop search (in row with icons) */}
+                <div className="d-none d-lg-block" style={{ minWidth: 260, margin: '0 auto', flex: '0 1 320px' }}>
+                  <div className="position-relative" ref={searchRef}>
+                    <form className="search position-relative" style={{ width: '100%' }} onSubmit={handleToggleSearch}>
+                      <i
+                        className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
+                        style={{ fontSize: '1rem', cursor: 'pointer' }}
+                        onClick={handleToggleSearch}
+                      />
+                      <input
+                        type="search"
+                        name="title"
+                        className="form-control border-0 border-bottom"
+                        placeholder="Пошук"
+                        aria-label="Search"
+                        style={{ paddingLeft: '35px' }}
+                        onFocus={() => setShowSearch(true)}
+                        readOnly
+                      />
+                    </form>
+                  </div>
+                </div>
+                <div className="d-flex align-items-center navbar-mobile-icons" style={{ marginLeft: 'auto', gap: '18px' }}>
+                  <Link to="/favorites" className="nav-link px-2 text-warning position-relative">
+                    <i className="bi bi-heart fs-5" style={{color:'#000'}}></i>
+                    <FavoritesCount />
+                  </Link>
+                  <div
+                    className="position-relative"
+                    onMouseEnter={() => {
+                      clearTimeout(popoverTimeout.current);
+                      setShowPopover(true);
+                    }}
+                    onMouseLeave={() => {
+                      popoverTimeout.current = setTimeout(() => setShowPopover(false), 120);
+                    }}
+                    style={{display: 'flex', alignItems: 'center'}}>
+                    <button
+                      className="btn btn-link nav-link px-2 text-dark"
+                      type="button"
+                      style={{outline: 'none', boxShadow: 'none'}}
+                      tabIndex={0}
                     >
-                      {cat.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                      <i className="bi bi-person fs-5" style={{ color: '#000' }} />
+                    </button>
+                    {showPopover && (
+                      isAuthenticated ? (
+                        <AuthenticatedPopover onClose={() => setShowPopover(false)} />
+                      ) : (
+                        <AccountPopover
+                          onLogin={() => window.location.href = '/login'}
+                          onRegister={() => window.location.href = '/register'}
+                        />
+                      )
+                    )}
+                  </div>
+                  <Link to="/cart" className="nav-link px-2 position-relative text-success">
+                    <i className="bi bi-bag fs-5" style={{color:'#000'}}></i>
+                    <CartCount />
+                  </Link>
+                </div>
+              </div>
+              {/* Mobile menu row: гамбургер + пошук на одній лінії */}
+              <div className="d-flex d-lg-none align-items-center flex-row w-100" style={{gap: '8px', padding: '0 8px 10px 8px'}}>
+                <button className="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style={{border: '1px solid #ddd', borderRadius: 6, background: '#fff', width: 44, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                  <span className="navbar-toggler-icon"></span>
+                </button>
+                <div className="navbar-mobile-search flex-grow-1">
+                  <div className="position-relative" ref={searchRef}>
+                    <form className="search position-relative" style={{ width: '100%' }} onSubmit={handleToggleSearch}>
+                      <i
+                        className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
+                        style={{ fontSize: '1rem', cursor: 'pointer' }}
+                        onClick={handleToggleSearch}
+                      />
+                      <input
+                        type="search"
+                        name="title"
+                        className="form-control border-0 border-bottom"
+                        placeholder="Пошук"
+                        aria-label="Search"
+                        style={{ paddingLeft: '35px' }}
+                        onFocus={() => setShowSearch(true)}
+                        readOnly
+                      />
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                {/* Гамбургер на десктопі видалено, він є лише у мобільному flex-row */}
+                <div className="collapse navbar-collapse" id="navbarNav" style={{ flex: 1 }}>
+                  <ul className="navbar-nav mx-auto" style={{ position: 'relative' }}>
+                    {categories.map((cat) => (
+                      <li
+                        className="nav-item"
+                        key={cat.label}
+                        onMouseEnter={() => handleCategoryEnter(cat.query)}
+                        onMouseLeave={handleCategoryLeave}
+                        style={{ position: 'relative' }}
+                      >
+                        <Link
+                          className={"nav-link px-3 text-dark fw-bold"}
+                          to={`/catalog?category=${cat.query}`}
+                          style={{
+                            fontSize: 15,
+                            background: (activeCategory === cat.query || hoveredNav === cat.query) ? '#f5f5f5' : 'transparent',
+                            borderRadius: 3,
+                            fontWeight: 700,
+                            transition: 'background .12s',
+                          }}
+                        >
+                          {cat.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         {activeCategory && (
           <div
@@ -380,115 +431,196 @@ const Navbar = () => {
       </nav>
 
       {showSearch && (
-        <div
-          className="search-overlay-outer"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.25)',
-            zIndex: 2000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={e => {
-            if (e.target.classList.contains('search-overlay-outer')) setShowSearch(false);
-          }}
-        >
+        isMobile ? (
+          // Мобильный оверлей поиска
           <div
-            className="search-overlay bg-white p-4 shadow rounded"
+            className="search-overlay-outer"
             style={{
-              width: '95vw',
-              maxWidth: '1400px',
-              minHeight: '320px',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(255,255,255,0.98)',
+              zIndex: 2000,
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
-              position: 'relative',
+              alignItems: 'stretch',
+              justifyContent: 'flex-start',
+              padding: '0',
             }}
-            onClick={e => e.stopPropagation()}
+            onClick={e => {
+              if (e.target.classList.contains('search-overlay-outer')) setShowSearch(false);
+            }}
           >
             <button
               type="button"
               className="btn-close position-absolute"
-              style={{ top: 16, right: 16, zIndex: 10 }}
+              style={{ top: 18, right: 18, zIndex: 10, width: 36, height: 36 }}
               aria-label="Close"
               onClick={() => setShowSearch(false)}
             />
-            <form className="mb-4" style={{ width: '94%' }} onSubmit={handleToggleSearch}>
-              <div className="position-relative">
+            <form className="w-100" style={{marginTop: 48, padding: '0 18px'}} onSubmit={handleToggleSearch}>
+              <div className="position-relative" style={{width: '100%'}}>
                 <i
                   className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
-                  style={{ fontSize: '1.2rem', left: '10px', cursor: 'pointer' }}
+                  style={{ fontSize: '1.4rem', left: '10px', cursor: 'pointer' }}
                   onClick={handleToggleSearch}
                 />
                 <input
                   type="search"
                   name="title"
-                  className="form-control border-0 border-bottom ps-5 py-2"
+                  className="form-control border-0 border-bottom ps-5 py-3"
                   placeholder="Пошук"
                   aria-label="Search"
                   autoFocus
-                  style={{ fontSize: '1.2rem', background: 'transparent' }}
+                  style={{ fontSize: '1.3rem', background: 'transparent', borderRadius: 0, boxShadow: 'none', borderWidth: 2 }}
                 />
               </div>
             </form>
-            <div className="d-flex w-100 justify-content-center align-items-start" style={{gap: '80px'}}>
-              <div style={{ minWidth: '260px', flex: '0 0 260px', paddingLeft: '40px' }}>
-                <h6 className="mb-3">Найпопулярніші</h6>
-                <div className="d-flex flex-wrap">
-                  {popularTags.map(tag => (
-                    <button key={tag} className="btn btn-outline-secondary btn-sm m-1">
-                      {tag}
-                    </button>
-                  ))}
-                </div>
+            {/* Найпопулярніше */}
+            <div style={{padding: '18px 18px 0 18px'}}>
+              <div style={{fontWeight: 700, fontSize: '1.1rem', marginBottom: 10}}>Найпопулярніше</div>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                <a href="/catalog?search=сумка" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>сумка</span>
+                </a>
+                <a href="/catalog?search=джинси жіночі" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>джинси жіночі</span>
+                </a>
+                <a href="/catalog?search=піжама" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>піжама</span>
+                </a>
+                <a href="/catalog?search=футболка" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>футболка</span>
+                </a>
+                <a href="/catalog?search=лонгслів" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>лонгслів</span>
+                </a>
+                <a href="/catalog?search=футболка жіноча" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>футболка жіноча</span>
+                </a>
+                <a href="/catalog?search=боді" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>боді</span>
+                </a>
+                <a href="/catalog?search=шорти" style={{textDecoration:'none'}}>
+                  <span style={{display:'inline-block', background:'#fff', color:'#757575', border:'1px solid #bdbdbd', borderRadius:4, padding:'6px 14px', fontWeight:500, fontSize:'0.98rem', lineHeight:'1.1'}}>шорти</span>
+                </a>
               </div>
-              <div style={{ flex: '1 1 0', minWidth: '0', paddingLeft: '20px' }}>
-                <h6 className="mb-3">Рекомендуємо</h6>
-                <div className="d-flex flex-wrap justify-content-start">
-                  {recommendedProducts.map((p, idx) => (
-                    <div key={idx} style={{ width: '110px', margin: '0 12px 20px 0' }} className="text-center">
-                      <img src={p.image} alt={p.title} className="img-fluid mb-2 rounded shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
-                      <p className="mb-1 small">{p.title}</p>
-                      <p className="fw-bold mb-1 small">{p.price}</p>
-                      {p.onlineOnly && <p className="text-muted small mb-1">тільки онлайн</p>}
-                      {p.badge && <p className="text-warning small fw-bold mb-0">{p.badge}</p>}
-                    </div>
-                  ))}
+            </div>
+          </div>
+        ) : (
+          // Десктопный оверлей поиска
+          <div
+            className="search-overlay-outer"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.25)',
+              zIndex: 2000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onClick={e => {
+              if (e.target.classList.contains('search-overlay-outer')) setShowSearch(false);
+            }}
+          >
+            <div
+              className="search-overlay bg-white p-4 shadow rounded"
+              style={{
+                width: '95vw',
+                maxWidth: '1400px',
+                minHeight: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                position: 'relative',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="btn-close position-absolute"
+                style={{ top: 16, right: 16, zIndex: 10 }}
+                aria-label="Close"
+                onClick={() => setShowSearch(false)}
+              />
+              <form className="mb-4" style={{ width: '94%' }} onSubmit={handleToggleSearch}>
+                <div className="position-relative">
+                  <i
+                    className="bi bi-search position-absolute top-50 start-0 translate-middle-y text-dark ps-2"
+                    style={{ fontSize: '1.2rem', left: '10px', cursor: 'pointer' }}
+                    onClick={handleToggleSearch}
+                  />
+                  <input
+                    type="search"
+                    name="title"
+                    className="form-control border-0 border-bottom ps-5 py-2"
+                    placeholder="Пошук"
+                    aria-label="Search"
+                    autoFocus
+                    style={{ fontSize: '1.2rem', background: 'transparent' }}
+                  />
                 </div>
-                <div className="mt-4">
-                  <h6 className="mb-3">Популярні колекції</h6>
-                  <div className="d-flex flex-wrap gap-3">
-                    <div className="text-center" style={{ width: '110px' }}>
-                      <img src="https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?auto=format&fit=facearea&w=200&q=80" alt="Весна 2024" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
-                      <div className="small">Весна 2024</div>
-                    </div>
-                    <div className="text-center" style={{ width: '110px' }}>
-                      <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=facearea&w=200&q=80" alt="Street Style" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
-                      <div className="small">Street Style</div>
-                    </div>
-                    <div className="text-center" style={{ width: '110px' }}>
-                      <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=facearea&w=200&q=80" alt="Для дому" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
-                      <div className="small">Для дому</div>
-                    </div>
-                    <div className="text-center" style={{ width: '110px' }}>
-                      <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=facearea&w=200&q=80" alt="Спорт" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
-                      <div className="small">Спорт</div>
-                    </div>
-                    <div className="text-center" style={{ width: '110px' }}>
-                      <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=facearea&w=200&q=80" alt="Весна 2025" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
-                      <div className="small">Весна 2025</div>
+              </form>
+              <div className="d-flex w-100 justify-content-center align-items-start" style={{gap: '80px'}}>
+                <div style={{ minWidth: '260px', flex: '0 0 260px', paddingLeft: '40px' }}>
+                  <h6 className="mb-3">Найпопулярніші</h6>
+                  <div className="d-flex flex-wrap">
+                    {popularTags.map(tag => (
+                      <button key={tag} className="btn btn-outline-secondary btn-sm m-1">
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ flex: '1 1 0', minWidth: '0', paddingLeft: '20px' }}>
+                  <h6 className="mb-3">Рекомендуємо</h6>
+                  <div className="d-flex flex-wrap justify-content-start">
+                    {recommendedProducts.map((p, idx) => (
+                      <div key={idx} style={{ width: '110px', margin: '0 12px 20px 0' }} className="text-center">
+                        <img src={p.image} alt={p.title} className="img-fluid mb-2 rounded shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
+                        <p className="mb-1 small">{p.title}</p>
+                        <p className="fw-bold mb-1 small">{p.price}</p>
+                        {p.onlineOnly && <p className="text-muted small mb-1">тільки онлайн</p>}
+                        {p.badge && <p className="text-warning small fw-bold mb-0">{p.badge}</p>}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4">
+                    <h6 className="mb-3">Популярні колекції</h6>
+                    <div className="d-flex flex-wrap gap-3">
+                      <div className="text-center" style={{ width: '110px' }}>
+                        <img src="https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?auto=format&fit=facearea&w=200&q=80" alt="Весна 2024" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
+                        <div className="small">Весна 2024</div>
+                      </div>
+                      <div className="text-center" style={{ width: '110px' }}>
+                        <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=facearea&w=200&q=80" alt="Street Style" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
+                        <div className="small">Street Style</div>
+                      </div>
+                      <div className="text-center" style={{ width: '110px' }}>
+                        <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=facearea&w=200&q=80" alt="Для дому" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
+                        <div className="small">Для дому</div>
+                      </div>
+                      <div className="text-center" style={{ width: '110px' }}>
+                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=facearea&w=200&q=80" alt="Спорт" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
+                        <div className="small">Спорт</div>
+                      </div>
+                      <div className="text-center" style={{ width: '110px' }}>
+                        <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=facearea&w=200&q=80" alt="Весна 2025" className="img-fluid rounded mb-2 shadow-sm" style={{height: '110px', objectFit: 'cover', width: '100%'}} />
+                        <div className="small">Весна 2025</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )
       )}
     </div>
   );

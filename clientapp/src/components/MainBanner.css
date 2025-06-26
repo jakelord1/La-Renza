@@ -52,12 +52,26 @@
   .main-carousel {
     min-height: 180px;
     max-height: 220px;
+    border-radius: 8px !important;
   }
   .main-carousel img {
     min-height: 180px;
     max-height: 220px;
+    border-radius: 8px !important;
   }
   .main-carousel .carousel-arrow {
     display: none !important;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 480px) {
+  .main-carousel {
+    min-height: 160px;
+    max-height: 200px;
+  }
+  .main-carousel img {
+    min-height: 160px;
+    max-height: 200px;
   }
 }

@@ -30,19 +30,23 @@ const CategoryList = ({ onCategoryClick }) => {
 
   return (
     <div className="container py-4">
-      <div className="d-flex flex-nowrap overflow-auto gap-3 justify-content-center">
+      <div className="category-list-grid">
         {categories.map((cat, idx) => (
+<<<<<<< Lera
+          <div key={cat.id || idx} className="text-center flex-shrink-0" style={{ minWidth: 90, maxWidth: 90, cursor: 'pointer' }} onClick={() => onCategoryClick && onCategoryClick(cat)}>
+=======
           <div key={cat.id || idx} className="text-center" style={{ minWidth: 90, cursor: 'pointer' }} onClick={() => {
               navigate(`/catalog/category/${cat.id}`);
               if (onCategoryClick) onCategoryClick(cat);
             }}>
+>>>>>>> master
             <img
               src={cat.image?.path ? `/images/${cat.image.path}` : '/images/no-image.jpg'}
               alt={cat.name}
               className="rounded-circle border border-2 border-purple mb-2"
               style={{ width: 64, height: 64, objectFit: 'cover', background: '#eee' }}
             />
-            <div className="fw-semibold small text-dark">{cat.name}</div>
+            <div className="fw-semibold small text-dark text-truncate" style={{fontSize: '0.875rem'}}>{cat.name}</div>
           </div>
         ))}
       </div>

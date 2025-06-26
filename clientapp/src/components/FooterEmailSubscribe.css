@@ -49,7 +49,7 @@
 }
 @media (max-width: 575.98px) {
   .footer-subscribe-section .rounded-4 {
-    padding: 16px 4px !important;
+    padding: 16px 8px !important;
   }
   .footer-subscribe-section h3 {
     font-size: 1.1rem !important;
@@ -59,5 +59,25 @@
   }
   .footer-subscribe-section form {
     gap: 8px !important;
+  }
+  .footer-subscribe-section .input-group input {
+    font-size: 14px;
+  }
+  .footer-subscribe-section button[type="submit"] {
+    font-size: 14px;
+    padding: 8px 16px !important;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 480px) {
+  .footer-subscribe-section .rounded-4 {
+    padding: 12px 6px !important;
+  }
+  .footer-subscribe-section h3 {
+    font-size: 1rem !important;
+  }
+  .footer-subscribe-section .small {
+    font-size: 0.8rem !important;
   }
 }

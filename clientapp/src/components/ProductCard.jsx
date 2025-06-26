@@ -100,7 +100,7 @@ React.useEffect(() => { setLiked(!!propIsFavorite); }, [propIsFavorite]);
   return (
     <div 
       className="product-card position-relative d-flex flex-column p-0" 
-      style={{background:'#fff', borderRadius: '10px', minWidth: 260, maxWidth: 260, width: 260, height: 420, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', border: 'none', overflow:'hidden', margin:'0 10px 18px 10px'}}
+      style={{background:'#fff', borderRadius: '10px', width: '100%', height: 'auto', minHeight: 420, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', border: 'none', overflow:'hidden'}}
       role="button"
       tabIndex={0}
       onClick={onCardClick}
