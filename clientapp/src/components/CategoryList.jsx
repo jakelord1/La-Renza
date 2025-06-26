@@ -32,14 +32,11 @@ const CategoryList = ({ onCategoryClick }) => {
     <div className="container py-4">
       <div className="category-list-grid">
         {categories.map((cat, idx) => (
-<<<<<<< Lera
-          <div key={cat.id || idx} className="text-center flex-shrink-0" style={{ minWidth: 90, maxWidth: 90, cursor: 'pointer' }} onClick={() => onCategoryClick && onCategoryClick(cat)}>
-=======
-          <div key={cat.id || idx} className="text-center" style={{ minWidth: 90, cursor: 'pointer' }} onClick={() => {
+          <div key={cat.id || idx} className="text-center flex-shrink-0" style={{ minWidth: 90, cursor: 'pointer' }} onClick={() => {
               navigate(`/catalog/category/${cat.id}`);
               if (onCategoryClick) onCategoryClick(cat);
             }}>
->>>>>>> master
+
             <img
               src={cat.image?.path ? `/images/${cat.image.path}` : '/images/no-image.jpg'}
               alt={cat.name}
