@@ -1,6 +1,7 @@
 import React from 'react';
 import { Form, Button, Collapse } from 'react-bootstrap';
 import CategoryTree from './CategoryTree';
+import { useNavigate } from 'react-router-dom';
 
 const CatalogSidebar = ({
   filters,
@@ -10,6 +11,7 @@ const CatalogSidebar = ({
   colors,
   onReset
 }) => {
+  const navigate = useNavigate();
   return (
     <aside className="catalog-sidebar pe-2" style={{minWidth: 240, maxWidth: 320}}>
       <h5 className="fw-bold mb-3">Фільтри</h5>
@@ -19,13 +21,16 @@ const CatalogSidebar = ({
         <CategoryTree
           categories={categories}
           selected={filters.categories}
-          onSelect={catId => setFilters(f => ({ ...f, categories: [catId] }))}
+          onSelect={catId => navigate(`/catalog/category/${catId}`)}
         />
         <button
           type="button"
           className="btn btn-outline-secondary btn-sm mt-2"
           style={{width: '100%'}}
-          onClick={() => setFilters(f => ({ ...f, categories: [] }))}
+          onClick={() => {
+            navigate('/catalog');
+            setFilters(f => ({ ...f, categories: [] }));
+          }}
         >
           Скинути категорію
         </button>
@@ -57,30 +62,48 @@ const CatalogSidebar = ({
       <div className="mb-4">
         <div className="fw-semibold mb-2">Колір</div>
         <div className="d-flex flex-wrap gap-2">
-          {colors.map(color => (
-            <div
-              key={color.value}
-              title={color.label}
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                background: color.hex,
-                border: filters.colors.includes(color.value) ? '2px solid var(--purple)' : '2px solid #eee',
-                cursor: 'pointer',
-                outline: 'none',
-                boxShadow: filters.colors.includes(color.value) ? '0 0 0 2px #e5d1fa' : 'none'
-              }}
-              onClick={() => setFilters(f => ({
-                ...f,
-                colors: f.colors.includes(color.value)
-                  ? f.colors.filter(v => v !== color.value)
-                  : [...f.colors, color.value]
-              }))}
-              tabIndex={0}
-              role="button"
-            />
-          ))}
+          {colors.map(color => {
+            const selected = filters.colors.includes(color.value);
+            return (
+              <div
+                key={color.value}
+                title={color.label}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  border: selected ? '2px solid var(--purple)' : '2px solid #eee',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  boxShadow: selected ? '0 0 0 2px #e5d1fa' : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#fff',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+                onClick={() => setFilters(f => ({
+                  ...f,
+                  colors: f.colors.includes(color.value)
+                    ? f.colors.filter(v => v !== color.value)
+                    : [...f.colors, color.value]
+                }))}
+                tabIndex={0}
+                role="button"
+              >
+                {color.imagePath ? (
+                  <img
+                    src={"/images/" + color.imagePath}
+                    alt={color.label}
+                    style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', display: 'block' }}
+                  />
+                ) : (
+                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: '#eee', display: 'block' }} />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

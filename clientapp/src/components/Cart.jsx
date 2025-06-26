@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Loader from './common/Loader';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Account/accountShoppingCarts`;
 const Fav_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Favorites`;
@@ -18,7 +19,7 @@ const setFavorites = (favorites) => {
 };
 
 const Cart = () => {
-  // --- Єдина корзина ---
+
   const [cartItems, setCartItems] = useState([]);
   const [cartLoading, setCartLoading] = useState(true);
   const [cartError, setCartError] = useState(null);
@@ -113,10 +114,9 @@ const Cart = () => {
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [addresses, setAddresses] = useState([]);
-const [addressLoading, setAddressLoading] = useState(false);
-const [addressError, setAddressError] = useState(null);
-const [selectedAddress, setSelectedAddress] = useState('');
-  
+  const [addressLoading, setAddressLoading] = useState(false);
+  const [addressError, setAddressError] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState('');
   
   const navigate = useNavigate();
 
@@ -197,8 +197,7 @@ const [selectedAddress, setSelectedAddress] = useState('');
         window.dispatchEvent(new Event('cart-updated'));
       }
     } else {
-      // TODO: API PATCH/PUT для зміни кількості товару у серверній корзині
-      // Після успіху рефетчити корзину
+
     }
   };
 
@@ -211,14 +210,13 @@ const [selectedAddress, setSelectedAddress] = useState('');
       if (!isLoggedIn) {
         removeItem(product.id);
       } else {
-        // Додаємо в обране через API як у ProductCard.jsx
+
         try {
           const res = await fetch(`/api/Account/accountModels/${product.modelId || product.productId || product.id}`, {
             method: 'POST',
             credentials: 'include',
           });
           if (res.ok) {
-            // Успіх — видаляємо з корзини
             removeItem(product.id, product.productId, product.modelId);
           } else {
             const err = await res.json().catch(() => ({}));
@@ -234,7 +232,7 @@ const [selectedAddress, setSelectedAddress] = useState('');
   const isFavorite = (id) => favorites.some(item => item.id === id);
 
   const totalPrice = cartItems.reduce((sum, item) => sum + ((Number(item.price) || 0) * (item.quantity || 1)), 0);
-  // Вартість доставки для підрахунку (беремо deliveryPrice, як у UI)
+
   const deliveryCost = selectedDelivery ? Number(deliveryOptions.find(opt => opt.id === selectedDelivery)?.deliveryPrice ?? 0) : 0;
   
 
@@ -246,14 +244,11 @@ const [selectedAddress, setSelectedAddress] = useState('');
       window.dispatchEvent(new Event('cart-updated'));
     } else {
       try {
-        // Видалення з серверної корзини
         const res = await fetch(`/api/Account/removeFromCartByProduct/${productId}`, {
           method: 'DELETE',
           credentials: 'include',
         });
         if (res.ok) {
-          // Оновити корзину після видалення
-          // refetchCart();
           setCartItems(items => items.filter(item => item.productId !== productId));
         } else {
           const err = await res.json().catch(() => ({}));
@@ -588,6 +583,17 @@ const [selectedAddress, setSelectedAddress] = useState('');
     }
   `;
 
+  if (cartLoading) {
+    return (
+      <section className="cart-page py-5">
+        <style>{customStyles}</style>
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 300 }}>
+          <Loader message="Завантаження кошика..." />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="cart-page py-5">
       <style>{customStyles}</style>
@@ -737,7 +743,6 @@ const [selectedAddress, setSelectedAddress] = useState('');
                       </div>
                     </div>
 
-                    {/* Поле телефону */}
                     <div className="mb-3">
                       <label className="form-label">Телефон</label>
                       <input
@@ -750,7 +755,6 @@ const [selectedAddress, setSelectedAddress] = useState('');
                       />
                     </div>
 
-                    {/* Селектор адрес */}
                     {isLoggedIn && (
                       <div className="mb-3">
                         <label className="form-label">Оберіть адресу доставки</label>

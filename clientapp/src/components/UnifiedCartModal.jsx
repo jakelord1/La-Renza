@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { useAuthCheck } from './RequireAuth';
+import Loader from './common/Loader';
+
 const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   const getProductImage = (product) => {
     if (!product) return '/images/no-image.jpg';
@@ -17,13 +20,10 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   const [selectedSize, setSelectedSize] = React.useState(null);
   const [isAdding, setIsAdding] = React.useState(false);
 
+  const isAuthenticated = useAuthCheck();
+
   const addToCart = async (colorId, sizeId, quantity) => {
-    let isLoggedIn = false;
-    try {
-      const profile = JSON.parse(localStorage.getItem('profile')) || null;
-      if (profile && profile.email) isLoggedIn = true;
-    } catch {}
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       return true;
     }
     try {
@@ -205,6 +205,7 @@ const UnifiedCartModal = ({ show, product, onClose, onCheckout }) => {
   return ReactDOM.createPortal(
     <div style={overlayStyle}>
       <div style={modalStyle}>
+        {isAdding && <Loader style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', zIndex: 10000 }} />}
         <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'none', border: 'none', fontSize: 28, cursor: 'pointer', lineHeight: 1, color: '#222' }} aria-label="Закрити">×</button>
         {step === 'select' ? (
           <>

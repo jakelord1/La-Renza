@@ -166,6 +166,7 @@ const Colors = () => {
         materialInfo: modelObj.materialInfo,
         startDate: modelObj.startDate,
         price: modelObj.price,
+        photos: [],
         rate: modelObj.rate,
         bage: modelObj.bage,
         categoryId: modelObj.categoryId,
@@ -237,6 +238,7 @@ const Colors = () => {
         price: modelObj.price,
         rate: modelObj.rate,
         bage: modelObj.bage,
+        photos: [],
         categoryId: modelObj.categoryId,
         category: typeof modelObj.category === 'string' ? modelObj.category : (modelObj.category?.name || ''),
         sizes: Array.isArray(modelObj.sizes) ? modelObj.sizes : []
@@ -390,15 +392,13 @@ const Colors = () => {
                         <td>
                           <div className="d-flex gap-1" style={{maxWidth: '150px', flexWrap: 'wrap'}}>
                             {color.image && (
-                              <img
-                                src={color.image.path}
+                              <Image
+                                src={color.image.path ? `/images/${color.image.path.replace(/^[/\\]+/, '')}` : 'https://via.placeholder.com/30x30?text=No+Image'}
                                 alt="Фото кольору"
-                                style={{
-                                  width: '30px',
-                                  height: '30px',
-                                  objectFit: 'cover',
-                                  borderRadius: '4px',
-                                  border: '1px solid #dee2e6'
+                                style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #dee2e6' }}
+                                onError={e => {
+                                  e.target.onerror = null;
+                                  e.target.src = 'https://via.placeholder.com/30x30?text=No+Image';
                                 }}
                               />
                             )}

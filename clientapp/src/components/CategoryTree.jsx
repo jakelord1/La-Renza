@@ -1,19 +1,45 @@
 import React, { useState } from 'react';
 
+// Helper: find all parent ids for selected category
+function findOpenPath(categories, selectedId) {
+  const map = {};
+  function buildMap(list, parentId = null) {
+    list.forEach(cat => {
+      map[cat.id] = parentId;
+      if (cat.children?.length) buildMap(cat.children, cat.id);
+    });
+  }
+  buildMap(categories);
+  const path = [];
+  let current = selectedId;
+  while (map[current]) {
+    path.unshift(map[current]);
+    current = map[current];
+  }
+  return path;
+}
+
 const CategoryTree = ({ categories, selected, onSelect }) => {
+  const selectedId = selected && selected.length ? selected[0] : null;
+  const openIds = selectedId ? findOpenPath(categories, selectedId) : [];
   return (
     <ul className="list-unstyled mb-0 ps-1">
       {categories.map(cat => (
-        <CategoryNode key={cat.id} cat={cat} selected={selected} onSelect={onSelect} />
+        <CategoryNode key={cat.id} cat={cat} selected={selected} onSelect={onSelect} openIds={openIds} />
       ))}
     </ul>
   );
 };
 
-const CategoryNode = ({ cat, selected, onSelect }) => {
+const CategoryNode = ({ cat, selected, onSelect, openIds = [] }) => {
   const [open, setOpen] = useState(false);
   const hasChildren = cat.children && cat.children.length > 0;
   const isSelected = selected.includes(cat.id);
+
+  // Открывать если id есть в openIds
+  React.useEffect(() => {
+    if (openIds.includes(cat.id)) setOpen(true);
+  }, [openIds, cat.id]);
 
   return (
     <li>
@@ -51,7 +77,7 @@ const CategoryNode = ({ cat, selected, onSelect }) => {
       {hasChildren && open && (
         <ul className="list-unstyled ms-3">
           {cat.children.map(child => (
-            <CategoryNode key={child.id} cat={child} selected={selected} onSelect={onSelect} />
+            <CategoryNode key={child.id} cat={child} selected={selected} onSelect={onSelect} openIds={openIds} />
           ))}
         </ul>
       )}

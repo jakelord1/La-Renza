@@ -13,13 +13,14 @@ function getRandomItems(arr, n, excludeIds = []) {
 }
 
 const Favorites = () => {
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState([]); 
+  const [favoriteModels, setFavoriteModels] = useState([]); 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [allModels, setAllModels] = useState([]);
-const [allProducts, setAllProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
 
-  // Завантажити всі моделі та продукти для рекомендацій
+
   useEffect(() => {
     fetch(MODELS_API_URL)
       .then(res => res.ok ? res.json() : [])
@@ -37,18 +38,46 @@ const [allProducts, setAllProducts] = useState([]);
     setIsAuthenticated(authRes.ok);
     if (!authRes.ok) {
       setFavorites([]);
+      setFavoriteModels([]);
       setLoading(false);
       return;
     }
     const res = await fetch(`${API_URL}/api/Account/accountModels`, { credentials: 'include' });
     if (res.ok) {
       const data = await res.json();
-      setFavorites(Array.isArray(data) ? data : []);
+      const ids = Array.isArray(data) ? data.map(m => m.id) : [];
+      setFavorites(ids);
+      
+      let models = allModels;
+      let products = allProducts;
+      if (!allModels.length || !allProducts.length) {
+        const [modelsRes, productsRes] = await Promise.all([
+          fetch(MODELS_API_URL),
+          fetch('/api/Products')
+        ]);
+        models = (modelsRes.ok ? await modelsRes.json() : []);
+        products = (productsRes.ok ? await productsRes.json() : []);
+        setAllModels(models);
+        setAllProducts(products);
+      }
+      const favModels = models.filter(model => ids.includes(model.id));
+      const favModelsWithProducts = favModels.map(model => {
+        const modelProducts = products.filter(
+          product => product.color && product.color.model && product.color.model.id === model.id
+        ).map(product => ({
+          ...product,
+          price: product.color && product.color.model && product.color.model.price != null ? product.color.model.price : product.price
+        }));
+        return { ...model, products: modelProducts };
+      });
+      setFavoriteModels(favModelsWithProducts);
     } else {
       setFavorites([]);
+      setFavoriteModels([]);
     }
     setLoading(false);
   };
+
 
   useEffect(() => {
     fetchFavorites();
@@ -168,11 +197,11 @@ const [allProducts, setAllProducts] = useState([]);
           </>
         ) : (
           <div className="catalog-grid">
-            {favorites.map(model => (
+            {favoriteModels.map(model => (
               <div key={model.id} className="catalog-grid-item position-relative">
                 <ProductCard
                   model={model}
-                  sizes={model.sizes || model.size || model.Sizes || []}
+                  products={model.products}
                   isAuthenticated={isAuthenticated}
                   isFavorite={true}
                   onFavoriteChange={() => window.dispatchEvent(new Event('favorites-updated'))}
