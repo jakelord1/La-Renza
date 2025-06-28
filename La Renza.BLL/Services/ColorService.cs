@@ -48,19 +48,16 @@ namespace La_Renza.BLL.Services
         }
         public async Task UpdateColor(ColorDTO colorDto)
         {
-            var color = new Color
-            {
-                Id = colorDto.Id,
-                Name = colorDto.Name,
-                ModelId = colorDto.ModelId,
-                ImageId = colorDto.ImageId,
-            };
-            var Saved = await _db.Colors.Get(colorDto.Id);
-            if (Saved != null)
-                Saved = color;
-            else
-                throw new Exception();
-            _db.Colors.Update(color);
+            var existingColor = await _db.Colors.Get(colorDto.Id);
+            if (existingColor == null)
+                throw new Exception("Color not found");
+
+            existingColor.Name = colorDto.Name;
+            existingColor.ModelId = colorDto.ModelId;
+            existingColor.ImageId = colorDto.ImageId;
+            existingColor.Model = await _db.Models.Get(colorDto.ModelId);
+
+            _db.Colors.Update(existingColor); 
             await _db.Save();
         }
 
