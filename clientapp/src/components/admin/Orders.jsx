@@ -3,10 +3,22 @@ import { Card, Form, Button, Row, Col, Spinner, Alert, Table, Modal, Pagination,
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Orders`;
 const USERS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Users`;
+const DELIVERY_METHODS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/DeliveryMethods`;
+const COUPONS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Coupons`;
+const PRODUCTS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Products`;
+
+const paymentMethodMap = {
+  0: 'Готівка',
+  1: 'Банківська карта',
+  2: 'Google Pay',
+  3: 'Apple Pay'
+};
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
+  const [deliveryMethods, setDeliveryMethods] = useState([]);
+  const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -23,18 +35,49 @@ const Orders = () => {
     phonenumber: ''
   });
   
+  const statusDisplayMap = {
+    'New': 'Нове',
+    'InProgress': 'В процесі',
+    'Ready': 'Готово'
+  };
+
+  const displayToStatusMap = {
+    'Нове': 'New',
+    'В процесі': 'InProgress',
+    'Готово': 'Ready'
+  };
+
   const [errorFields, setErrorFields] = useState({});
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
-  const fetchOrders = async () => {
+  const fetchAllData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Помилка завантаження замовлень');
-      const data = await res.json();
-      setOrders(data);
+      const [ordersRes, usersRes, deliveryMethodsRes, couponsRes] = await Promise.all([
+        fetch(API_URL),
+        fetch(USERS_API_URL),
+        fetch(DELIVERY_METHODS_API_URL),
+        fetch(COUPONS_API_URL),
+      ]);
+
+      if (!ordersRes.ok) throw new Error('Помилка завантаження замовлень');
+      const ordersData = await ordersRes.json();
+      setOrders(ordersData);
+
+      if (!usersRes.ok) throw new Error('Помилка завантаження користувачів');
+      const usersData = await usersRes.json();
+      setUsers(usersData);
+
+      if (!deliveryMethodsRes.ok) throw new Error('Помилка завантаження методів доставки');
+      const deliveryMethodsData = await deliveryMethodsRes.json();
+      setDeliveryMethods(deliveryMethodsData);
+
+      if (!couponsRes.ok) throw new Error('Помилка завантаження купонів');
+      const couponsData = await couponsRes.json();
+      setCoupons(couponsData);
+
     } catch (e) {
       setAlert({ show: true, type: 'danger', message: e.message });
     } finally {
@@ -42,20 +85,8 @@ const Orders = () => {
     }
   };
 
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch(USERS_API_URL);
-      if (!res.ok) throw new Error('Помилка завантаження користувачів');
-      const data = await res.json();
-      setUsers(data);
-    } catch (e) {
-      setAlert({ show: true, type: 'danger', message: e.message });
-    }
-  };
-
   useEffect(() => {
-    fetchOrders();
-    fetchUsers();
+    fetchAllData();
   }, []);
 
   const handleInputChange = (e) => {
@@ -67,23 +98,23 @@ const Orders = () => {
   };
 
   const handleEditOrder = (order) => {
-  if (!order) return;
-  setSelectedOrder(order);
-  setFormData({
-    userId: order.userId || '',
-    status: order.status || 'Нове',
-    deliveryId: order.deliveryId || '',
-    cuponsId: order.cuponsId || '',
-    orderName: order.orderName || '',
-    paymentMethod: order.paymentMethod || 'Готівка',
-    deliveryMethodId: order.deliveryMethodId || '',
-    phonenumber: order.phonenumber || '',
-    notes: order.notes || '',
-    totalPrice: order.totalPrice || 0,
-    id: order.id
-  });
-  setShowEditModal(true);
-};
+    if (!order) return;
+    setSelectedOrder(order);
+    setFormData({
+      userId: order.userId || '',
+      status: order.status || 'New',
+      deliveryId: order.deliveryId || '',
+      cuponsId: order.cuponsId || '',
+      orderName: order.orderName || '',
+      paymentMethod: order.paymentMethod !== null && order.paymentMethod !== undefined ? String(order.paymentMethod) : '',
+      deliveryMethodId: order.deliveryMethodId || '',
+      phonenumber: order.phonenumber || '',
+      notes: order.notes || '',
+      totalPrice: order.totalPrice || 0,
+      id: order.id
+    });
+    setShowEditModal(true);
+  };
 
   const handleAddOrder = () => {
     setFormData({
@@ -117,13 +148,24 @@ const Orders = () => {
     }
     
     try {
-      const url = selectedOrder ? `${API_URL}/${selectedOrder.id}` : API_URL;
+      const url = API_URL;
       const method = selectedOrder ? 'PUT' : 'POST';
       
-      const orderData = {
-        ...formData,
-        ...(selectedOrder && { id: selectedOrder.id })
-      };
+      let orderData;
+      if (selectedOrder) { // PUT
+        orderData = {
+          ...selectedOrder,
+          ...formData,
+          User: users.find(u => u.id === formData.userId),
+          orderItems: selectedOrder.items || [],
+        };
+      } else { // POST
+        orderData = {
+          ...formData,
+          User: users.find(u => u.id === formData.userId),
+          orderItems: [],
+        };
+      }
       
       const res = await fetch(url, {
         method,
@@ -143,7 +185,7 @@ const Orders = () => {
       });
       
       setShowEditModal(false);
-      fetchOrders();
+      fetchAllData();
     } catch (e) {
       setAlert({ show: true, type: 'danger', message: e.message });
     } finally {
@@ -152,12 +194,17 @@ const Orders = () => {
   };
 
   const handleUpdateStatus = async (id, newStatus) => {
+    const orderToUpdate = orders.find(o => o.id === id);
+    if (!orderToUpdate) {
+      setAlert({ show: true, type: 'danger', message: 'Замовлення не знайдено' });
+      return;
+    }
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(API_URL, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ ...orderToUpdate, status: newStatus })
       });
       
       if (!res.ok) throw new Error('Не вдалося оновити статус замовлення');
@@ -169,7 +216,7 @@ const Orders = () => {
       });
       
       
-      fetchOrders();
+      fetchAllData();
     } catch (e) {
       setAlert({ show: true, type: 'danger', message: e.message });
     } finally {
@@ -177,26 +224,58 @@ const Orders = () => {
     }
   };
 
-  const handleViewDetails = (order) => {
-    
-    const orderWithDefaults = {
-      ...order,
-      items: order.items || [],
-      totalPrice: order.totalPrice || 0,
-      status: order.status || 'Нове',
-      paymentMethod: order.paymentMethod || 'Не вказано',
-      orderName: order.orderName || 'Без назви',
-      phonenumber: order.phonenumber || 'Не вказано',
-      deliveryId: order.deliveryId || 'Не вказано',
-      cuponsId: order.cuponsId || 'Не використовувався',
-      deliveryMethodId: order.deliveryMethodId || 'Не вказано',
-      notes: order.notes || '',
-      createdAt: order.createdAt || new Date().toISOString(),
-      completedAt: order.completedAt || null
-    };
-    
-    setSelectedOrder(orderWithDefaults);
-    setShowDetailsModal(true);
+  const handleViewDetails = async (order) => {
+    setLoading(true);
+    try {
+      const customer = users.find(u => u.id === order.userId);
+      const deliveryMethod = deliveryMethods.find(d => d.id === order.deliveryMethodId);
+      const coupon = coupons.find(c => c.id === order.cuponsId);
+
+      const itemsWithProductNames = await Promise.all(
+        (order.orderItems || order.items || []).map(async (item) => {
+          try {
+            if (!item.productId) return { ...item, modelName: 'ID товару відсутній' };
+            const productRes = await fetch(`${PRODUCTS_API_URL}/${item.productId}`);
+            if (!productRes.ok) {
+              return { ...item, modelName: `Товар #${item.productId}` };
+            }
+            const productData = await productRes.json();
+            const modelName = productData?.color?.model?.name || 'Назву не знайдено';
+            return { ...item, modelName };
+          } catch {
+            return { ...item, modelName: `Помилка завантаження товару #${item.productId}` };
+          }
+        })
+      );
+
+      const subtotal = itemsWithProductNames.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
+      const deliveryCost = deliveryMethod ? Number(deliveryMethod.deliveryPrice) : 0;
+      const calculatedTotalPrice = subtotal + deliveryCost;
+      
+      const orderWithDefaults = {
+        ...order,
+        items: itemsWithProductNames,
+        totalPrice: calculatedTotalPrice,
+        statusDisplay: statusDisplayMap[order.status] || order.status,
+        paymentMethodDisplay: paymentMethodMap[order.paymentMethod] ?? 'Не вказано',
+        customerName: customer ? (customer.fullName || customer.email) : 'Невідомо',
+        deliveryMethodName: deliveryMethod ? deliveryMethod.name : 'Не вказано',
+        couponName: coupon ? coupon.code : 'Не використовувався',
+        orderName: order.orderName || 'Без назви',
+        phonenumber: order.phonenumber || 'Не вказано',
+        deliveryId: order.deliveryId || 'Не вказано',
+        notes: order.notes || '',
+        createdAt: order.createdAt || new Date().toISOString(),
+        completedAt: order.completedAt || null
+      };
+      
+      setSelectedOrder(orderWithDefaults);
+      setShowDetailsModal(true);
+    } catch(e) {
+      setAlert({ show: true, type: 'danger', message: 'Не вдалося завантажити деталі замовлення.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -300,15 +379,15 @@ const Orders = () => {
                   <h5 className="mb-3 fw-bold">Інформація про замовлення</h5>
                   <div className="row">
                     <div className="col-md-6">
-                      <p><strong>Статус:</strong> <Badge bg={getStatusColor(selectedOrder.status)}>{selectedOrder.status}</Badge></p>
+                      <p><strong>Статус:</strong> <Badge bg={getStatusColor(selectedOrder.status)}>{selectedOrder.statusDisplay}</Badge></p>
                       <p><strong>Дата замовлення:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
                       <p><strong>Завершення:</strong> {selectedOrder.completedAt ? new Date(selectedOrder.completedAt).toLocaleString() : 'Не завершено'}</p>
-                      <p><strong>Метод оплати:</strong> {selectedOrder.paymentMethod || 'Не вказано'}</p>
+                      <p><strong>Метод оплати:</strong> {selectedOrder.paymentMethodDisplay}</p>
                     </div>
                     <div className="col-md-6">
-                      <p><strong>Клієнт:</strong> {selectedOrder.userId || 'Невідомо'}</p>
+                      <p><strong>Клієнт:</strong> {selectedOrder.customerName || 'Невідомо'}</p>
                       <p><strong>Телефон:</strong> {selectedOrder.phonenumber || 'Не вказано'}</p>
-                      <p><strong>ID купона:</strong> {selectedOrder.cuponsId || 'Не використовувався'}</p>
+                      <p><strong>Купон:</strong> {selectedOrder.couponName || 'Не використовувався'}</p>
                       <p><strong>ID доставки:</strong> {selectedOrder.deliveryId || 'Не вказано'}</p>
                     </div>
                   </div>
@@ -321,7 +400,7 @@ const Orders = () => {
                   <div className="row">
                     <div className="col-md-6">
                       <p><strong>Назва замовлення:</strong> {selectedOrder.orderName || 'Не вказано'}</p>
-                      <p><strong>ID методу доставки:</strong> {selectedOrder.deliveryMethodId || 'Не вказано'}</p>
+                      <p><strong>Метод доставки:</strong> {selectedOrder.deliveryMethodName || 'Не вказано'}</p>
                     </div>
                     <div className="col-md-6">
                       <p><strong>Загальна сума:</strong> <span className="text-success fw-bold">{selectedOrder.totalPrice || 0} ₴</span></p>
@@ -348,8 +427,8 @@ const Orders = () => {
                       </thead>
                       <tbody>
                         {selectedOrder.items.map((item, index) => (
-                          <tr key={index}>
-                            <td>{item.name || `Товар #${index + 1}`}</td>
+                          <tr key={item.id || index}>
+                            <td>{item.modelName || `Товар #${index + 1}`}</td>
                             <td>{item.quantity || 1}</td>
                             <td>{item.price || 0} ₴</td>
                             <td>{(item.quantity || 1) * (item.price || 0)} ₴</td>
@@ -429,20 +508,12 @@ const Orders = () => {
     <Form.Label className="mb-1 fw-medium">Статус <span className="text-danger">*</span></Form.Label>
 <Form.Select
   name="status"
-  value={formData.status}
+  value={statusDisplayMap[formData.status] || ''}
   onChange={e => {
-    const map = {
-      'Нове': 'New',
-      'В процесі': 'InProgress',
-      'Готово': 'Ready',
-      'New': 'New',
-      'InProgress': 'InProgress',
-      'Ready': 'Ready'
-    };
     handleInputChange({
       target: {
         name: 'status',
-        value: map[e.target.value] || e.target.value
+        value: displayToStatusMap[e.target.value] || ''
       }
     });
   }}
@@ -496,19 +567,21 @@ const Orders = () => {
               {errorFields.orderName && <div className="invalid-feedback">{errorFields.orderName}</div>}
             </div>
             <div className="col-12">
-  <Form.Label className="mb-1 fw-medium">Метод оплати (код)</Form.Label>
-  <FormControl
-    type="number"
-    name="paymentMethod"
-    value={formData.paymentMethod || ''}
-    onChange={handleInputChange}
-    className={errorFields.paymentMethod ? 'is-invalid' : ''}
-    disabled={loading}
-    placeholder="Введіть код методу оплати"
-    min="0"
-  />
-  {errorFields.paymentMethod && <div className="invalid-feedback">{errorFields.paymentMethod}</div>}
-</div>
+              <Form.Label className="mb-1 fw-medium">Метод оплати</Form.Label>
+              <Form.Select
+                name="paymentMethod"
+                value={formData.paymentMethod}
+                onChange={handleInputChange}
+                className={errorFields.paymentMethod ? 'is-invalid' : ''}
+                disabled={loading}
+              >
+                <option value="">Оберіть метод оплати</option>
+                {Object.entries(paymentMethodMap).map(([code, name]) => (
+                  <option key={code} value={code}>{name}</option>
+                ))}
+              </Form.Select>
+              {errorFields.paymentMethod && <div className="invalid-feedback">{errorFields.paymentMethod}</div>}
+            </div>
             <div className="col-12">
               <Form.Label className="mb-1 fw-medium">ID методу доставки</Form.Label>
               <FormControl
@@ -607,14 +680,14 @@ const Orders = () => {
         <td><Badge bg={getStatusColor(order.status)}>{
   order.status === 'New' ? 'Нове' : order.status === 'InProgress' ? 'В процесі' : order.status === 'Ready' ? 'Готово' : order.status
 }</Badge></td>
-        <td>{order.orderName || ''}</td>
-        <td>{order.createdAt ? new Date(order.createdAt).toLocaleString() : ''}</td>
-        <td>{order.completedAt ? new Date(order.completedAt).toLocaleString() : ''}</td>
-        <td>{order.paymentMethod || ''}</td>
-        <td>{order.deliveryMethodId || ''}</td>
-        <td>{order.deliveryId || ''}</td>
-        <td>{order.cuponsId || ''}</td>
-        <td>{order.phonenumber || ''}</td>
+        <td>{order.orderName || '—'}</td>
+        <td>{order.createdAt ? new Date(order.createdAt).toLocaleString() : '—'}</td>
+        <td>{order.completedAt ? new Date(order.completedAt).toLocaleString() : '—'}</td>
+        <td>{order.paymentMethod || '—'}</td>
+        <td>{order.deliveryMethodId || '—'}</td>
+        <td>{order.deliveryId || '—'}</td>
+        <td>{order.cuponsId || '—'}</td>
+        <td>{order.phonenumber || '—'}</td>
         <td>
           <div className="d-flex gap-2">
             <Button 
@@ -662,67 +735,6 @@ const Orders = () => {
           </>
         )}
       </Card>
-
-      <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} centered size="lg">
-        <Modal.Header closeButton className="border-0">
-          <Modal.Title className="fw-bold">Деталі замовлення #{selectedOrder?.id}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedOrder && (
-            <>
-              <Card className="mb-3">
-                <Card.Body>
-                  <h5 className="mb-3">Інформація про замовлення</h5>
-                  <Row>
-                    <Col md={6}>
-                      <p><strong>Статус:</strong> {selectedOrder.status}</p>
-                      <p><strong>Дата замовлення:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
-                      <p><strong>Дата виконання:</strong> {selectedOrder.completedAt ? new Date(selectedOrder.completedAt).toLocaleString() : 'Не виконано'}</p>
-                      <p><strong>Метод оплати:</strong> {selectedOrder.paymentMethod}</p>
-                      <p><strong>Метод доставки:</strong> {selectedOrder.deliveryMethod}</p>
-                    </Col>
-                    <Col md={6}>
-                      <p><strong>Ім'я замовника:</strong> {selectedOrder.orderName}</p>
-                      <p><strong>Телефон:</strong> {selectedOrder.phonenumber}</p>
-                      <p><strong>Купон:</strong> {selectedOrder.cuponsId ? `#${selectedOrder.cuponsId}` : 'Немає'}</p>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-
-              <Card>
-                <Card.Body>
-                  <h5 className="mb-3">Товари замовлення</h5>
-                  <Table striped>
-                    <thead>
-                      <tr>
-                        <th>Назва</th>
-                        <th>Кількість</th>
-                        <th>Ціна за одиницю</th>
-                        <th>Всього</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Array.isArray(selectedOrder.items) && selectedOrder.items.map(item => (
-                        <tr key={item.id}>
-                          <td>{item.product.name}</td>
-                          <td>{item.quantity}</td>
-                          <td>{item.price} ₴</td>
-                          <td>{item.quantity * item.price} ₴</td>
-                        </tr>
-                      ))}
-                      <tr>
-                        <td colSpan={3} className="text-end fw-bold">Всього:</td>
-                        <td className="fw-bold">{selectedOrder.totalPrice} ₴</td>
-                      </tr>
-                    </tbody>
-                  </Table>
-                </Card.Body>
-              </Card>
-            </>
-          )}
-        </Modal.Body>
-      </Modal>
     </div>
   );
 };

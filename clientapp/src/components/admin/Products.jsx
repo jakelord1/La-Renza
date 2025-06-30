@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Spinner, Alert, Table, Modal, Image, Row, Col } from 'react-bootstrap';
+import { Card, Form, Button, Spinner, Alert, Table, Modal, Image, Row, Col, Accordion } from 'react-bootstrap';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Products`;
 const COLORS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Colors`;
-const SIZES_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Sizes`;
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -25,8 +24,10 @@ const Products = () => {
   const [modelId, setModelId] = useState('');
 
   const [colors, setColors] = useState([]);
-  const [sizes, setSizes] = useState([]);
   const [models, setModels] = useState([]);
+  const [filteredColors, setFilteredColors] = useState([]);
+  const [filteredSizes, setFilteredSizes] = useState([]);
+  const [groupedProducts, setGroupedProducts] = useState([]);
   const [_loadingData, setLoadingData] = useState(false);
 
   const fetchProducts = async () => {
@@ -63,11 +64,6 @@ const Products = () => {
         const colorsData = await colorsRes.json();
         setColors(colorsData);
 
-        const sizesRes = await fetch(SIZES_API_URL);
-        if (!sizesRes.ok) throw new Error('Помилка завантаження розмірів');
-        const sizesData = await sizesRes.json();
-        setSizes(sizesData);
-
         await fetchModels();
         await fetchProducts();
       } catch (e) {
@@ -78,6 +74,87 @@ const Products = () => {
     };
     fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    const groupProducts = () => {
+      if (!products || products.length === 0) {
+        setGroupedProducts([]);
+        return;
+      }
+
+      const grouped = products.reduce((acc, product) => {
+        const modelId = product.color?.model?.id;
+        const modelName = product.color?.model?.name || 'Без моделі';
+
+        if (!modelId) return acc;
+
+        let modelGroup = acc.find(g => g.modelId === modelId);
+
+        if (!modelGroup) {
+          modelGroup = { modelId, modelName, colors: [] };
+          acc.push(modelGroup);
+        }
+
+        const colorId = product.color?.id;
+        const colorName = product.color?.name || 'Без кольору';
+
+        if (!colorId) return acc;
+
+        let colorGroup = modelGroup.colors.find(c => c.colorId === colorId);
+
+        if (!colorGroup) {
+          colorGroup = { colorId, colorName, products: [] };
+          modelGroup.colors.push(colorGroup);
+        }
+
+        colorGroup.products.push(product);
+
+        return acc;
+      }, []);
+      
+      setGroupedProducts(grouped.sort((a, b) => a.modelName.localeCompare(b.modelName)));
+    };
+
+    groupProducts();
+  }, [products]);
+
+  const handleModelChange = async (e) => {
+    const newModelId = e.target.value;
+    setModelId(newModelId);
+    setColorId('');
+    setSizeId('');
+
+    if (!newModelId) {
+        setFilteredColors([]);
+        setFilteredSizes([]);
+        return;
+    }
+
+    const selectedModel = models.find(m => m.id === parseInt(newModelId));
+    if (!selectedModel) {
+        setFilteredColors([]);
+        setFilteredSizes([]);
+        return;
+    }
+
+    setFilteredColors(colors.filter(c => c.modelId === selectedModel.id));
+
+    if (selectedModel.categoryId) {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${selectedModel.categoryId}`);
+            if (!res.ok) {
+                throw new Error('Помилка завантаження розмірів для категорії');
+            }
+            const categoryData = await res.json();
+            setFilteredSizes(categoryData.sizes || []);
+        } catch (e) {
+            setAlert({ show: true, type: 'danger', message: e.message });
+            setFilteredSizes([]);
+        }
+    } else {
+        setFilteredSizes([]);
+    }
+  };
 
   const resetForm = () => {
     setName('');
@@ -113,7 +190,7 @@ const Products = () => {
     setLoading(true);
     try {
       const selectedColor = colors.find(c => c.id === parseInt(colorId));
-      const selectedSize = sizes.find(s => s.id === parseInt(sizeId));
+      const selectedSize = filteredSizes.find(s => s.id === parseInt(sizeId));
       const selectedModel = models.find(m => m.id === parseInt(modelId));
 
       const image = selectedColor?.imageId
@@ -134,7 +211,8 @@ const Products = () => {
             category: typeof selectedModel.category === 'string'
               ? selectedModel.category
               : (selectedModel.category?.name || ''),
-            sizes: selectedModel.sizes
+            sizes: selectedModel.sizes,
+            photos: selectedModel.photos || []
           }
         : null;
       console.log('MODEL FOR PAYLOAD:', model);
@@ -190,18 +268,36 @@ const Products = () => {
     }
   };
 
-  const handleEditProduct = (product) => {
+  const handleEditProduct = async (product) => {
+    // Fetch dependent data FIRST
+    let availableSizes = [];
+    const productModelId = product.color?.model?.id?.toString() || '';
+    const selectedModel = models.find(m => m.id === parseInt(productModelId));
+    const availableColors = selectedModel ? colors.filter(c => c.modelId === selectedModel.id) : [];
+
+    if (selectedModel && selectedModel.categoryId) {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${selectedModel.categoryId}`);
+            if (!res.ok) throw new Error('Помилка завантаження розмірів');
+            const categoryData = await res.json();
+            availableSizes = categoryData.sizes || [];
+        } catch (e) {
+            setAlert({ show: true, type: 'danger', message: e.message });
+        }
+    }
+
+    // Now set ALL state for the modal at once
     setEditingProduct(product);
-    setName(product.name);
-    setDescription(product.description || '');
-    setPrice(product.color?.model?.price !== undefined && product.color?.model?.price !== null ? product.color.model.price.toString() : '');
-    setCategoryId(product.categoryId !== undefined && product.categoryId !== null ? product.categoryId.toString() : '');
-    setImageUrl(product.imageUrl || '');
-    setIsActive(product.isActive);
-    setColorId(product.color?.id ? product.color.id.toString() : '');
-    setSizeId(product.size?.id ? product.size.id.toString() : '');
-    setModelId(product.color?.model?.id ? product.color.model.id.toString() : '');
-    setQuantity(product.quantity !== undefined && product.quantity !== null ? product.quantity.toString() : '');
+    setQuantity(product.quantity?.toString() || '0');
+    
+    setFilteredColors(availableColors);
+    setFilteredSizes(availableSizes);
+
+    setModelId(productModelId);
+    setColorId(product.color?.id?.toString() || '');
+    setSizeId(product.size?.id?.toString() || '');
+
+    // Finally, show the modal
     setShowEditModal(true);
   };
 
@@ -226,7 +322,7 @@ const Products = () => {
     setLoading(true);
     try {
       const selectedColor = colors.find(c => c.id === parseInt(colorId));
-      const selectedSize = sizes.find(s => s.id === parseInt(sizeId));
+      const selectedSize = filteredSizes.find(s => s.id === parseInt(sizeId));
       const selectedModel = models.find(m => m.id === parseInt(modelId));
 
       const image = selectedColor?.imageId
@@ -247,7 +343,8 @@ const Products = () => {
             category: typeof selectedModel.category === 'string'
               ? selectedModel.category
               : (selectedModel.category?.name || ''),
-            sizes: selectedModel.sizes
+            sizes: selectedModel.sizes,
+            photos: selectedModel.photos || []
           }
         : null;
       console.log('MODEL FOR PAYLOAD:', model);
@@ -467,56 +564,66 @@ const Products = () => {
           </div>
         ) : (
           <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-            {products.length === 0 ? (
+            {groupedProducts.length === 0 ? (
               <div className="text-muted text-center py-5">Товарів ще немає</div>
             ) : (
-              <Table hover className="align-middle">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Колір</th>
-                    <th>Розмір</th>
-                    <th>Модель</th>
-                    <th>Лайки</th>
-                    <th>Кількість</th>
-                    <th>Дії</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map(product => (
-                    <tr key={product.id}>
-                      <td>{product.id}</td>
-                      <td>{product.color?.name || '-'}</td>
-                      <td>{product.size?.name || '-'}</td>
-                      <td>{product.color?.model?.name || '-'}</td>
-                      <td>{product.usersLikesId ? product.usersLikesId.length : 0}</td>
-                      <td>{product.quantity || 0}</td>
-                      <td>
-                        <div className="d-flex gap-2">
-                          <Button 
-                            variant="link" 
-                            size="sm" 
-                            onClick={() => handleEditProduct(product)} 
-                            title="Редагувати" 
-                            className="p-0"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </Button>
-                          <Button 
-                            variant="link" 
-                            size="sm" 
-                            onClick={() => handleDeleteProduct(product.id)} 
-                            title="Видалити" 
-                            className="p-0"
-                          >
-                            <i className="bi bi-trash text-danger"></i>
-                          </Button>
+              <Accordion defaultActiveKey="0" alwaysOpen>
+                {groupedProducts.map((modelGroup, index) => (
+                  <Accordion.Item eventKey={String(index)} key={modelGroup.modelId}>
+                    <Accordion.Header><b>{modelGroup.modelName}</b></Accordion.Header>
+                    <Accordion.Body>
+                      {modelGroup.colors.map(colorGroup => (
+                        <div key={colorGroup.colorId} className="mb-4">
+                          <h5 className="fw-bold mb-3" style={{ fontSize: '1.1rem' }}>{colorGroup.colorName}</h5>
+                          <Table hover className="align-middle mb-0">
+                            <thead>
+                              <tr>
+                                <th>ID</th>
+                                <th>Розмір</th>
+                                <th>Лайки</th>
+                                <th>Кількість</th>
+                                <th>Дії</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {colorGroup.products.sort((a,b) => a.id - b.id).map(product => (
+                                <tr key={product.id}>
+                                  <td>{product.id}</td>
+                                  <td>{product.size?.name || '-'}</td>
+                                  <td>{product.usersLikesId ? product.usersLikesId.length : 0}</td>
+                                  <td>{product.quantity || 0}</td>
+                                  <td>
+                                    <div className="d-flex gap-2">
+                                      <Button
+                                        variant="link"
+                                        size="sm"
+                                        onClick={() => handleEditProduct(product)}
+                                        title="Редагувати"
+                                        className="p-0"
+                                      >
+                                        <i className="bi bi-pencil"></i>
+                                      </Button>
+                                      <Button
+                                        variant="link"
+                                        size="sm"
+                                        onClick={() => handleDeleteProduct(product.id)}
+                                        title="Видалити"
+                                        className="p-0"
+                                      >
+                                        <i className="bi bi-trash text-danger"></i>
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+                      ))}
+                    </Accordion.Body>
+                  </Accordion.Item>
+                ))}
+              </Accordion>
             )}
           </div>
         )}
@@ -531,15 +638,33 @@ const Products = () => {
             <Row>
               <Col md={12}>
                 <Form.Group className="mb-3">
+                  <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
+                  <Form.Select 
+                    value={modelId} 
+                    onChange={handleModelChange}
+                    required
+                    className="form-control-lg"
+                  >
+                    <option value="">Виберіть модель</option>
+                    {models.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
                   <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
                   <Form.Select 
                     value={colorId} 
                     onChange={(e) => setColorId(e.target.value)}
                     required
                     className="form-control-lg"
+                    disabled={!modelId}
                   >
                     <option value="">Виберіть колір</option>
-                    {colors.map(color => (
+                    {filteredColors.map(color => (
                       <option key={color.id} value={color.id}>
                         {color.name}
                       </option>
@@ -554,28 +679,12 @@ const Products = () => {
                     onChange={(e) => setSizeId(e.target.value)}
                     required
                     className="form-control-lg"
+                    disabled={!modelId}
                   >
                     <option value="">Виберіть розмір</option>
-                    {sizes.map(size => (
+                    {filteredSizes.map(size => (
                       <option key={size.id} value={size.id}>
                         {size.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={modelId} 
-                    onChange={(e) => setModelId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">Виберіть модель</option>
-                    {models.map(model => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
                       </option>
                     ))}
                   </Form.Select>
@@ -616,15 +725,32 @@ const Products = () => {
         <Modal.Body>
           <Form onSubmit={handleUpdateProduct}>
             <Form.Group className="mb-3">
+              <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
+              <Form.Select 
+                value={modelId} 
+                onChange={handleModelChange}
+                required
+                className="form-control-lg"
+              >
+                <option value="">Виберіть модель</option>
+                {models.map(model => (
+                  <option key={model.id} value={model.id}>
+                    {model.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
               <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
               <Form.Select 
                 value={colorId} 
                 onChange={(e) => setColorId(e.target.value)}
                 required
                 className="form-control-lg"
+                disabled={!modelId}
               >
                 <option value="">Виберіть колір</option>
-                {colors.map(color => (
+                {filteredColors.map(color => (
                   <option key={color.id} value={color.id}>
                     {color.name}
                   </option>
@@ -638,27 +764,12 @@ const Products = () => {
                 onChange={(e) => setSizeId(e.target.value)}
                 required
                 className="form-control-lg"
+                disabled={!modelId}
               >
                 <option value="">Виберіть розмір</option>
-                {sizes.map(size => (
+                {filteredSizes.map(size => (
                   <option key={size.id} value={size.id}>
                     {size.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
-              <Form.Select 
-                value={modelId} 
-                onChange={(e) => setModelId(e.target.value)}
-                required
-                className="form-control-lg"
-              >
-                <option value="">Виберіть модель</option>
-                {models.map(model => (
-                  <option key={model.id} value={model.id}>
-                    {model.name}
                   </option>
                 ))}
               </Form.Select>

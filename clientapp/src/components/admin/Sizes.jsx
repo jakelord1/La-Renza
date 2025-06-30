@@ -63,8 +63,10 @@ const Sizes = () => {
     }
     setLoading(true);
     try {
+      const selectedCategory = categories.find(c => c.id === Number(categoryId));
       const body = {
         categoryId: Number(categoryId),
+        category: selectedCategory,
         name
       };
       const res = await fetch(API_URL, {

@@ -3,6 +3,7 @@ import './ProductDetails.css';
 import AddToCartModal from './AddToCartModal';
 import LoginToFavoriteModal from './LoginToFavoriteModal';
 import { Pagination } from 'react-bootstrap';
+import Loader from './common/Loader';
 
 const API_URL = import.meta.env.VITE_BACKEND_API_LINK;
 
@@ -11,6 +12,7 @@ const ProductDetails = ({ model, products = [] }) => {
   const [showLikeTooltip, setShowLikeTooltip] = useState(null);
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [categoryName, setCategoryName] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const uniqueSizes = Array.from(new Set(products.map(p => p.size?.name).filter(Boolean)));
   const [selectedSize, setSelectedSize] = useState(uniqueSizes[0] || '');
@@ -20,14 +22,29 @@ const ProductDetails = ({ model, products = [] }) => {
 
 
   useEffect(() => {
-    const catId = model?.categoryId;
-    if (!catId) return;
-    fetch(`${API_URL}/api/Categories/${catId}`, { method: 'GET' })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data && (data.name || data.Name)) setCategoryName(data.name || data.Name);
-      })
-      .catch(() => setCategoryName('Категорія'));
+    const fetchData = async () => {
+      if (!model?.categoryId) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const catRes = await fetch(`${API_URL}/api/Categories/${model.categoryId}`);
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          if (catData && (catData.name || catData.Name)) {
+            setCategoryName(catData.name || catData.Name);
+          }
+        } else {
+          setCategoryName('Категорія');
+        }
+      } catch {
+        setCategoryName('Категорія');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, [model?.categoryId]);
 
 
@@ -229,6 +246,18 @@ const handleAddToCart = () => {
     };
   }, [showModal]);
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/Account/accountProfile', { credentials: 'include' })
+      .then(res => setIsAuthenticated(res.ok))
+      .catch(() => setIsAuthenticated(false));
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
+
   if (!model) return <div>Товар не знайдено</div>;
 
   const images = (model.photos && model.photos.length > 0)
@@ -366,15 +395,6 @@ const handleAddToCart = () => {
 
     return pages;
   };
-
-
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/Account/accountProfile', { credentials: 'include' })
-      .then(res => setIsAuthenticated(res.ok))
-      .catch(() => setIsAuthenticated(false));
-  }, []);
 
   return (
     <div className="product-details-page container py-4">

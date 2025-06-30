@@ -79,7 +79,7 @@ const Categories = () => {
         parentCategoryId: isGlobal || !parentCategoryId ? null : Number(parentCategoryId),
         isGlobal,
         imageId: imageId,
-        image: { id: image.id ?? null, path: imagePreview || '' },
+        image: { id: image.id ?? null, path: image.path || '' },
         sizes: [],
         models: []
       };
@@ -110,7 +110,7 @@ const Categories = () => {
       id: cat.image?.id ?? null
     });
     setImageId(cat.imageId ?? null);
-    setImagePreview(cat.image?.path || '');
+    setImagePreview(cat.image?.path ? `/images/${cat.image.path.replace(/^[/\\]+/, '')}` : '');
     setShowEditModal(true);
   };
 
@@ -128,7 +128,7 @@ const Categories = () => {
         parentCategoryId: isGlobal || !parentCategoryId ? null : Number(parentCategoryId),
         isGlobal,
         imageId: imageId,
-        image: { id: image.id ?? null, path: imagePreview || '' },
+        image: { id: image.id ?? null, path: image.path || '' },
         sizes: editingCategory.sizes ?? [],
         models: editingCategory.models ?? []
       };
@@ -302,7 +302,7 @@ const Categories = () => {
                     onChange={e => setSearchQuery(e.target.value)}
                   />
                 </InputGroup>
-                <div className="d-flex flex-wrap gap-2 mt-2">
+                <div className="d-flex flex-wrap gap-2 mt-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                   {availableImages.filter(img => img.path.toLowerCase().includes(searchQuery.toLowerCase())).map(img => (
                     <div key={img.id} style={{ border: imageId === img.id ? '2px solid #6f42c1' : '1px solid #ccc', borderRadius: 6, padding: 2, cursor: 'pointer' }} onClick={() => { setImageId(img.id); setImage({ path: img.path, id: img.id }); setImagePreview(`/images/${img.path.replace(/^[/\\]+/, '')}`); }}>
                       <Image src={`/images/${img.path.replace(/^[/\\]+/, '')}`} alt="img" style={{ maxHeight: 60, maxWidth: 90, objectFit: 'contain', borderRadius: 4 }} />
@@ -352,11 +352,32 @@ const Categories = () => {
               </Form.Select>
             </div>
             <div className="col-12">
-              <label htmlFor="edit-imagePath" className="form-label text-secondary small mb-1">Шлях до зображення</label>
-              <Form.Control type="text" id="edit-imagePath" value={`/images/${image.path}`} onChange={e => setImage({ path: e.target.value.replace('/images/', '') })} placeholder="/images/img.jpg" disabled={loading} className="rounded-3 mb-1" />
-              {image.path && (
-                <div className="mb-2"><img src={`/images/${image.path}`} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc' }} /></div>
-              )}
+              <Form.Group controlId="formCategoryImageEdit">
+                <Form.Label>Оберіть зображення</Form.Label>
+                <InputGroup>
+                  <FormControl
+                    placeholder="Пошук зображення..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                  />
+                </InputGroup>
+                <div className="d-flex flex-wrap gap-2 mt-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                  {availableImages.filter(img => img.path.toLowerCase().includes(searchQuery.toLowerCase())).map(img => (
+                    <div key={img.id} style={{ border: imageId === img.id ? '2px solid #6f42c1' : '1px solid #ccc', borderRadius: 6, padding: 2, cursor: 'pointer' }} onClick={() => { setImageId(img.id); setImage({ path: img.path, id: img.id }); setImagePreview(`/images/${img.path.replace(/^[/\\]+/, '')}`); }}>
+                      <Image src={`/images/${img.path.replace(/^[/\\]+/, '')}`} alt="img" style={{ maxHeight: 60, maxWidth: 90, objectFit: 'contain', borderRadius: 4 }} />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 text-center">
+                  {imagePreview && (
+                    <>
+                      <span className="text-muted">Обрано: </span>
+                      <span style={{ fontSize: 12, color: '#888', marginRight: 8 }}>{imagePreview}</span>
+                      <div className="mb-2"><img src={imagePreview} alt="preview" style={{ maxHeight: 70, borderRadius: 8, border: '1px solid #ccc', marginTop: 8 }} /></div>
+                    </>
+                  )}
+                </div>
+              </Form.Group>
             </div>
             <div className="col-12 mt-2">
               <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>

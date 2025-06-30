@@ -14,6 +14,8 @@ const Images = () => {
 
   const [file, setFile] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [editFile, setEditFile] = useState(null);
+  const [editPreviewImage, setEditPreviewImage] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
@@ -68,7 +70,6 @@ const Images = () => {
         body: formData
       });
       if (!res.ok) throw new Error('Не вдалося додати зображення');
-      const data = await res.json(); 
       setAlert({ show: true, type: 'success', message: 'Зображення додано!' });
       setShowAddModal(false);
       resetForm();
@@ -80,32 +81,36 @@ const Images = () => {
     }
   };
 
-  const [editPath, setEditPath] = useState('');
-const handleEditImage = (image) => {
+  const handleEditImage = (image) => {
     setEditingImage(image);
-    setEditPath(image.path);
+    setEditFile(null);
+    setEditPreviewImage(getFullImageUrl(image.path));
     setShowEditModal(true);
   };
 
   const handleUpdateImage = async (e) => {
     e.preventDefault();
-    if (!editPath) {
-      setAlert({ show: true, type: 'danger', message: 'Введіть шлях до зображення' });
+    if (!editFile) {
+      setAlert({ show: true, type: 'danger', message: 'Оберіть новий файл для завантаження' });
       return;
     }
     setLoading(true);
     try {
-      const body = { id: editingImage.id, path: editPath };
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+      const formData = new FormData();
+      formData.append('file', editFile);
+
+      const res = await fetch(`${API_URL}/${editingImage.id}`, {
+        method: 'PUT',
+        body: formData,
       });
+
       if (!res.ok) throw new Error('Не вдалося оновити зображення');
+      
       setAlert({ show: true, type: 'success', message: 'Зображення оновлено!' });
       setShowEditModal(false);
       setEditingImage(null);
-      resetForm();
+      setEditFile(null);
+      setEditPreviewImage(null);
       fetchImages();
     } catch (e) {
       setAlert({ show: true, type: 'danger', message: e.message });
@@ -297,18 +302,56 @@ const handleEditImage = (image) => {
         </Modal.Body>
       </Modal>
 
-      <Modal show={showEditModal} onHide={() => { setShowEditModal(false); setEditingImage(null); }} centered size="md" dialogClassName="modal-narrow">
+      <Modal show={showEditModal} onHide={() => { setShowEditModal(false); setEditingImage(null); setEditFile(null); setEditPreviewImage(null); }} centered size="md" dialogClassName="modal-narrow">
         <Modal.Header closeButton className="border-0">
           <Modal.Title className="fw-bold">Редагувати зображення</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleUpdateImage} className="row g-3">
             <div className="col-12">
-              <label htmlFor="edit-path" className="form-label text-secondary small mb-1">Path</label>
-              <Form.Control type="text" id="edit-path" value={editPath} onChange={e => setEditPath(e.target.value)} placeholder="URL або шлях до зображення" disabled={loading} className="rounded-3" />
+              <div className="mb-3 text-center">
+                {editPreviewImage && (
+                  <div style={{
+                    minHeight: '200px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1rem',
+                    backgroundColor: '#f8f9fa',
+                    borderRadius: '8px',
+                    padding: '1rem'
+                  }}>
+                    <Image
+                      src={editPreviewImage}
+                      alt="Попередній перегляд"
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '300px',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <label htmlFor="edit-file-upload" className="form-label text-secondary small mb-1">Виберіть новий файл зображення</label>
+              <Form.Control
+                type="file"
+                id="edit-file-upload"
+                accept="image/*"
+                onChange={e => {
+                  const f = e.target.files[0];
+                  setEditFile(f);
+                  if (f) {
+                    const reader = new FileReader();
+                    reader.onload = ev => setEditPreviewImage(ev.target.result);
+                    reader.readAsDataURL(f);
+                  }
+                }}
+                className="form-control-lg"
+              />
             </div>
             <div className="col-12 mt-2">
-              <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
+              <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight: 600, fontSize: '1.1rem', padding: '12px 0' }} disabled={loading || !editFile}>
                 {loading ? <Spinner size="sm" /> : <><i className="bi bi-save me-2"></i>Зберегти зміни</>}
               </Button>
             </div>

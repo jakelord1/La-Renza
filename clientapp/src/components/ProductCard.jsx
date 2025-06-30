@@ -31,9 +31,25 @@ const ProductCard = ({ model, products, sizes: propSizes, isAuthenticated, isFav
   : '';
 
   const badges = model ? (model.badges || [model.isNew && 'НОВИНКА'].filter(Boolean)) : [];
-  const sizes = Array.isArray(propSizes) && propSizes.length > 0
-  ? propSizes
-  : (model && products ? Array.from(new Set(products.map(p => p.size?.name).filter(Boolean))) : []);
+  const sizes = (() => {
+    if (Array.isArray(propSizes) && propSizes.length > 0) {
+      return propSizes;
+    }
+    if (model && products) {
+      const productSizes = products.map(p => p.size).filter(Boolean);
+      const uniqueSizeObjects = [];
+      const seenIds = new Set();
+      for (const size of productSizes) {
+        if (size && typeof size.id !== 'undefined' && !seenIds.has(size.id)) {
+          uniqueSizeObjects.push(size);
+          seenIds.add(size.id);
+        }
+      }
+      uniqueSizeObjects.sort((a, b) => a.id - b.id);
+      return uniqueSizeObjects.map(s => s.name);
+    }
+    return [];
+  })();
 
   const minPrice = products && products.length ? Math.min(...products.map(p => p.price || 0)) : (model ? model.price || 0 : 0);
   const [activeColorId, setActiveColorId] = React.useState((model && model.colors && model.colors[0]?.id) || null);
@@ -115,7 +131,11 @@ React.useEffect(() => { setLiked(!!propIsFavorite); }, [propIsFavorite]);
       </div>
 
       <div className="px-3 pt-3 pb-2 d-flex flex-column gap-1 flex-grow-1 w-100" style={{fontSize:'0.98rem', background:'#fff'}}>
-        <div className="text-secondary small lh-1 mb-1" style={{minHeight:18}}>{sizes && sizes.length ? sizes.join(', ') : 'Без розміру'}</div>
+        <div className="text-secondary small lh-1 mb-1" style={{minHeight:18}}>
+          {sizes.length > 1 
+            ? `${sizes[0]} - ${sizes[sizes.length - 1]}`
+            : (sizes.length === 1 ? sizes[0] : 'Без розміру')}
+        </div>
         <div className="fw-normal text-truncate mb-1" title={model.name} style={{fontSize:'1rem',lineHeight:'1.2'}}>{model.name}</div>
         <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
           <span className="fw-bold" style={{fontSize:'1.08rem',color:'var(--purple)'}}>{minPrice} UAH</span>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductDetails from './ProductDetails';
+import Loader from './common/Loader';
 
 const MODELS_API_URL = '/api/Models';
 const PRODUCTS_API_URL = '/api/Products';
@@ -30,10 +31,10 @@ const ProductDetailsWrapper = () => {
         const productsData = await productsRes.json();
         const commentsData = await commentsRes.json();
 
-        // Найти модель по id
+
         const foundModel = modelsData.find(m => String(m.id) === String(id));
         if (!foundModel) throw new Error('Товар не знайдено');
-        // Найти продукты этой модели
+
         const modelProducts = productsData.filter(
           p => p.color && p.color.model && String(p.color.model.id) === String(id)
         );
@@ -49,11 +50,10 @@ const ProductDetailsWrapper = () => {
     fetchData();
   }, [id]);
 
-  if (loading) return <div>Завантаження...</div>;
+  if (loading) return <Loader />;
   if (error) return <div className="alert alert-danger">{error}</div>;
   if (!model) return <div>Товар не знайдено</div>;
 
-  // Передаем модель, продукты и комментарии в ProductDetails
   return <ProductDetails model={model} products={products} comments={comments} />;
 };
 
