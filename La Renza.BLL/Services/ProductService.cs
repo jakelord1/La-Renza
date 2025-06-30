@@ -33,21 +33,34 @@ namespace La_Renza.BLL.Services
             await _db.Products.Create(product);
             await _db.Save();
         }
+        //public async Task UpdateProduct(ProductDTO productDto)
+        //{
+        //    Product orig = await _db.Products.Get(productDto.Id);
+        //    var product = new Product
+        //    {
+        //        Id = productDto.Id,
+        //        ColorId = productDto.ColorId,
+        //        SizeId = productDto.SizeId,
+        //        Quantity = productDto.Quantity,
+        //        User = orig.User
+        //    };
+        //    _db.Products.Update(product);
+        //    await _db.Save();
+
+        //}
         public async Task UpdateProduct(ProductDTO productDto)
         {
-            Product orig = await _db.Products.Get(productDto.Id);
-            var product = new Product
-            {
-                Id = productDto.Id,
-                ColorId = productDto.ColorId,
-                SizeId = productDto.SizeId,
-                Quantity = productDto.Quantity,
-                User = orig.User
-            };
-            _db.Products.Update(product);
-            await _db.Save();
+            var product = await _db.Products.Get(productDto.Id);
+            if (product == null)
+                throw new Exception("Product not found");
 
+            product.ColorId = productDto.ColorId;
+            product.SizeId = productDto.SizeId;
+            product.Quantity = productDto.Quantity;
+
+            await _db.Save();
         }
+
         public async Task DeleteProduct(int id)
         {
             await _db.Products.Delete(id);
