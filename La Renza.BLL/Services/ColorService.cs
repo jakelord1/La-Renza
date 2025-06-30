@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
-using La_Renza.DAL.Interfaces;
-using La_Renza.DAL.Entities;
+using La_Renza.BLL.Interfaces;
+using La_Renza.BLL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

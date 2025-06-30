@@ -1,5 +1,5 @@
 using La_Renza.BLL.Interfaces;
-using La_Renza.DAL.Entities;
+using La_Renza.BLL.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace La_Renza.Controllers

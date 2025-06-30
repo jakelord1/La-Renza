@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using La_Renza.DAL.Entities;
-using La_Renza.DAL.Interfaces;
-using La_Renza.DAL.EF;
+using La_Renza.BLL.Entities;
+using La_Renza.BLL.Interfaces;
+using La_Renza.BLL.EF;
 
-namespace La_Renza.DAL.Repositories
+namespace La_Renza.BLL.Repositories
 {
     public class OrderRepository : IRepository<Order>
     {

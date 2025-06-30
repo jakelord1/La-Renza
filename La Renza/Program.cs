@@ -1,5 +1,5 @@
 using La_Renza.BLL;
-using La_Renza.DAL;
+using La_Renza.BLL.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +27,7 @@ builder.Services.AddSession(options =>
     options.Cookie.Name = "Session";
 }); 
 
-builder.Services.AddLaRenzaDAL(builder.Configuration.GetConnectionString("DefaultConnection")!);
+builder.Services.AddLaRenzaContext(builder.Configuration.GetConnectionString("DefaultConnection")!);
 DependencyInjection.AddLaRenzaBLL(builder.Services);
 
 var app = builder.Build();

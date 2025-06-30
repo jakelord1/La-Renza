@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mysqlx.Crud;
 
-namespace La_Renza.DAL.Entities
+namespace La_Renza.BLL.Entities
 {
     public class User
     {

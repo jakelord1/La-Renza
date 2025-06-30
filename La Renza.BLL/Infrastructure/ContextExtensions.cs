@@ -1,4 +1,4 @@
-﻿using La_Renza.DAL.EF;
+﻿using La_Renza.BLL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -7,11 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace La_Renza.DAL
+namespace La_Renza.BLL
 {
-    public static class DALServiceCollectionExtensions
+    public static class ContextExtensions
     {
-        public static void AddLaRenzaDAL(this IServiceCollection services, string connectionString)
+        public static void AddLaRenzaContext(this IServiceCollection services, string connectionString)
         {
             services.AddDbContext<LaRenzaContext>(options =>
                 options.UseMySQL(connectionString));

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using La_Renza.DAL.Entities;
+using La_Renza.BLL.Entities;
 
 namespace La_Renza.BLL.DTO
 {

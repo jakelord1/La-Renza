@@ -8,7 +8,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace La_Renza.DAL.Entities
+namespace La_Renza.BLL.Entities
 {
     public class Comment
     {

@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using La_Renza.DAL.Entities;
-using La_Renza.DAL.Interfaces;
-using La_Renza.DAL.EF;
+using La_Renza.BLL.Entities;
+using La_Renza.BLL.Interfaces;
+using La_Renza.BLL.EF;
 using System.Drawing;
 
-namespace La_Renza.DAL.Repositories
+namespace La_Renza.BLL.Repositories
 {
     public class ProductRepository : IProductRepository
     {

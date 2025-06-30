@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using La_Renza.DAL.Entities;
+using La_Renza.BLL.Entities;
 using System.Numerics;
 
-namespace La_Renza.DAL.EF
+namespace La_Renza.BLL.EF
 {   
     
     public class LaRenzaContext : DbContext

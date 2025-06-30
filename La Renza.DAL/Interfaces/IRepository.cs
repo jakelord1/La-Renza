@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 
-namespace La_Renza.DAL.Interfaces
+namespace La_Renza.BLL.Interfaces
 {
     public interface IRepository<T> where T : class 
     {

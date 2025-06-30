@@ -1,6 +1,6 @@
-﻿using La_Renza.DAL.Entities;
+﻿using La_Renza.BLL.Entities;
 
-namespace La_Renza.DAL.Interfaces
+namespace La_Renza.BLL.Interfaces
 {
     public interface IUnitOfWork
     {

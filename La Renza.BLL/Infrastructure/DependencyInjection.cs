@@ -1,5 +1,4 @@
-using La_Renza.BLL.Infrastructure;
-using La_Renza.DAL.Interfaces;
+using La_Renza.BLL.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -7,12 +6,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using La_Renza.DAL.Repositories;
+using La_Renza.BLL.Repositories;
 using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.Services;
-using La_Renza.DAL.Entities;
+using La_Renza.BLL.Entities;
 
-namespace La_Renza.BLL
+namespace La_Renza.BLL.Infrastructure
 {
     public static class DependencyInjection
     {

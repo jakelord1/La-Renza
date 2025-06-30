@@ -1,4 +1,4 @@
-﻿using La_Renza.DAL.Entities;
+﻿using La_Renza.BLL.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,7 +1,7 @@
 ﻿using La_Renza.BLL.DTO;
 using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.Services;
-using La_Renza.DAL.Entities;
+using La_Renza.BLL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Mysqlx.Crud;
 

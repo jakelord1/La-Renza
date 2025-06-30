@@ -1,6 +1,6 @@
 ﻿using La_Renza.BLL.DTO;
-using La_Renza.DAL.Entities;
-using La_Renza.DAL.Interfaces;
+using La_Renza.BLL.Entities;
+using La_Renza.BLL.Interfaces;
 using La_Renza.BLL.Infrastructure;
 using La_Renza.BLL.Interfaces;
 using AutoMapper;
@@ -21,7 +21,7 @@ namespace La_Renza.BLL.Services
         public async Task CreateOrder(OrderDTO orderDto)
         {
             var last = (await Database.Orders.GetAll()).LastOrDefault();
-            var order = new DAL.Entities.Order
+            var order = new BLL.Entities.Order
             {
                 Id = orderDto.Id,
                 UserId = orderDto.UserId,
@@ -42,7 +42,7 @@ namespace La_Renza.BLL.Services
 
         public async Task UpdateOrder(OrderDTO orderDto)
         {
-            var order = new DAL.Entities.Order
+            var order = new BLL.Entities.Order
             {
                 Id = orderDto.Id,
                 UserId = orderDto.UserId,

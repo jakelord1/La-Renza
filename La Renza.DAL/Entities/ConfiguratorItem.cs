@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
-namespace La_Renza.DAL.Entities
+namespace La_Renza.BLL.Entities
 {
 
     public class ConfiguratorItem
