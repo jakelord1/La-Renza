@@ -23,12 +23,13 @@ namespace La_Renza.BLL.Services
         }
         public async Task CreateComment(CommentDTO commentDto)
         {
+            var image = await _db.Images.Get(commentDto.Image.Id);
             var comment = new Comment
             {
                 Text = commentDto.Text,
                 ProductId = commentDto.ProductId,
                 UserId = commentDto.UserId,
-                Image = _mapper.Map<Image>(commentDto.Image),
+                Image = image,
                 Rating = commentDto.Rating,
                 Date = commentDto.Date,
                 LikesAmount = commentDto.LikesAmount
@@ -36,27 +37,51 @@ namespace La_Renza.BLL.Services
             await _db.Comments.Create(comment);
             await _db.Save();
         }
+        //public async Task UpdateComment(CommentDTO commentDto)
+        //{
+        //    var comment = new Comment
+        //    {
+        //        Id = commentDto.Id,
+        //        Text = commentDto.Text,
+        //        ProductId = commentDto.ProductId,
+        //        UserId = commentDto.UserId,
+        //        Image = _mapper.Map<Image>(commentDto.Image),
+        //        Rating = commentDto.Rating,
+        //        Date = commentDto.Date,
+        //        LikesAmount = commentDto.LikesAmount
+        //    };
+        //    var Saved = await _db.Comments.Get(commentDto.Id);
+        //    if (Saved != null)
+        //        Saved = comment;
+        //    else
+        //        throw new Exception();
+        //    _db.Comments.Update(comment);
+        //    await _db.Save();
+        //}
+
         public async Task UpdateComment(CommentDTO commentDto)
         {
-            var comment = new Comment
+            var existingComment = await _db.Comments.Get(commentDto.Id); 
+
+            if (existingComment == null)
+                throw new Exception("Комментарий не найден");
+       
+            existingComment.Text = commentDto.Text;
+            existingComment.ProductId = commentDto.ProductId;
+            existingComment.UserId = commentDto.UserId;
+            existingComment.Rating = commentDto.Rating;
+            existingComment.Date = commentDto.Date;
+            existingComment.LikesAmount = commentDto.LikesAmount;
+
+            if (commentDto.Image != null)
             {
-                Id = commentDto.Id,
-                Text = commentDto.Text,
-                ProductId = commentDto.ProductId,
-                UserId = commentDto.UserId,
-                Image = _mapper.Map<Image>(commentDto.Image),
-                Rating = commentDto.Rating,
-                Date = commentDto.Date,
-                LikesAmount = commentDto.LikesAmount
-            };
-            var Saved = await _db.Comments.Get(commentDto.Id);
-            if (Saved != null)
-                Saved = comment;
-            else
-                throw new Exception();
-            _db.Comments.Update(comment);
+                var image = await _db.Images.Get(commentDto.Image.Id);
+                existingComment.Image = image;
+            }
+
             await _db.Save();
         }
+
         public async Task DeleteComment(int id)
         {
             await _db.Comments.Delete(id);
