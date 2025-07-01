@@ -398,9 +398,25 @@ namespace La_Renza.Controllers
                 return Unauthorized(new { message = "User not logged in." });
 
             var favoriteModels = await _productService.GetModelsByUserId(user.Id);
-            
 
-            return Ok(favoriteModels);
+            var result = favoriteModels.Select(model => new ModelProduct
+            {
+                Id = model.Id,
+                Name = model.Name ?? "Unknown",
+                Description = model.Description,
+                MaterialInfo = model.MaterialInfo,
+                StartDate = model.StartDate,
+                Price = (decimal)model.Price,
+                ImageUrl = model.Photos.FirstOrDefault()?.Path ?? "",
+                Rate = model.Rate,
+                Sizes = model.Sizes,
+                CategoryId = model.CategoryId,
+                Bages = !string.IsNullOrEmpty(model.Bage)
+       ? new List<string> { model.Bage! }
+       : new List<string>()
+
+            }).ToList();
+            return Ok(result);
         }
 
         // GET: api/Account/
