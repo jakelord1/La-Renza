@@ -87,7 +87,7 @@ const Dashboard = () => {
                 <Card.Body>
                   <div className="mb-2">
                     <span className="d-inline-flex align-items-center justify-content-center rounded-circle bg-light shadow-sm" style={{ width: 56, height: 56 }}>
-                      <i className="bi bi-grid fs-2 text-primary"></i>
+                      <i className="bi bi-grid fs-2" style={{color: '#6f42c1'}}></i>
                     </span>
                   </div>
                   <h3 className="fw-bold mb-0">{totalProducts}</h3>

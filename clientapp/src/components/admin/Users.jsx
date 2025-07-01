@@ -342,7 +342,7 @@ const Users = () => {
             style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
             onClick={() => { resetForm(); setShowAddModal(true); }}
           >
-            <i className="bi bi-plus-lg" style={{fontSize:18}}></i> Додати
+            <i className="bi bi-plus-lg " style={{fontSize:18}}></i> Додати
           </Button>
         </div>
         {loading ? (
@@ -389,7 +389,8 @@ const Users = () => {
                             {(user.cupons || []).map(coupon => (
                               <span
                                 key={coupon.id}
-                                className="badge rounded-pill bg-primary"
+                                className="badge rounded-pill"
+                                style={{backgroundColor: '#6f42c1'}}
                               >
                                 {coupon.name}
                               </span>
@@ -400,7 +401,7 @@ const Users = () => {
                               onClick={() => handleManageCoupons(user)}
                               className="p-0 ms-1"
                             >
-                              <i className="bi bi-plus-circle"></i>
+                              <i className="bi bi-plus-circle" style={{color: '#6f42c1'}}></i>
                             </Button>
                           </div>
                         </td>
@@ -413,7 +414,7 @@ const Users = () => {
                         <td>{user.laRenzaPoints}</td>
                         <td>
                           <div className="d-flex gap-2">
-                            <Button variant="link" size="sm" onClick={() => handleEditUser(user)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
+                            <Button variant="link" size="sm" onClick={() => handleEditUser(user)} title="Редагувати" className="p-0"><i className="bi bi-pencil" style={{color: '#6f42c1'}}></i></Button>
                             <Button variant="link" size="sm" onClick={() => handleDeleteUser(user.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
                           </div>
                         </td>
@@ -496,7 +497,7 @@ const Users = () => {
               />
             </div>
             <div className="col-12">
-              <Button type="submit" variant="primary" disabled={loading} className="rounded-3">
+              <Button type="submit" disabled={loading} className="rounded-3" style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}>
                 {loading ? <Spinner animation="border" size="sm" /> : 'Додати'}
               </Button>
             </div>

@@ -185,7 +185,6 @@ const Categories = () => {
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
           <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі категорії</h4>
           <Button
-            variant="primary"
             style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
             onClick={() => { resetForm(); setShowAddModal(true); }}
           >
@@ -231,7 +230,7 @@ const Categories = () => {
 ) : '—'}</td>
                           <td>
                             <div className="d-flex gap-2">
-                              <Button variant="link" size="sm" onClick={() => handleEditCategory(group)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
+                              <Button variant="link" size="sm" onClick={() => handleEditCategory(group)} title="Редагувати" className="p-0"><i className="bi bi-pencil" style={{color: '#6f42c1'}}></i></Button>
                               <Button variant="link" size="sm" onClick={() => handleDeleteCategory(group.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
                               <Button variant="link" size="sm" onClick={() => { setModalTitle('Розміри'); setModalList(group.sizes); setShowSizesModal(true); }} title="Розміри" className="p-0"><i className="bi bi-rulers"></i></Button>
                               <Button variant="link" size="sm" onClick={() => { setModalTitle('Моделі'); setModalList(group.models); setShowModelsModal(true); }} title="Моделі" className="p-0"><i className="bi bi-person"></i></Button>
@@ -252,7 +251,7 @@ const Categories = () => {
 ) : '—'}</td>
                             <td>
                               <div className="d-flex gap-2">
-                                <Button variant="link" size="sm" onClick={() => handleEditCategory(child)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
+                                <Button variant="link" size="sm" onClick={() => handleEditCategory(child)} title="Редагувати" className="p-0"><i className="bi bi-pencil" style={{color: '#6f42c1'}}></i></Button>
                                 <Button variant="link" size="sm" onClick={() => handleDeleteCategory(child.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
                                 <Button variant="link" size="sm" onClick={() => { setModalTitle('Розміри'); setModalList(child.sizes); setShowSizesModal(true); }} title="Розміри" className="p-0"><i className="bi bi-rulers"></i></Button>
                                 <Button variant="link" size="sm" onClick={() => { setModalTitle('Моделі'); setModalList(child.models); setShowModelsModal(true); }} title="Моделі" className="p-0"><i className="bi bi-person"></i></Button>

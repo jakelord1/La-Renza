@@ -219,7 +219,7 @@ const Images = () => {
 </td>
                       <td>
                         <div className="d-flex gap-2">
-                          <Button variant="link" size="sm" onClick={() => handleEditImage(image)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
+                          <Button variant="link" size="sm" onClick={() => handleEditImage(image)} title="Редагувати" className="p-0"><i className="bi bi-pencil" style={{color: '#6f42c1'}}></i></Button>
                           <Button variant="link" size="sm" onClick={() => handleDeleteImage(image.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
                         </div>
                       </td>

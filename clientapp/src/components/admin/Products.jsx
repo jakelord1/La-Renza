@@ -525,7 +525,7 @@ const Products = () => {
               >
                 Скасувати
               </Button>
-              <Button variant="primary" type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}>
                 {loading ? (
                   <>
                     <Spinner as="span" size="sm" animation="border" role="status" aria-hidden="true" className="me-1" />
@@ -556,7 +556,6 @@ const Products = () => {
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
           <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі товари</h4>
           <Button
-            variant="primary"
             style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
             onClick={() => { resetForm(); setShowAddModal(true); }}
           >
@@ -609,7 +608,7 @@ const Products = () => {
                                         title="Редагувати"
                                         className="p-0"
                                       >
-                                        <i className="bi bi-pencil"></i>
+                                        <i className="bi bi-pencil" style={{color: '#6f42c1'}}></i>
                                       </Button>
                                       <Button
                                         variant="link"

@@ -5,6 +5,22 @@ import { Card, Form, Button, Spinner, Alert, Table, Modal, Badge } from 'react-b
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Models`;
 
 const Models = () => {
+  // CSS стили для фиолетовых элементов
+  const customStyles = `
+    <style>
+      .btn-outline-primary:hover {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      .btn-outline-primary:hover .bi-pencil {
+        color: white !important;
+      }
+      .badge.bg-primary {
+        background-color: #6f42c1 !important;
+      }
+    </style>
+  `;
+
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
@@ -507,7 +523,6 @@ const Models = () => {
           </Form.Group>
           <div className="d-flex justify-content-end">
             <Button
-              variant="primary"
               type="submit"
               style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
             >
@@ -526,6 +541,7 @@ const Models = () => {
 
   return (
     <div>
+      <div dangerouslySetInnerHTML={{ __html: customStyles }} />
       <h2 className="mb-4 fw-bold" style={{fontSize: '2.1rem'}}>Моделі</h2>
 
       {alert.show && (
@@ -538,7 +554,6 @@ const Models = () => {
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
           <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі моделі</h4>
           <Button
-            variant="primary"
             style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
             onClick={() => { resetForm(); setShowAddModal(true); }}
           >
@@ -615,7 +630,7 @@ const Models = () => {
                             onClick={() => handleEditModel(model)}
                             title="Редагувати"
                           >
-                            <i className="bi bi-pencil"></i>
+                            <i className="bi bi-pencil" style={{color: '#6f42c1'}}></i>
                           </Button>
                           <Button
                             variant="outline-danger"

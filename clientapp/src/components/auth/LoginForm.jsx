@@ -7,6 +7,20 @@ const API_URL = 'https://localhost:7071/api/Account/loginUser';
 
 
 const LoginForm = () => {
+  // CSS стили для фиолетовых чекбоксов
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -85,6 +99,7 @@ const LoginForm = () => {
 
     return (
         <>
+            <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
             
     <section className="auth-page bg-light py-5">
       <div className="container">

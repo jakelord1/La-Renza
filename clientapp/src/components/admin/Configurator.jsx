@@ -24,6 +24,28 @@ const saveConfigItem = async (item) => {
 };
 
 const Configurator = () => {
+  // CSS стили для фиолетовых чекбоксов
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+      input[type="radio"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="radio"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
   const [navbar, setNavbar] = useState([
     {
       navbarName: 'ВСІ',
@@ -162,6 +184,7 @@ const Configurator = () => {
 
   return (
     <div>
+      <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
       <h2 className="mb-4">Конфігуратор</h2>
       {loading && <Spinner animation="border" />}
       {error && <Alert variant="danger">{error}</Alert>}
@@ -230,7 +253,7 @@ const Configurator = () => {
             </div>
           )}
 
-          <Button variant="primary" onClick={saveCategoryIds}>
+          <Button onClick={saveCategoryIds} style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}>
             Зберегти категорії
           </Button>
         </Card.Body>
@@ -299,7 +322,7 @@ const Configurator = () => {
             </div>
           )}
 
-          <Button variant="primary" onClick={saveCategoryTabsIds}>
+          <Button onClick={saveCategoryTabsIds} style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}>
             Зберегти категорії для табів
           </Button>
         </Card.Body>
@@ -346,7 +369,7 @@ const Configurator = () => {
           <Button variant="secondary" onClick={addCarouselItem} className="me-2">
             Додати слайд
           </Button>
-          <Button variant="primary" onClick={saveCarousel}>
+          <Button onClick={saveCarousel} style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}>
             Зберегти банери
           </Button>
         </Card.Body>
@@ -402,7 +425,7 @@ const Configurator = () => {
           <Button variant="secondary" onClick={addPromoItem} className="me-2">
             Додати промо
           </Button>
-          <Button variant="primary" onClick={savePromo}>
+          <Button onClick={savePromo} style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}>
             Зберегти промо-банери
           </Button>
         </Card.Body>
@@ -587,7 +610,6 @@ const Configurator = () => {
               className="me-2"
             >Додати секцію</Button>
             <Button
-              variant="primary"
               onClick={async () => {
                 setSuccess(null); setError(null);
                 const payload = {
@@ -600,6 +622,7 @@ const Configurator = () => {
                 setSuccess(ok ? 'Розділи меню збережено' : null);
                 setError(ok ? null : 'Помилка збереження');
               }}
+              style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}
             >Зберегти розділи</Button>
           </div>
         </Card.Body>

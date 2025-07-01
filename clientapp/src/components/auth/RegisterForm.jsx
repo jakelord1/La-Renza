@@ -7,6 +7,28 @@ const API_URL = 'https://localhost:7071/api/Users';
 
 
 const RegisterForm = () => {
+    // CSS стили для фиолетовых чекбоксов и радиокнопок
+    const checkboxStyles = `
+      <style>
+        input[type="checkbox"]:checked {
+          background-color: #6f42c1 !important;
+          border-color: #6f42c1 !important;
+        }
+        input[type="checkbox"]:focus {
+          border-color: #6f42c1 !important;
+          box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+        }
+        input[type="radio"]:checked {
+          background-color: #6f42c1 !important;
+          border-color: #6f42c1 !important;
+        }
+        input[type="radio"]:focus {
+          border-color: #6f42c1 !important;
+          box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+        }
+      </style>
+    `;
+
     const [formData, setFormData] = useState({
         email: '',
         firstName: '',
@@ -111,6 +133,7 @@ const RegisterForm = () => {
 
     return (
         <>
+            <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
             {alert.show && (
                 <Alert variant={alert.type} onClose={() => setAlert({ ...alert, show: false })} dismissible>
                     {alert.message}

@@ -231,7 +231,7 @@ const Invoices = () => {
                       <td>
                         <div className="d-flex gap-2">
                           <Button variant="link" size="sm" onClick={() => handleEditInvoice(invoice)} title="Редагувати" className="p-0">
-                            <i className="bi bi-pencil"></i>
+                            <i className="bi bi-pencil" style={{color: '#6f42c1'}}></i>
                           </Button>
                           <Button variant="link" size="sm" onClick={() => handleDeleteInvoice(invoice.id)} title="Видалити" className="p-0">
                             <i className="bi bi-trash text-danger"></i>

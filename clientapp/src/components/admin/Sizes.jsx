@@ -200,7 +200,7 @@ const Sizes = () => {
                             <td>{size.name}</td>
                             <td>
                               <div className="d-flex gap-2">
-                                <Button variant="link" size="sm" onClick={() => handleEditSize(size)} title="Редагувати" className="p-0"><i className="bi bi-pencil"></i></Button>
+                                <Button variant="link" size="sm" onClick={() => handleEditSize(size)} title="Редагувати" className="p-0"><i className="bi bi-pencil" style={{color: '#6f42c1'}}></i></Button>
                                 <Button variant="link" size="sm" onClick={() => handleDeleteSize(size.id)} title="Видалити" className="p-0"><i className="bi bi-trash text-danger"></i></Button>
                               </div>
                             </td>

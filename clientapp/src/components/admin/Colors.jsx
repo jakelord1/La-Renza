@@ -413,7 +413,7 @@ const Colors = () => {
                               title="Редагувати"
                               onClick={() => handleEditColor(color)}
                             >
-                              <i className="bi bi-pencil"></i>
+                              <i className="bi bi-pencil" style={{color: '#6f42c1'}}></i>
                             </Button>
                             <Button 
                               variant="link" 

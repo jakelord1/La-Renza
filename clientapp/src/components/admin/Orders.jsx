@@ -456,14 +456,14 @@ const Orders = () => {
           </Button>
           {selectedOrder && (
             <Button 
-              variant="primary"
               onClick={() => {
                 setShowDetailsModal(false);
                 handleEditOrder(selectedOrder);
               }}
               className="px-4"
+              style={{ background: '#6f42c1', border: 'none', fontWeight: 600 }}
             >
-              <i className="bi bi-pencil me-2"></i>Редагувати
+              <i className="bi bi-pencil me-2" style={{color: '#6f42c1'}}></i>Редагувати
             </Button>
           )}
         </Modal.Footer>
@@ -635,7 +635,6 @@ const Orders = () => {
         <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
           <h4 className="fw-bold mb-0" style={{fontSize:'1.3rem'}}>Всі замовлення</h4>
           <Button
-            variant="primary"
             style={{ background: '#6f42c1', border: 'none', borderRadius: 10, fontWeight: 600, fontSize: '1.05rem', padding: '8px 22px', display: 'flex', alignItems: 'center', gap: 8 }}
             onClick={handleAddOrder}
             disabled={loading}
@@ -706,7 +705,7 @@ const Orders = () => {
               title="Редагувати"
               className="p-0"
             >
-              <i className="bi bi-pencil text-primary"></i>
+              <i className="bi bi-pencil" style={{color: '#6f42c1'}}></i>
             </Button>
             <Button 
               variant="link" 
