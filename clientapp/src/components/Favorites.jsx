@@ -112,7 +112,7 @@ const Favorites = () => {
         <div className="d-flex align-items-center mb-2" style={{marginTop: '10px'}}>
           <h2 className="fw-bold mb-0" style={{color: '#222', fontSize: '2.2rem', letterSpacing: '-1px'}}>Вибране</h2>
           <FavoritesCount />
-          <span className="badge rounded-pill ms-3" style={{background: '#1976f7', color: '#fff', fontWeight: 500, fontSize: '1rem', padding: '8px 18px'}}>НОВИНКИ</span>
+          <span className="badge rounded-pill ms-3" style={{background: '#6f42c1', color: '#fff', fontWeight: 500, fontSize: '1rem', padding: '8px 18px'}}>НОВИНКИ</span>
         </div>
         <hr style={{marginTop: 0, marginBottom: '40px', borderColor: '#eee'}} />
         <div style={{marginBottom: '50px'}}></div>
@@ -122,7 +122,7 @@ const Favorites = () => {
           <>
             <div className="row justify-content-center text-center my-5">
               <div className="col-md-4 mb-4">
-                <i className="bi bi-heart text-primary" style={{fontSize: '64px'}}></i>
+                <i className="bi bi-heart" style={{color: '#e53935', fontSize: '64px'}}></i>
                 <h5 className="fw-bold mt-3">Додати</h5>
                 <div className="text-secondary">Швидко зберігайте товари на потім</div>
               </div>
@@ -141,7 +141,7 @@ const Favorites = () => {
             <div className="mt-5 mb-5" style={{background: '#f6f7fa', borderRadius: '8px', padding: '40px 20px'}}>
               <div className="text-center mb-2" style={{fontWeight: 700, fontSize: '1.25rem'}}>Чи повинні тут бути якісь товари?</div>
               <div className="text-center text-secondary" style={{fontSize: '1.05rem'}}>
-                Якщо ви вважаєте, що додавали товари раніше, <a href="/login" className="text-decoration-underline">Увійдіть до облікового запису</a>, щоб побачити їх.
+                Якщо ви вважаєте, що додавали товари раніше, <a href="/login" className="text-decoration-underline" style={{color: '#6f42c1'}}>Увійдіть до облікового запису</a>, щоб побачити їх.
               </div>
             </div>
             <div style={{marginBottom: '100px'}}></div>
@@ -168,7 +168,7 @@ const Favorites = () => {
           <>
             <div className="row justify-content-center text-center my-5">
               <div className="col-md-4 mb-4">
-                <i className="bi bi-heart text-primary" style={{fontSize: '64px'}}></i>
+                <i className="bi bi-heart" style={{color: '#e53935', fontSize: '64px'}}></i>
                 <h5 className="fw-bold mt-3">Додати</h5>
                 <div className="text-secondary">Швидко зберігайте товари на потім</div>
               </div>
@@ -189,7 +189,7 @@ const Favorites = () => {
                 Чи повинні тут бути якісь товари?
               </div>
               <div className="text-center text-secondary" style={{fontSize: '1.05rem'}}>
-                Якщо ви вважаєте, що додавали товари раніше, <a href="/login" className="text-decoration-underline">Увійдіть до облікового запису</a>, щоб побачити їх.
+                Якщо ви вважаєте, що додавали товари раніше, <a href="/login" className="text-decoration-underline" style={{color: '#6f42c1'}}>Увійдіть до облікового запису</a>, щоб побачити їх.
               </div>
             </div>
             <div style={{marginBottom: '100px'}}></div>

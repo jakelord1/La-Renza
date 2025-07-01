@@ -4,6 +4,20 @@ import Alert from 'react-bootstrap/Alert';
 const API_URL = 'https://localhost:7071/api/Account';
 
 const AccountAddresses = () => {
+  // CSS стили для фиолетовых чекбоксов
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
  const [addresses, setAddresses] = useState([]);
  const [showModal, setShowModal] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
@@ -144,6 +158,7 @@ const handleDelete = async (id) => {
                     </Alert>
                 )}
     <div className="account-content">
+      <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">Адреси доставки</h2>
         <button

@@ -502,6 +502,22 @@ const Cart = () => {
   }
 
   const customStyles = `
+    input[type="checkbox"]:checked {
+      background-color: #6f42c1 !important;
+      border-color: #6f42c1 !important;
+    }
+    input[type="checkbox"]:focus {
+      border-color: #6f42c1 !important;
+      box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+    }
+    input[type="radio"]:checked {
+      background-color: #6f42c1 !important;
+      border-color: #6f42c1 !important;
+    }
+    input[type="radio"]:focus {
+      border-color: #6f42c1 !important;
+      box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+    }
     .address-list-group {
       border-radius: 16px;
       overflow: hidden;

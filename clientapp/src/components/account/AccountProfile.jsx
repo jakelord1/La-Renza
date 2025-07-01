@@ -6,6 +6,28 @@ import Alert from 'react-bootstrap/Alert';
 const API_URL = 'https://localhost:7071/api/Account';
 
 const AccountProfile = () => {
+  // CSS стили для фиолетовых чекбоксов и радиокнопок
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+      input[type="radio"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="radio"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
    const [formData, setFormData] = useState({
     firstName: '',
     surName : '',
@@ -97,6 +119,7 @@ const [loading, setLoading] = useState(true);
                 </Alert>
             )}
     <div className="account-content">
+      <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
       <h2 className="mb-4">Інформація профілю</h2>
       <div className="card">
         <div className="card-body">

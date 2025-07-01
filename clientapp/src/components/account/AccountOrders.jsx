@@ -14,6 +14,20 @@ const paymentMethods = {
 };
 
 const AccountOrders = () => {
+  // CSS стили для фиолетовых чекбоксов
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -45,6 +59,7 @@ useEffect(() => {
 
   return (
     <div className="account-content">
+      <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
       <h2 className="mb-4">Мої замовлення</h2>
       {loading ? (
         <div className="text-center"><Spinner animation="border" variant="primary" /></div>

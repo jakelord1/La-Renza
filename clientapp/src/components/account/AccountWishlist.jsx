@@ -14,6 +14,20 @@ const BADGE_COLORS = {
 
 
 const AccountWishlist = () => {
+  // CSS стили для фиолетовых чекбоксов
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
   const navigate = useNavigate();
  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +63,7 @@ if (loading) {
   }
   return (
     <div className="account-content">
+      <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
       <div className="d-flex align-items-center justify-content-between mb-4">
         <h2 className="fw-bold mb-0" style={{fontSize: '2.1rem'}}>Мій список бажань</h2>
         <div className="d-flex align-items-center gap-3">

@@ -191,6 +191,20 @@ function CouponCarousel({ userCoupons, allCoupons, points ,onActivateCoupon }) {
 
 
 const AccountClub = () => {
+  // CSS стили для фиолетовых чекбоксов
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
   const [showClubModal, setShowClubModal] = useState(false);
  const [points, setPoints] = useState(null);
   
@@ -282,6 +296,7 @@ const [loadingCoupons, setLoadingCoupons] = useState(false);
   };
   return (
     <div className="account-content">
+      <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
       <h2 className="mb-4">Акаунт учасника клубу</h2>
       <div className="d-flex align-items-center mb-3" style={{justifyContent:'space-between'}}>
         <div style={{background:'var(--purple, #7c3aed)',color:'#fff',borderRadius: 24,padding:'8px 32px',fontWeight:700,fontSize:18}}>

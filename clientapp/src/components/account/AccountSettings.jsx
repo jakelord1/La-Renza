@@ -5,6 +5,20 @@ import Alert from 'react-bootstrap/Alert';
 const API_URL = 'https://localhost:7071/api/Account';
 
 const AccountSettings = () => {
+  // CSS стили для фиолетовых чекбоксов
+  const checkboxStyles = `
+    <style>
+      input[type="checkbox"]:checked {
+        background-color: #6f42c1 !important;
+        border-color: #6f42c1 !important;
+      }
+      input[type="checkbox"]:focus {
+        border-color: #6f42c1 !important;
+        box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25) !important;
+      }
+    </style>
+  `;
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -77,6 +91,7 @@ const AccountSettings = () => {
 
   return (
     <div className="account-content">
+      <div dangerouslySetInnerHTML={{ __html: checkboxStyles }} />
       <h2 className="mb-4">Налаштування акаунта</h2>
       
       <div className="card mb-4">
