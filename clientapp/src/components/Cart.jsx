@@ -196,8 +196,6 @@ const Cart = () => {
         setCartItems(updated);
         window.dispatchEvent(new Event('cart-updated'));
       }
-    } else {
-
     }
   };
 
@@ -210,14 +208,13 @@ const Cart = () => {
       if (!isLoggedIn) {
         removeItem(product.id);
       } else {
-
         try {
-          const res = await fetch(`/api/Account/accountModels/${product.modelId || product.productId || product.id}`, {
+          const res = await fetch(`/api/Account/accountModels/${product.modelId || product.productId}`, {
             method: 'POST',
             credentials: 'include',
           });
           if (res.ok) {
-            removeItem(product.id, product.productId, product.modelId);
+            removeItem(product.id, product.productId);
           } else {
             const err = await res.json().catch(() => ({}));
             alert(err.message || 'Помилка при додаванні в обране');
@@ -236,7 +233,7 @@ const Cart = () => {
   const deliveryCost = selectedDelivery ? Number(deliveryOptions.find(opt => opt.id === selectedDelivery)?.deliveryPrice ?? 0) : 0;
   
 
-  const removeItem = async (id, productId, modelId) => {
+  const removeItem = async (id, productId) => {
     if (!isLoggedIn) {
       const updated = cartItems.filter(item => item.id !== id);
       localStorage.setItem('cart', JSON.stringify(updated));
@@ -283,12 +280,11 @@ const Cart = () => {
       const paymentMethodInt = paymentMap[selectedPayment] ?? 0;
 
       const now = new Date();
-      const dateStr = now.toISOString().slice(0, 19);
 
       const productPromises = cartItems.map(item =>
-        fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Products/${item.id}`)
+        fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Products/${item.productId}`)
           .then(res => {
-            if (!res.ok) throw new Error('Не вдалося отримати продукт з id ' + item.id);
+            if (!res.ok) throw new Error('Не вдалося отримати продукт з id ' + item.productId);
             return res.json();
           })
       );
@@ -315,11 +311,11 @@ const Cart = () => {
         return {
           Id: 0,
           OrderId: null,
-          ProductId: item.id,
+          ProductId: item.productId,
           Quantity: item.quantity,
           Price: Number(item.price) || 0,
           Product: {
-            Id: fullProduct.id ?? item.id ?? null,
+            Id: fullProduct.id ?? item.productId ?? null,
             ColorId: fullProduct.colorId ?? item.colorId ?? null,
             SizeId: fullProduct.sizeId ?? item.sizeId ?? null,
             Quantity: item.quantity ?? fullProduct.quantity ?? null,
@@ -387,7 +383,9 @@ const Cart = () => {
             setPlacedOrderItems(lastOrder.orderItems || []);
           }
         }
-      } catch {}
+      } catch {
+        // do nothing
+      }
 
     } catch (error) {
       alert(error.message || 'Помилка оформлення замовлення');
@@ -657,7 +655,7 @@ const Cart = () => {
                             />
                           </div>
                         </div>
-                        <button className="btn btn-outline-danger btn-sm me-2" onClick={() => removeItem(product.id, product.productId, product.modelId)}>Видалити</button>
+                        <button className="btn btn-outline-danger btn-sm me-2" onClick={() => removeItem(product.id, product.productId)}>Видалити</button>
                         {isLoggedIn && (
                           <button
                             className={`btn btn-sm ${isFavorite(product.id) ? 'btn-fav-filled' : 'btn-fav-outline'}`}

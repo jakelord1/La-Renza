@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Spinner, Alert, Table, Modal, Image, Row, Col } from 'react-bootstrap';
+import { Card, Form, Button, Spinner, Alert, Table, Modal, Image, Row, Col, Accordion } from 'react-bootstrap';
 
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Products`;
 const COLORS_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Colors`;
-const SIZES_API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Sizes`;
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -25,8 +24,14 @@ const Products = () => {
   const [modelId, setModelId] = useState('');
 
   const [colors, setColors] = useState([]);
-  const [sizes, setSizes] = useState([]);
   const [models, setModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState(null);
+  const [modelColors, setModelColors] = useState([]);
+  const [selectedModelColor, setSelectedModelColor] = useState('');
+  const [categorySizes, setCategorySizes] = useState([]);
+  const [selectedCategorySize, setSelectedCategorySize] = useState('');
+  const [sizeLoading, setSizeLoading] = useState(false);
+  const [groupedProducts, setGroupedProducts] = useState([]);
   const [_loadingData, setLoadingData] = useState(false);
 
   const fetchProducts = async () => {
@@ -63,11 +68,6 @@ const Products = () => {
         const colorsData = await colorsRes.json();
         setColors(colorsData);
 
-        const sizesRes = await fetch(SIZES_API_URL);
-        if (!sizesRes.ok) throw new Error('Помилка завантаження розмірів');
-        const sizesData = await sizesRes.json();
-        setSizes(sizesData);
-
         await fetchModels();
         await fetchProducts();
       } catch (e) {
@@ -78,6 +78,92 @@ const Products = () => {
     };
     fetchInitialData();
   }, []);
+
+  useEffect(() => {
+    const groupProducts = () => {
+      if (!products || products.length === 0) {
+        setGroupedProducts([]);
+        return;
+      }
+
+      const grouped = products.reduce((acc, product) => {
+        const modelId = product.color?.model?.id;
+        const modelName = product.color?.model?.name || 'Без моделі';
+
+        if (!modelId) return acc;
+
+        let modelGroup = acc.find(g => g.modelId === modelId);
+
+        if (!modelGroup) {
+          modelGroup = { modelId, modelName, colors: [] };
+          acc.push(modelGroup);
+        }
+
+        const colorId = product.color?.id;
+        const colorName = product.color?.name || 'Без кольору';
+
+        if (!colorId) return acc;
+
+        let colorGroup = modelGroup.colors.find(c => c.colorId === colorId);
+
+        if (!colorGroup) {
+          colorGroup = { colorId, colorName, products: [] };
+          modelGroup.colors.push(colorGroup);
+        }
+
+        colorGroup.products.push(product);
+
+        return acc;
+      }, []);
+      
+      setGroupedProducts(grouped.sort((a, b) => a.modelName.localeCompare(b.modelName)));
+    };
+
+    groupProducts();
+  }, [products]);
+
+  const handleModelChange = async (e) => {
+    const modelId = parseInt(e.target.value);
+    const model = models.find(m => m.id === modelId);
+    setSelectedModel(model);
+    setModelColors(model ? model.colors : []);
+    setSelectedModelColor('');
+    setCategorySizes([]);
+    setSelectedCategorySize('');
+    if (model && model.categoryId) {
+      setSizeLoading(true);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${model.categoryId}`);
+        if (!res.ok) throw new Error('Помилка завантаження категорії');
+        const category = await res.json();
+        if (category.sizes && category.sizes.length > 0) {
+          setCategorySizes(category.sizes);
+        } else if (category.parentCategoryId) {
+          const parentRes = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${category.parentCategoryId}`);
+          if (parentRes.ok) {
+            const parentCategory = await parentRes.json();
+            setCategorySizes(parentCategory.sizes || []);
+          } else {
+            setCategorySizes([]);
+          }
+        } else {
+          setCategorySizes([]);
+        }
+      } catch {
+        setCategorySizes([]);
+      } finally {
+        setSizeLoading(false);
+      }
+    }
+  };
+
+  const handleColorChange = (e) => {
+    setSelectedModelColor(e.target.value);
+  };
+
+  const handleSizeChange = (e) => {
+    setSelectedCategorySize(e.target.value);
+  };
 
   const resetForm = () => {
     setName('');
@@ -113,7 +199,7 @@ const Products = () => {
     setLoading(true);
     try {
       const selectedColor = colors.find(c => c.id === parseInt(colorId));
-      const selectedSize = sizes.find(s => s.id === parseInt(sizeId));
+      const selectedSize = categorySizes.find(s => s.id === parseInt(sizeId));
       const selectedModel = models.find(m => m.id === parseInt(modelId));
 
       const image = selectedColor?.imageId
@@ -134,7 +220,8 @@ const Products = () => {
             category: typeof selectedModel.category === 'string'
               ? selectedModel.category
               : (selectedModel.category?.name || ''),
-            sizes: selectedModel.sizes
+            sizes: selectedModel.sizes,
+            photos: selectedModel.photos || []
           }
         : null;
       console.log('MODEL FOR PAYLOAD:', model);
@@ -190,18 +277,35 @@ const Products = () => {
     }
   };
 
-  const handleEditProduct = (product) => {
+  const handleEditProduct = async (product) => {
+    // Найти модель по id
+    const productModelId = product.color?.model?.id;
+    const selectedModelObj = models.find(m => m.id === productModelId);
+
+    // Найти цвета для этой модели
+    const availableColors = selectedModelObj ? colors.filter(c => c.modelId === selectedModelObj.id) : [];
+
+    // Найти размеры для категории модели
+    let availableSizes = [];
+    if (selectedModelObj && selectedModelObj.categoryId) {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${selectedModelObj.categoryId}`);
+        if (res.ok) {
+          const categoryData = await res.json();
+          availableSizes = categoryData.sizes || [];
+        }
+      } catch (e) { /* ignore */ }
+    }
+
     setEditingProduct(product);
-    setName(product.name);
-    setDescription(product.description || '');
-    setPrice(product.color?.model?.price !== undefined && product.color?.model?.price !== null ? product.color.model.price.toString() : '');
-    setCategoryId(product.categoryId !== undefined && product.categoryId !== null ? product.categoryId.toString() : '');
-    setImageUrl(product.imageUrl || '');
-    setIsActive(product.isActive);
-    setColorId(product.color?.id ? product.color.id.toString() : '');
-    setSizeId(product.size?.id ? product.size.id.toString() : '');
-    setModelId(product.color?.model?.id ? product.color.model.id.toString() : '');
-    setQuantity(product.quantity !== undefined && product.quantity !== null ? product.quantity.toString() : '');
+    setQuantity(product.quantity?.toString() || '0');
+
+    setSelectedModel(selectedModelObj || null);
+    setModelColors(availableColors);
+    setSelectedModelColor(product.color?.id?.toString() || '');
+    setCategorySizes(availableSizes);
+    setSelectedCategorySize(product.size?.id?.toString() || '');
+
     setShowEditModal(true);
   };
 
@@ -226,7 +330,7 @@ const Products = () => {
     setLoading(true);
     try {
       const selectedColor = colors.find(c => c.id === parseInt(colorId));
-      const selectedSize = sizes.find(s => s.id === parseInt(sizeId));
+      const selectedSize = categorySizes.find(s => s.id === parseInt(sizeId));
       const selectedModel = models.find(m => m.id === parseInt(modelId));
 
       const image = selectedColor?.imageId
@@ -247,7 +351,8 @@ const Products = () => {
             category: typeof selectedModel.category === 'string'
               ? selectedModel.category
               : (selectedModel.category?.name || ''),
-            sizes: selectedModel.sizes
+            sizes: selectedModel.sizes,
+            photos: selectedModel.photos || []
           }
         : null;
       console.log('MODEL FOR PAYLOAD:', model);
@@ -467,56 +572,66 @@ const Products = () => {
           </div>
         ) : (
           <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-            {products.length === 0 ? (
+            {groupedProducts.length === 0 ? (
               <div className="text-muted text-center py-5">Товарів ще немає</div>
             ) : (
-              <Table hover className="align-middle">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Колір</th>
-                    <th>Розмір</th>
-                    <th>Модель</th>
-                    <th>Лайки</th>
-                    <th>Кількість</th>
-                    <th>Дії</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.map(product => (
-                    <tr key={product.id}>
-                      <td>{product.id}</td>
-                      <td>{product.color?.name || '-'}</td>
-                      <td>{product.size?.name || '-'}</td>
-                      <td>{product.color?.model?.name || '-'}</td>
-                      <td>{product.usersLikesId ? product.usersLikesId.length : 0}</td>
-                      <td>{product.quantity || 0}</td>
-                      <td>
-                        <div className="d-flex gap-2">
-                          <Button 
-                            variant="link" 
-                            size="sm" 
-                            onClick={() => handleEditProduct(product)} 
-                            title="Редагувати" 
-                            className="p-0"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </Button>
-                          <Button 
-                            variant="link" 
-                            size="sm" 
-                            onClick={() => handleDeleteProduct(product.id)} 
-                            title="Видалити" 
-                            className="p-0"
-                          >
-                            <i className="bi bi-trash text-danger"></i>
-                          </Button>
+              <Accordion defaultActiveKey="0" alwaysOpen>
+                {groupedProducts.map((modelGroup, index) => (
+                  <Accordion.Item eventKey={String(index)} key={modelGroup.modelId}>
+                    <Accordion.Header><b>{modelGroup.modelName}</b></Accordion.Header>
+                    <Accordion.Body>
+                      {modelGroup.colors.map(colorGroup => (
+                        <div key={colorGroup.colorId} className="mb-4">
+                          <h5 className="fw-bold mb-3" style={{ fontSize: '1.1rem' }}>{colorGroup.colorName}</h5>
+                          <Table hover className="align-middle mb-0">
+                            <thead>
+                              <tr>
+                                <th>ID</th>
+                                <th>Розмір</th>
+                                <th>Лайки</th>
+                                <th>Кількість</th>
+                                <th>Дії</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {colorGroup.products.sort((a,b) => a.id - b.id).map(product => (
+                                <tr key={product.id}>
+                                  <td>{product.id}</td>
+                                  <td>{product.size?.name || '-'}</td>
+                                  <td>{product.usersLikesId ? product.usersLikesId.length : 0}</td>
+                                  <td>{product.quantity || 0}</td>
+                                  <td>
+                                    <div className="d-flex gap-2">
+                                      <Button
+                                        variant="link"
+                                        size="sm"
+                                        onClick={() => handleEditProduct(product)}
+                                        title="Редагувати"
+                                        className="p-0"
+                                      >
+                                        <i className="bi bi-pencil"></i>
+                                      </Button>
+                                      <Button
+                                        variant="link"
+                                        size="sm"
+                                        onClick={() => handleDeleteProduct(product.id)}
+                                        title="Видалити"
+                                        className="p-0"
+                                      >
+                                        <i className="bi bi-trash text-danger"></i>
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+                      ))}
+                    </Accordion.Body>
+                  </Accordion.Item>
+                ))}
+              </Accordion>
             )}
           </div>
         )}
@@ -528,72 +643,48 @@ const Products = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleAddProduct}>
-            <Row>
-              <Col md={12}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={colorId} 
-                    onChange={(e) => setColorId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">Виберіть колір</option>
-                    {colors.map(color => (
-                      <option key={color.id} value={color.id}>
-                        {color.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={sizeId} 
-                    onChange={(e) => setSizeId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">Виберіть розмір</option>
-                    {sizes.map(size => (
-                      <option key={size.id} value={size.id}>
-                        {size.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={modelId} 
-                    onChange={(e) => setModelId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">Виберіть модель</option>
-                    {models.map(model => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
+              <Form.Select value={selectedModel?.id || ''} onChange={handleModelChange} required className="form-control-lg">
+                <option value="">Виберіть модель</option>
+                {models.map(model => (
+                  <option key={model.id} value={model.id}>{model.name}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedModelColor} onChange={handleColorChange} required className="form-control-lg">
+                  <option value="">Виберіть колір</option>
+                  {modelColors.map(color => (
+                    <option key={color.id} value={color.id}>{color.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedCategorySize} onChange={handleSizeChange} required className="form-control-lg" disabled={sizeLoading || !categorySizes.length}>
+                  <option value="">Виберіть розмір</option>
+                  {categorySizes.map(size => (
+                    <option key={size.id} value={size.id}>{size.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
+            <Form.Group className="mb-3">
+              <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
+              <Form.Control
+                type="number"
+                min="0"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+                className="form-control-lg"
+              />
+            </Form.Group>
             
             <div className="mt-4">
               <Button 
@@ -616,53 +707,36 @@ const Products = () => {
         <Modal.Body>
           <Form onSubmit={handleUpdateProduct}>
             <Form.Group className="mb-3">
-              <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
-              <Form.Select 
-                value={colorId} 
-                onChange={(e) => setColorId(e.target.value)}
-                required
-                className="form-control-lg"
-              >
-                <option value="">Виберіть колір</option>
-                {colors.map(color => (
-                  <option key={color.id} value={color.id}>
-                    {color.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
-              <Form.Select 
-                value={sizeId} 
-                onChange={(e) => setSizeId(e.target.value)}
-                required
-                className="form-control-lg"
-              >
-                <option value="">Виберіть розмір</option>
-                {sizes.map(size => (
-                  <option key={size.id} value={size.id}>
-                    {size.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
               <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
-              <Form.Select 
-                value={modelId} 
-                onChange={(e) => setModelId(e.target.value)}
-                required
-                className="form-control-lg"
-              >
+              <Form.Select value={selectedModel?.id || ''} onChange={handleModelChange} required className="form-control-lg">
                 <option value="">Виберіть модель</option>
                 {models.map(model => (
-                  <option key={model.id} value={model.id}>
-                    {model.name}
-                  </option>
+                  <option key={model.id} value={model.id}>{model.name}</option>
                 ))}
               </Form.Select>
             </Form.Group>
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedModelColor} onChange={handleColorChange} required className="form-control-lg">
+                  <option value="">Виберіть колір</option>
+                  {modelColors.map(color => (
+                    <option key={color.id} value={color.id}>{color.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedCategorySize} onChange={handleSizeChange} required className="form-control-lg" disabled={sizeLoading || !categorySizes.length}>
+                  <option value="">Виберіть розмір</option>
+                  {categorySizes.map(size => (
+                    <option key={size.id} value={size.id}>{size.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
             <Form.Group className="mb-3">
               <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
               <Form.Control

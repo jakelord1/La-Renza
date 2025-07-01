@@ -1,12 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 
 import ProductCard from './ProductCard';
 import UnifiedCartModal from './UnifiedCartModal';
 import { Link } from 'react-router-dom';
+import Loader from './common/Loader';
 
 const MODELS_API_URL = '/api/Models';
 const PRODUCTS_API_URL = '/api/Products';
+
+function getAllDescendantIds(categoryIds, allCategories) {
+  const categoryMap = new Map();
+  allCategories.forEach(c => categoryMap.set(c.id, { ...c, children: [] }));
+
+  allCategories.forEach(c => {
+    if (c.parentCategoryId && categoryMap.has(c.parentCategoryId)) {
+      categoryMap.get(c.parentCategoryId).children.push(categoryMap.get(c.id));
+    }
+  });
+
+  const allIds = new Set(categoryIds);
+
+  function findDescendants(catId) {
+    const category = categoryMap.get(catId);
+    if (category && category.children) {
+      for (const child of category.children) {
+        allIds.add(child.id);
+        findDescendants(child.id);
+      }
+    }
+  }
+
+  for (const catId of categoryIds) {
+    findDescendants(catId);
+  }
+
+  return Array.from(allIds);
+}
 
 const ProductGrid = ({ activeCategory = 'Усі' }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,6 +71,7 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
   }, [isAuthenticated]);
   const [models, setModels] = useState([]);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
   const [showCartModal, setShowCartModal] = useState(false);
@@ -57,6 +88,10 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
         if (!productsRes.ok) throw new Error('Помилка завантаження продуктів');
         const productsData = await productsRes.json();
 
+        const categoriesRes = await fetch('/api/Categories');
+        if (!categoriesRes.ok) throw new Error('Помилка завантаження категорій');
+        const categoriesData = await categoriesRes.json();
+
         const enrichedProducts = productsData.map(p => ({
           ...p,
           categoryId: p.color?.model?.categoryId ?? null
@@ -64,6 +99,7 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
 
         setModels(modelsData);
         setProducts(enrichedProducts);
+        setCategories(categoriesData);
       } catch (e) {
         setAlert({ show: true, type: 'danger', message: e.message });
       } finally {
@@ -83,9 +119,17 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
     return { ...model, products: modelProducts };
   });
 
-  const filteredModels = modelsWithProducts.filter(model =>
-    (activeCategory === 'Усі' || model.categoryId === Number(activeCategory)) && model.products.length > 0
-  );
+  const filteredModels = useMemo(() => {
+    if (activeCategory === 'Усі') {
+      return modelsWithProducts.filter(model => model.products.length > 0);
+    }
+    const activeCategoryId = Number(activeCategory);
+    const categoryIdsToFilter = getAllDescendantIds([activeCategoryId], categories);
+
+    return modelsWithProducts.filter(model =>
+      categoryIdsToFilter.includes(model.categoryId) && model.products.length > 0
+    );
+  }, [modelsWithProducts, activeCategory, categories]);
 
   const handleAddToCart = (product) => {
     setSelectedProduct(product);
@@ -109,10 +153,10 @@ const ProductGrid = ({ activeCategory = 'Усі' }) => {
         </div>
       )}
       {loading ? (
-        <div className="text-center my-4">Завантаження...</div>
+        <Loader />
       ) : (
         <div className="row g-3 g-md-4">
-          {(products.filter(product => activeCategory === 'Усі' || product.categoryId === Number(activeCategory)).length === 0) ? (
+          {(filteredModels.length === 0) ? (
             <div className="col-12 text-center">Немає доступних товарів.</div>
           ) : (
             filteredModels.map(model => (

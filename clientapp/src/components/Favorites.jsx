@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
 import FavoritesCount from './FavoritesCount';
+import UnifiedCartModal from './UnifiedCartModal';
+import Loader from './common/Loader';
 
 const API_URL = import.meta.env.VITE_BACKEND_API_LINK;
 
@@ -19,7 +21,24 @@ const Favorites = () => {
   const [loading, setLoading] = useState(true);
   const [allModels, setAllModels] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
+  const handleAddToCart = (product) => {
+    setSelectedProduct(product);
+    setShowCartModal(true);
+  };
+
+  const handleCloseCartModal = () => {
+    setShowCartModal(false);
+    setSelectedProduct(null);
+  };
+
+  const handleCheckout = () => {
+    setShowCartModal(false);
+    setSelectedProduct(null);
+    window.location.href = '/cart';
+  };
 
   useEffect(() => {
     fetch(MODELS_API_URL)
@@ -98,7 +117,7 @@ const Favorites = () => {
         <hr style={{marginTop: 0, marginBottom: '40px', borderColor: '#eee'}} />
         <div style={{marginBottom: '50px'}}></div>
         {loading ? (
-          <div className="text-center py-5">Завантаження...</div>
+          <Loader />
         ) : !isAuthenticated ? (
           <>
             <div className="row justify-content-center text-center my-5">
@@ -138,7 +157,7 @@ const Favorites = () => {
   }));
   return (
     <div key={model.id} className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center mb-4">
-      <ProductCard model={model} products={modelProducts} isAuthenticated={isAuthenticated} />
+      <ProductCard model={model} products={modelProducts} isAuthenticated={isAuthenticated} onAddToCart={handleAddToCart} />
     </div>
   );
 })}
@@ -188,7 +207,7 @@ const Favorites = () => {
   }));
   return (
     <div key={model.id} className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center mb-4">
-      <ProductCard model={model} products={modelProducts} isAuthenticated={isAuthenticated} />
+      <ProductCard model={model} products={modelProducts} isAuthenticated={isAuthenticated} onAddToCart={handleAddToCart} />
     </div>
   );
 })}
@@ -206,12 +225,19 @@ const Favorites = () => {
                   isFavorite={true}
                   onFavoriteChange={() => window.dispatchEvent(new Event('favorites-updated'))}
                   onCardClick={() => window.location.href = `/product/${model.id}`}
+                  onAddToCart={handleAddToCart}
                 />
               </div>
             ))}
           </div>
         )}
       </div>
+      <UnifiedCartModal
+        show={showCartModal}
+        product={selectedProduct}
+        onClose={handleCloseCartModal}
+        onCheckout={handleCheckout}
+      />
     </section>
   );
 };
