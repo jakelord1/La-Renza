@@ -25,8 +25,12 @@ const Products = () => {
 
   const [colors, setColors] = useState([]);
   const [models, setModels] = useState([]);
-  const [filteredColors, setFilteredColors] = useState([]);
-  const [filteredSizes, setFilteredSizes] = useState([]);
+  const [selectedModel, setSelectedModel] = useState(null);
+  const [modelColors, setModelColors] = useState([]);
+  const [selectedModelColor, setSelectedModelColor] = useState('');
+  const [categorySizes, setCategorySizes] = useState([]);
+  const [selectedCategorySize, setSelectedCategorySize] = useState('');
+  const [sizeLoading, setSizeLoading] = useState(false);
   const [groupedProducts, setGroupedProducts] = useState([]);
   const [_loadingData, setLoadingData] = useState(false);
 
@@ -119,41 +123,46 @@ const Products = () => {
   }, [products]);
 
   const handleModelChange = async (e) => {
-    const newModelId = e.target.value;
-    setModelId(newModelId);
-    setColorId('');
-    setSizeId('');
-
-    if (!newModelId) {
-        setFilteredColors([]);
-        setFilteredSizes([]);
-        return;
-    }
-
-    const selectedModel = models.find(m => m.id === parseInt(newModelId));
-    if (!selectedModel) {
-        setFilteredColors([]);
-        setFilteredSizes([]);
-        return;
-    }
-
-    setFilteredColors(colors.filter(c => c.modelId === selectedModel.id));
-
-    if (selectedModel.categoryId) {
-        try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${selectedModel.categoryId}`);
-            if (!res.ok) {
-                throw new Error('Помилка завантаження розмірів для категорії');
-            }
-            const categoryData = await res.json();
-            setFilteredSizes(categoryData.sizes || []);
-        } catch (e) {
-            setAlert({ show: true, type: 'danger', message: e.message });
-            setFilteredSizes([]);
+    const modelId = parseInt(e.target.value);
+    const model = models.find(m => m.id === modelId);
+    setSelectedModel(model);
+    setModelColors(model ? model.colors : []);
+    setSelectedModelColor('');
+    setCategorySizes([]);
+    setSelectedCategorySize('');
+    if (model && model.categoryId) {
+      setSizeLoading(true);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${model.categoryId}`);
+        if (!res.ok) throw new Error('Помилка завантаження категорії');
+        const category = await res.json();
+        if (category.sizes && category.sizes.length > 0) {
+          setCategorySizes(category.sizes);
+        } else if (category.parentCategoryId) {
+          const parentRes = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${category.parentCategoryId}`);
+          if (parentRes.ok) {
+            const parentCategory = await parentRes.json();
+            setCategorySizes(parentCategory.sizes || []);
+          } else {
+            setCategorySizes([]);
+          }
+        } else {
+          setCategorySizes([]);
         }
-    } else {
-        setFilteredSizes([]);
+      } catch {
+        setCategorySizes([]);
+      } finally {
+        setSizeLoading(false);
+      }
     }
+  };
+
+  const handleColorChange = (e) => {
+    setSelectedModelColor(e.target.value);
+  };
+
+  const handleSizeChange = (e) => {
+    setSelectedCategorySize(e.target.value);
   };
 
   const resetForm = () => {
@@ -190,7 +199,7 @@ const Products = () => {
     setLoading(true);
     try {
       const selectedColor = colors.find(c => c.id === parseInt(colorId));
-      const selectedSize = filteredSizes.find(s => s.id === parseInt(sizeId));
+      const selectedSize = categorySizes.find(s => s.id === parseInt(sizeId));
       const selectedModel = models.find(m => m.id === parseInt(modelId));
 
       const image = selectedColor?.imageId
@@ -269,35 +278,34 @@ const Products = () => {
   };
 
   const handleEditProduct = async (product) => {
-    // Fetch dependent data FIRST
-    let availableSizes = [];
-    const productModelId = product.color?.model?.id?.toString() || '';
-    const selectedModel = models.find(m => m.id === parseInt(productModelId));
-    const availableColors = selectedModel ? colors.filter(c => c.modelId === selectedModel.id) : [];
+    // Найти модель по id
+    const productModelId = product.color?.model?.id;
+    const selectedModelObj = models.find(m => m.id === productModelId);
 
-    if (selectedModel && selectedModel.categoryId) {
-        try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${selectedModel.categoryId}`);
-            if (!res.ok) throw new Error('Помилка завантаження розмірів');
-            const categoryData = await res.json();
-            availableSizes = categoryData.sizes || [];
-        } catch (e) {
-            setAlert({ show: true, type: 'danger', message: e.message });
+    // Найти цвета для этой модели
+    const availableColors = selectedModelObj ? colors.filter(c => c.modelId === selectedModelObj.id) : [];
+
+    // Найти размеры для категории модели
+    let availableSizes = [];
+    if (selectedModelObj && selectedModelObj.categoryId) {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API_LINK}/api/Categories/${selectedModelObj.categoryId}`);
+        if (res.ok) {
+          const categoryData = await res.json();
+          availableSizes = categoryData.sizes || [];
         }
+      } catch (e) { /* ignore */ }
     }
 
-    // Now set ALL state for the modal at once
     setEditingProduct(product);
     setQuantity(product.quantity?.toString() || '0');
-    
-    setFilteredColors(availableColors);
-    setFilteredSizes(availableSizes);
 
-    setModelId(productModelId);
-    setColorId(product.color?.id?.toString() || '');
-    setSizeId(product.size?.id?.toString() || '');
+    setSelectedModel(selectedModelObj || null);
+    setModelColors(availableColors);
+    setSelectedModelColor(product.color?.id?.toString() || '');
+    setCategorySizes(availableSizes);
+    setSelectedCategorySize(product.size?.id?.toString() || '');
 
-    // Finally, show the modal
     setShowEditModal(true);
   };
 
@@ -322,7 +330,7 @@ const Products = () => {
     setLoading(true);
     try {
       const selectedColor = colors.find(c => c.id === parseInt(colorId));
-      const selectedSize = filteredSizes.find(s => s.id === parseInt(sizeId));
+      const selectedSize = categorySizes.find(s => s.id === parseInt(sizeId));
       const selectedModel = models.find(m => m.id === parseInt(modelId));
 
       const image = selectedColor?.imageId
@@ -635,74 +643,48 @@ const Products = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleAddProduct}>
-            <Row>
-              <Col md={12}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={modelId} 
-                    onChange={handleModelChange}
-                    required
-                    className="form-control-lg"
-                  >
-                    <option value="">Виберіть модель</option>
-                    {models.map(model => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={colorId} 
-                    onChange={(e) => setColorId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                    disabled={!modelId}
-                  >
-                    <option value="">Виберіть колір</option>
-                    {filteredColors.map(color => (
-                      <option key={color.id} value={color.id}>
-                        {color.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
-                  <Form.Select 
-                    value={sizeId} 
-                    onChange={(e) => setSizeId(e.target.value)}
-                    required
-                    className="form-control-lg"
-                    disabled={!modelId}
-                  >
-                    <option value="">Виберіть розмір</option>
-                    {filteredSizes.map(size => (
-                      <option key={size.id} value={size.id}>
-                        {size.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-                
-                <Form.Group className="mb-3">
-                  <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
-                  <Form.Control
-                    type="number"
-                    min="0"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    required
-                    className="form-control-lg"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
+              <Form.Select value={selectedModel?.id || ''} onChange={handleModelChange} required className="form-control-lg">
+                <option value="">Виберіть модель</option>
+                {models.map(model => (
+                  <option key={model.id} value={model.id}>{model.name}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedModelColor} onChange={handleColorChange} required className="form-control-lg">
+                  <option value="">Виберіть колір</option>
+                  {modelColors.map(color => (
+                    <option key={color.id} value={color.id}>{color.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedCategorySize} onChange={handleSizeChange} required className="form-control-lg" disabled={sizeLoading || !categorySizes.length}>
+                  <option value="">Виберіть розмір</option>
+                  {categorySizes.map(size => (
+                    <option key={size.id} value={size.id}>{size.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
+            <Form.Group className="mb-3">
+              <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
+              <Form.Control
+                type="number"
+                min="0"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+                className="form-control-lg"
+              />
+            </Form.Group>
             
             <div className="mt-4">
               <Button 
@@ -726,54 +708,35 @@ const Products = () => {
           <Form onSubmit={handleUpdateProduct}>
             <Form.Group className="mb-3">
               <Form.Label>Модель <span className="text-danger">*</span></Form.Label>
-              <Form.Select 
-                value={modelId} 
-                onChange={handleModelChange}
-                required
-                className="form-control-lg"
-              >
+              <Form.Select value={selectedModel?.id || ''} onChange={handleModelChange} required className="form-control-lg">
                 <option value="">Виберіть модель</option>
                 {models.map(model => (
-                  <option key={model.id} value={model.id}>
-                    {model.name}
-                  </option>
+                  <option key={model.id} value={model.id}>{model.name}</option>
                 ))}
               </Form.Select>
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
-              <Form.Select 
-                value={colorId} 
-                onChange={(e) => setColorId(e.target.value)}
-                required
-                className="form-control-lg"
-                disabled={!modelId}
-              >
-                <option value="">Виберіть колір</option>
-                {filteredColors.map(color => (
-                  <option key={color.id} value={color.id}>
-                    {color.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
-              <Form.Select 
-                value={sizeId} 
-                onChange={(e) => setSizeId(e.target.value)}
-                required
-                className="form-control-lg"
-                disabled={!modelId}
-              >
-                <option value="">Виберіть розмір</option>
-                {filteredSizes.map(size => (
-                  <option key={size.id} value={size.id}>
-                    {size.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Колір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedModelColor} onChange={handleColorChange} required className="form-control-lg">
+                  <option value="">Виберіть колір</option>
+                  {modelColors.map(color => (
+                    <option key={color.id} value={color.id}>{color.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
+            {selectedModel && (
+              <Form.Group className="mb-3">
+                <Form.Label>Розмір <span className="text-danger">*</span></Form.Label>
+                <Form.Select value={selectedCategorySize} onChange={handleSizeChange} required className="form-control-lg" disabled={sizeLoading || !categorySizes.length}>
+                  <option value="">Виберіть розмір</option>
+                  {categorySizes.map(size => (
+                    <option key={size.id} value={size.id}>{size.name}</option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            )}
             <Form.Group className="mb-3">
               <Form.Label>Кількість <span className="text-danger">*</span></Form.Label>
               <Form.Control

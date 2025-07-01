@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Row, Col, Spinner, Alert, Table, Modal, Pagination } from 'react-bootstrap';
 const API_URL = `${import.meta.env.VITE_BACKEND_API_LINK}/api/Comments`;
+const MODELS_API_URL = '/api/Models';
+const CATEGORY_API_URL = '/api/Categories';
+const USERS_API_URL = '/api/Users';
+const IMAGES_API_URL = '/api/Images';
 
 function StarRating({ value, onChange, disabled }) {
   return (
@@ -81,17 +85,11 @@ const Comments = () => {
   const [colorNames, setColorNames] = useState({});
   const [colorIdToModelId, setColorIdToModelId] = useState({});
   const [sizeNames, setSizeNames] = useState({});
-  const [imagePaths, setImagePaths] = useState({});
   const [productMap, setProductMap] = useState({});
   const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState('');
   const [text, setText] = useState('');
-  const [_image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [rating, setRating] = useState(5);
-  const [author, setAuthor] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: '', message: '' });
@@ -105,15 +103,24 @@ const Comments = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [commentImagePreview, setCommentImagePreview] = useState(null);
+  const [commentImage, setCommentImage] = useState(null);
+
+  const [selectedModelId, setSelectedModelId] = useState('');
+  const [selectedColorId, setSelectedColorId] = useState('');
+  const [selectedSizeId, setSelectedSizeId] = useState('');
+
   useEffect(() => {
     setLoading(true);
-    fetch('/api/Products')
-  .then(res => {
-    if (!res.ok) throw new Error('Помилка завантаження товарів');
-    return res.json();
-  })
-  .then(data => setProducts(data))
-  .catch(() => setProducts([]));
+    fetch(MODELS_API_URL)
+      .then(res => {
+        if (!res.ok) throw new Error('Помилка завантаження моделей');
+        return res.json();
+      })
+      .then(data => setModels(data))
+      .catch(() => setModels([]));
     fetch(API_URL)
       .then(res => {
         if (!res.ok) throw new Error('Помилка завантаження коментарів');
@@ -123,7 +130,6 @@ const Comments = () => {
         setAllComments(data);
         const userIds = Array.from(new Set(data.map(c => c.userId).filter(Boolean)));
         const productIds = Array.from(new Set(data.map(c => c.productId).filter(Boolean)));
-        const imageIds = Array.from(new Set(data.map(c => c.imageId).filter(Boolean)));
         const userReqs = userIds.map(id => fetch(`/api/Users/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const userResults = await Promise.all(userReqs);
         const userMap = {};
@@ -163,59 +169,55 @@ const Comments = () => {
         const modelReqs = modelIdArr.map(id => fetch(`/api/Models/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
         const modelResults = await Promise.all(modelReqs);
         setModelNames(Object.fromEntries(modelIdArr.map((id, i) => [id, modelResults[i]?.name || '-'])));
-        const imageReqs = imageIds.map(id => fetch(`/api/Images/${id}`).then(r => r.ok ? r.json() : null).catch(()=>null));
-        const imageResults = await Promise.all(imageReqs);
-        setImagePaths(Object.fromEntries(imageIds.map((id, i) => [id, imageResults[i]?.path || imageResults[i]?.url || ''])));
       })
       .catch(e => setAlert({ show: true, type: 'danger', message: e.message }))
       .finally(() => setLoading(false));
+    setLoading(true);
+    fetch(USERS_API_URL)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setUsers(data))
+      .catch(() => setUsers([]));
+    fetch('/api/Products')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setProducts(data))
+      .catch(() => setProducts([]));
   }, []);
-
-  const handleProductChange = (e) => {
-    const productId = parseInt(e.target.value);
-    const product = products.find(p => p.id === productId);
-    setSelectedProduct(product);
-    setSelectedSize('');
-    setSelectedColor('');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!selectedProduct) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть товар' });
-      return;
-    }
-    if (!selectedSize) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть розмір' });
-      return;
-    }
-    if (!selectedColor) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть колір' });
+    if (!selectedModelId || !selectedColorId || !selectedSizeId) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть модель, колір та розмір' });
       return;
     }
     if (!text.trim()) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, додайте текст коментаря' });
       return;
     }
-    if (!author.trim()) {
+    if (!selectedUserId) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, введіть автора' });
       return;
     }
-
     setLoading(true);
     try {
+      const foundProduct = products.find(
+        p =>
+          String(p.color?.model?.id) === selectedModelId &&
+          String(p.color?.id) === selectedColorId &&
+          String(p.size?.id) === selectedSizeId
+      );
+      const productId = foundProduct ? foundProduct.id : null;
+      if (!productId) {
+        setAlert({ show: true, type: 'danger', message: 'Не знайдено відповідний товар (productId)' });
+        return;
+      }
       const newComment = {
-        productId: selectedProduct.id,
+        productId: Number(productId),
+        userId: Number(selectedUserId),
+        image: commentImage ? { path: commentImage.path } : null,
         text,
-        author,
         rating,
-        date: new Date().toISOString().split('T')[0],
-        size: selectedSize,
-        color: selectedColor,
-        image: (imagePreview && typeof imagePreview === 'string' && imagePreview.match(/^https?:\/\//)) ? imagePreview : null,
-        likes: 0,
-        fit: 'Ідеальна'
+        date: new Date().toISOString(),
+        likesAmount: 0
       };
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -226,10 +228,10 @@ const Comments = () => {
       setAlert({ show: true, type: 'success', message: 'Коментар успішно додано!' });
       setShowAddModal(false);
       setText('');
-      setAuthor('');
+      setSelectedUserId('');
       setRating(5);
-      setImage(null);
-      setImagePreview(null);
+      setCommentImage(null);
+      setCommentImagePreview(null);
       const commentsRes = await fetch(API_URL);
       const updatedComments = await commentsRes.json();
       setAllComments(updatedComments);
@@ -264,51 +266,55 @@ const Comments = () => {
     }
   };
 
-  const handleEditComment = (comment) => {
+  const handleEditComment = async (comment) => {
     setEditingComment(comment);
-    setSelectedProduct(products.find(p => p.id === comment.productId));
-    setSelectedSize(comment.size);
-    setSelectedColor(comment.color);
+    const product = products.find(p => p.id === comment.productId);
+    setSelectedModelId(product?.color?.model?.id ? String(product.color.model.id) : '');
+    setSelectedColorId(product?.color?.id ? String(product.color.id) : '');
+    setSelectedSizeId(product?.size?.id ? String(product.size.id) : '');
+    setSelectedUserId(comment.userId);
     setText(comment.text);
-    setAuthor(comment.author);
     setRating(comment.rating);
-    setImagePreview(comment.image);
+    setCommentImagePreview(comment.image);
     setShowEditModal(true);
   };
 
   const handleUpdateComment = async (e) => {
     e.preventDefault();
-    if (!selectedProduct) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть товар' });
-      return;
-    }
-    if (!selectedSize) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть розмір' });
-      return;
-    }
-    if (!selectedColor) {
-      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть колір' });
+    if (!selectedModelId || !selectedColorId || !selectedSizeId) {
+      setAlert({ show: true, type: 'danger', message: 'Будь ласка, оберіть модель, колір та розмір' });
       return;
     }
     if (!text.trim()) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, додайте текст коментаря' });
       return;
     }
-    if (!author.trim()) {
+    if (!selectedUserId) {
       setAlert({ show: true, type: 'danger', message: 'Будь ласка, введіть автора' });
       return;
     }
     setLoading(true);
     try {
+      const foundProduct = products.find(
+        p =>
+          String(p.color?.model?.id) === selectedModelId &&
+          String(p.color?.id) === selectedColorId &&
+          String(p.size?.id) === selectedSizeId
+      );
+      const productId = foundProduct ? foundProduct.id : null;
+      if (!productId) {
+        setAlert({ show: true, type: 'danger', message: 'Не знайдено відповідний товар (productId)' });
+        return;
+      }
       const updatedComment = {
         ...editingComment,
-        productId: selectedProduct.id,
+        productId: Number(productId),
+        userId: Number(selectedUserId),
+        image: commentImage ? { path: commentImage.path } : null,
         text,
-        author,
         rating,
-        size: selectedSize,
-        color: selectedColor,
-        image: (imagePreview && typeof imagePreview === 'string' && imagePreview.match(/^https?:\/\//)) ? imagePreview : null,
+        date: editingComment.date || new Date().toISOString(),
+        likesAmount: editingComment.likesAmount || 0
       };
       const res = await fetch(`${API_URL}/${editingComment.id}`, {
         method: 'PUT',
@@ -401,6 +407,39 @@ const Comments = () => {
     return pages;
   };
 
+  const handleCommentImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = ev => setCommentImagePreview(ev.target.result);
+      reader.readAsDataURL(file);
+      // Загружаем на сервер
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch(IMAGES_API_URL, { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Не вдалося додати зображення');
+        const img = await res.json();
+        setCommentImage(img);
+      } catch (e) {
+        setCommentImage(null);
+      }
+    } else {
+      setCommentImagePreview(null);
+      setCommentImage(null);
+    }
+  };
+
+  const uniqueModels = Array.from(new Map(products.map(p => [p.color?.model?.id, p.color?.model])).values()).filter(Boolean);
+  const filteredColors = products
+    .filter(p => String(p.color?.model?.id) === selectedModelId)
+    .map(p => p.color)
+    .filter((color, idx, arr) => color && arr.findIndex(c => c.id === color.id) === idx);
+  const filteredSizes = products
+    .filter(p => String(p.color?.model?.id) === selectedModelId && String(p.color?.id) === selectedColorId)
+    .map(p => p.size)
+    .filter((size, idx, arr) => size && arr.findIndex(s => s.id === size.id) === idx);
+
   return (
     <div>
       <h2 className="mb-4 fw-bold" style={{fontSize: '2.1rem'}}>Коментарі</h2>
@@ -440,8 +479,8 @@ const Comments = () => {
                   {currentItems.map(comment => (
   <div key={comment.id} className="d-flex align-items-start gap-3 p-3 rounded-4 shadow-sm bg-light position-relative" style={{minHeight: 90}}>
       <div style={{width:48, height:48, borderRadius:12, background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px #0001', flexShrink:0}}>
-        {comment.imageId && imagePaths[comment.imageId] ? (
-          <img src={"/api/Images/" + comment.imageId + (imagePaths[comment.imageId].startsWith('/') ? imagePaths[comment.imageId] : '')} alt="фото відгуку" style={{width: 32, height: 32, objectFit: 'cover', borderRadius: 8}} />
+        {comment.image && comment.image.path ? (
+          <img src={"/images/" + comment.image.path} alt="фото відгуку" style={{width: 32, height: 32, objectFit: 'cover', borderRadius: 8}} />
         ) : (
           <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Question_Mark.svg" alt="?" style={{width: 32, height: 32, objectFit: 'contain'}} />
         )}
@@ -493,53 +532,95 @@ const Comments = () => {
       <Modal.Body>
         <Form onSubmit={handleSubmit} className="row g-3">
           <div className="col-12">
-            <label htmlFor="product" className="form-label text-secondary small mb-1">Товар</label>
-            <Form.Select id="product" className="form-select-lg custom-select" onChange={handleProductChange} disabled={loading} value={selectedProduct?.id || ''}>
-              <option value="">Оберіть товар</option>
-              {products.map(product => (
-                <option key={product.id} value={product.id}>{product.name}</option>
+            <label htmlFor="model" className="form-label text-secondary small mb-1">Модель</label>
+            <Form.Select
+              id="model"
+              value={selectedModelId}
+              onChange={e => {
+                setSelectedModelId(e.target.value);
+                setSelectedColorId('');
+                setSelectedSizeId('');
+              }}
+              required
+              className="form-select-lg custom-select"
+              disabled={loading}
+            >
+              <option value="">Оберіть модель</option>
+              {uniqueModels.map(model => (
+                <option key={model.id} value={model.id}>{model.name}</option>
               ))}
             </Form.Select>
           </div>
-          {selectedProduct && (
-            <>
-              <div className="col-6">
-                <label htmlFor="size" className="form-label text-secondary small mb-1">Розмір</label>
-                <Form.Select id="size" value={selectedSize} onChange={e => setSelectedSize(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                  <option value="">Розмір</option>
-                  {selectedProduct.sizes.map(size => (<option key={size} value={size}>{size}</option>))}
-                </Form.Select>
-              </div>
-              <div className="col-6">
-                <label htmlFor="color" className="form-label text-secondary small mb-1">Колір</label>
-                <Form.Select id="color" value={selectedColor} onChange={e => setSelectedColor(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                  <option value="">Колір</option>
-                  {selectedProduct.colors.map(color => (<option key={color} value={color}>{color}</option>))}
-                </Form.Select>
-              </div>
-            </>
+          {selectedModelId && (
+            <div className="col-12">
+              <label htmlFor="color" className="form-label text-secondary small mb-1">Колір</label>
+              <Form.Select
+                id="color"
+                value={selectedColorId}
+                onChange={e => {
+                  setSelectedColorId(e.target.value);
+                  setSelectedSizeId('');
+                }}
+                required
+                className="form-select-lg custom-select"
+                disabled={loading}
+              >
+                <option value="">Оберіть колір</option>
+                {filteredColors.map(color => (
+                  <option key={color.id} value={color.id}>{color.name}</option>
+                ))}
+              </Form.Select>
+            </div>
           )}
-          {selectedSize && selectedColor && (
-            <>
-              <div className="col-12">
-                <label htmlFor="author" className="form-label text-secondary small mb-1">Автор</label>
-                <Form.Control type="text" id="author" value={author} onChange={e => setAuthor(e.target.value)} placeholder="Автор" disabled={loading} className="rounded-3" />
-              </div>
-              <div className="col-12">
-                <label htmlFor="comment" className="form-label text-secondary small mb-1">Текст коментаря</label>
-                <Form.Control as="textarea" id="comment" value={text} onChange={e => setText(e.target.value)} placeholder="Текст коментаря" style={{ minHeight: 80 }} disabled={loading} className="rounded-3" />
-              </div>
-              <div className="col-12 mb-2">
-                <label className="form-label text-secondary small mb-1">Оцінка</label>
-                <StarRating value={rating} onChange={setRating} disabled={loading} />
-              </div>
-              <div className="col-12 mt-2">
-                <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
-                  {loading ? <Spinner size="sm" /> : <><i className="bi bi-send me-2"></i>Додати</>}
-                </Button>
-              </div>
-            </>
+          {selectedModelId && selectedColorId && (
+            <div className="col-12">
+              <label htmlFor="size" className="form-label text-secondary small mb-1">Розмір</label>
+              <Form.Select
+                id="size"
+                value={selectedSizeId}
+                onChange={e => setSelectedSizeId(e.target.value)}
+                required
+                className="form-select-lg custom-select"
+                disabled={loading}
+              >
+                <option value="">Оберіть розмір</option>
+                {filteredSizes.map(size => (
+                  <option key={size.id} value={size.id}>{size.name}</option>
+                ))}
+              </Form.Select>
+            </div>
           )}
+          <div className="col-12">
+            <label htmlFor="author" className="form-label text-secondary small mb-1">Автор</label>
+            <Form.Select id="author" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} className="form-select-lg custom-select" disabled={loading} required>
+              <option value="">Оберіть автора</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.fullName} ({user.email})</option>
+              ))}
+            </Form.Select>
+          </div>
+          <div className="col-12">
+            <label htmlFor="comment" className="form-label text-secondary small mb-1">Текст коментаря</label>
+            <Form.Control as="textarea" id="comment" value={text} onChange={e => setText(e.target.value)} placeholder="Текст коментаря" style={{ minHeight: 80 }} disabled={loading} className="rounded-3" />
+          </div>
+          <div className="col-12 mb-2">
+            <label className="form-label text-secondary small mb-1">Оцінка</label>
+            <StarRating value={rating} onChange={setRating} disabled={loading} />
+          </div>
+          <div className="col-12">
+            <label htmlFor="comment-image" className="form-label text-secondary small mb-1">Фото до коментаря</label>
+            <Form.Control type="file" id="comment-image" accept="image/*" onChange={handleCommentImageChange} className="form-control-lg" />
+            {commentImagePreview && (
+              <div className="mt-2 text-center">
+                <img src={commentImagePreview} alt="preview" style={{ maxWidth: 120, maxHeight: 120, objectFit: 'cover', borderRadius: 8 }} />
+              </div>
+            )}
+          </div>
+          <div className="col-12 mt-2">
+            <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
+              {loading ? <Spinner size="sm" /> : <><i className="bi bi-send me-2"></i>Додати</>}
+            </Button>
+          </div>
         </Form>
       </Modal.Body>
     </Modal>
@@ -579,13 +660,13 @@ const Comments = () => {
             <p><strong>Рейтинг:</strong> {'★'.repeat(currentComment.rating)}</p>
             <p><strong>Дата:</strong> {currentComment.date}</p>
             <p><strong>Текст:</strong> {currentComment.text}</p>
-            {currentComment.imageId && imagePaths[currentComment.imageId] ? (
+            {currentComment.image && currentComment.image.path ? (
               <div className="mt-3">
                 <p><strong>Зображення:</strong></p>
                 <img 
-                  src={imagePaths[currentComment.imageId]} 
-                  alt="Фото відгуку" 
-                  className="img-fluid rounded-3 shadow" 
+                  src={"/images/" + currentComment.image.path}
+                  alt="Фото відгуку"
+                  style={{ width: 120, objectFit: 'cover', borderRadius: 8, margin: '0 auto', display: 'block' }}
                 />
               </div>
             ) : (
@@ -609,35 +690,79 @@ const Comments = () => {
       <Modal.Body>
         <Form onSubmit={handleUpdateComment} className="row g-3">
           <div className="col-12">
-            <label htmlFor="edit-product" className="form-label text-secondary small mb-1">Товар</label>
-            <Form.Select id="edit-product" className="form-select-lg custom-select" onChange={handleProductChange} disabled={loading} value={selectedProduct?.id || ''}>
-  <option value="">Оберіть товар</option>
-  {products.map(product => (
-    <option key={product.id} value={product.id}>{product.name}</option>
-  ))}
-</Form.Select>
+            <label htmlFor="edit-model" className="form-label text-secondary small mb-1">Модель</label>
+            <Form.Select
+              id="edit-model"
+              value={selectedModelId}
+              onChange={e => {
+                setSelectedModelId(e.target.value);
+                setSelectedColorId('');
+                setSelectedSizeId('');
+              }}
+              required
+              className="form-select-lg custom-select"
+              disabled={loading}
+            >
+              <option value="">Оберіть модель</option>
+              {uniqueModels.map(model => (
+                <option key={model.id} value={model.id}>{model.name}</option>
+              ))}
+            </Form.Select>
           </div>
-          {selectedProduct && (
-            <>
-              <div className="col-6">
-                <label htmlFor="edit-size" className="form-label text-secondary small mb-1">Розмір</label>
-                <Form.Select id="edit-size" value={selectedSize} onChange={e => setSelectedSize(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                  <option value="">Розмір</option>
-                  {selectedProduct.sizes.map(size => (<option key={size} value={size}>{size}</option>))}
-                </Form.Select>
-              </div>
-              <div className="col-6">
-                <label htmlFor="edit-color" className="form-label text-secondary small mb-1">Колір</label>
-                <Form.Select id="edit-color" value={selectedColor} onChange={e => setSelectedColor(e.target.value)} className="form-select-lg custom-select" disabled={loading}>
-                  <option value="">Колір</option>
-                  {selectedProduct.colors.map(color => (<option key={color} value={color}>{color}</option>))}
-                </Form.Select>
-              </div>
-            </>
+          {selectedModelId && (
+            <div className="col-12">
+              <label htmlFor="edit-color" className="form-label text-secondary small mb-1">Колір</label>
+              <Form.Select
+                id="edit-color"
+                value={selectedColorId}
+                onChange={e => {
+                  setSelectedColorId(e.target.value);
+                  setSelectedSizeId('');
+                }}
+                required
+                className="form-select-lg custom-select"
+                disabled={loading}
+              >
+                <option value="">Оберіть колір</option>
+                {filteredColors.map(color => (
+                  <option key={color.id} value={color.id}>{color.name}</option>
+                ))}
+              </Form.Select>
+            </div>
+          )}
+          {selectedModelId && selectedColorId && (
+            <div className="col-12">
+              <label htmlFor="edit-size" className="form-label text-secondary small mb-1">Розмір</label>
+              <Form.Select
+                id="edit-size"
+                value={selectedSizeId}
+                onChange={e => setSelectedSizeId(e.target.value)}
+                required
+                className="form-select-lg custom-select"
+                disabled={loading}
+              >
+                <option value="">Оберіть розмір</option>
+                {filteredSizes.map(size => (
+                  <option key={size.id} value={size.id}>{size.name}</option>
+                ))}
+              </Form.Select>
+            </div>
           )}
           <div className="col-12">
             <label htmlFor="edit-author" className="form-label text-secondary small mb-1">Автор</label>
-            <Form.Control type="text" id="edit-author" value={author} onChange={e => setAuthor(e.target.value)} placeholder="Автор" disabled={loading} className="rounded-3" />
+            <Form.Select
+              id="edit-author"
+              value={selectedUserId}
+              onChange={e => setSelectedUserId(e.target.value)}
+              className="form-select-lg custom-select"
+              disabled={loading}
+              required
+            >
+              <option value="">Оберіть автора</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.fullName} ({user.email})</option>
+              ))}
+            </Form.Select>
           </div>
           <div className="col-12">
             <label htmlFor="edit-comment" className="form-label text-secondary small mb-1">Текст коментаря</label>
@@ -646,6 +771,15 @@ const Comments = () => {
           <div className="col-12 mb-2">
             <label className="form-label text-secondary small mb-1">Оцінка</label>
             <StarRating value={rating} onChange={setRating} disabled={loading} />
+          </div>
+          <div className="col-12">
+            <label htmlFor="edit-comment-image" className="form-label text-secondary small mb-1">Фото до коментаря</label>
+            <Form.Control type="file" id="edit-comment-image" accept="image/*" onChange={handleCommentImageChange} className="form-control-lg" />
+            {(commentImagePreview || editingComment?.image?.path) && (
+              <div className="mt-2 text-center">
+                <img src={commentImagePreview || `/images/${editingComment.image.path}`} alt="preview" style={{ maxWidth: 120, maxHeight: 120, objectFit: 'cover', borderRadius: 8 }} />
+              </div>
+            )}
           </div>
           <div className="col-12 mt-2">
             <Button type="submit" className="w-100 btn-lg rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: '#6f42c1', border: 'none', fontWeight:600, fontSize:'1.1rem', padding:'12px 0' }} disabled={loading}>
